@@ -1,0 +1,472 @@
+
+\newcommand{\ethpic}{/Users/haweber/PhD/Logos/ETHlogos_official/eth_logo_kurz_pos.pdf}
+\newcommand{\cmspic}{/Users/haweber/Postdoc/Logos/CMS-Color-Label.pdf}
+\newcommand{\fnalpic}{/Users/haweber/Postdoc/Logos/FNAL-Logo-NAL-Blue.pdf}
+\newcommand{\pathMTtpaper}{/Users/haweber/PhD/SUSY/svnrepository/papers/SUS-13-019/trunk/Figures/PaperPlots}
+
+%german hyphenations
+\hyphenation{be-schrei-ben}
+\hyphenation{be-schrie-ben}
+%%%XXXX ENDZUSTAENDEN IST VON HAND GETRENNT
+
+%maybeintroduce
+\newcommand{\stilde}{\widetilde}
+%\newcommand{\stilde){\tilde}
+\newcommand{\obar}{\overline}
+%\newcommand{\obar}{\bar}
+
+%luminosities
+\newcommand{\pbinv} {\ensuremath{\text{pb}^\text{$-$1}}\xspace}
+\newcommand{\fbinv} {\ensuremath{\text{fb}^\text{$-$1}}\xspace}
+\newcommand{\nbinv} {\ensuremath{\text{nb}^\text{$-$1}}\xspace}
+\newcommand{\mubinv} {\ensuremath{\upmu\mathrm{b}^{-1}}\xspace}
+\newcommand{\percms}{\ensuremath{\text{cm}^\text{$-$2}\,\text{s}^\text{$-$1}}\xspace}
+\newcommand{\lumi}{\ensuremath{\mathcal{L}}\xspace}
+\newcommand{\Lumi}{\ensuremath{\mathcal{L}}\xspace}
+\newcommand{\LumiInt}{\ensuremath{\mathcal{L}_\mathrm{int}}\xspace}
+\newcommand{\LInt}{\ensuremath{\int\mathcal{L} \mathrm{dt}}\xspace}
+
+%ECAL variables
+\newcommand{\muind}{\ensuremath{\mu_\mathrm{IND}}\xspace}
+\newcommand{\muSIC}{\ensuremath{\mu_\mathrm{SIC}}\xspace}
+\newcommand{\mustd}{\ensuremath{\mu_\mathrm{std}}\xspace}
+\newcommand{\buin}{\ensuremath{\text{burn-in}}\xspace}
+\newcommand{\vptpn}{\ensuremath{\text{VPT/PN}}\xspace}
+\newcommand{\VPTPN}{\ensuremath{\frac{\mathrm{VPT}}{\mathrm{PN}}}\xspace}
+\newcommand{\PBWO}{\ensuremath{\text{PbWO}_4}\xspace}
+\newcommand{\degC}{\ensuremath{\,^{\circ}\text{C}}\xspace}
+\newcommand{\degF}{\ensuremath{\,^{\circ}\text{F}}\xspace}
+
+%kinematical variables
+\newcommand{\vect}[1]{\ensuremath{\vec{#1}}\xspace}
+\newcommand{\vectUp}[2]{\ensuremath{\vec{#1}^{\,#2}}\xspace}
+\newcommand{\Vect}[1]{\ensuremath{\vv{#1}}\xspace}
+\newcommand{\MTt}{\ensuremath{M_\mathrm{T2}}\xspace}
+\newcommand{\MTtwo}{\ensuremath{M_\mathrm{T2}}\xspace}
+\newcommand{\MT}{\ensuremath{M_\mathrm{T}}\xspace}
+\newcommand{\HT}{\ensuremath{H_\mathrm{T}}\xspace}
+\newcommand{\MET}{\ensuremath{E_\mathrm{T}^\mathrm{miss}}\xspace}
+\newcommand{\METvect}{\ensuremath{\vec{E}_\mathrm{T}^\mathrm{miss}}\xspace}
+\newcommand{\ptmissvect}{\ensuremath{\vec{p}_\mathrm{T}^\mathrm{miss}}\xspace}
+\newcommand{\METvec}{\ensuremath{\vv{E}_\mathrm{T}^\mathrm{miss}}\xspace}
+\newcommand{\ptmiss}{\ensuremath{\vv{p}_\mathrm{T}^\mathrm{miss}}\xspace}
+\newcommand{\pT}{\ensuremath{p_\mathrm{T}}\xspace}
+\newcommand{\pt}{\ensuremath{p_\mathrm{T}}\xspace}
+\newcommand{\PT}{\ensuremath{p_\mathrm{T}}\xspace}
+\newcommand{\pTvect}{\ensuremath{\vec{p}_\mathrm{T}}\xspace}
+\newcommand{\ptvect}{\ensuremath{\vec{p}_\mathrm{T}}\xspace}
+\newcommand{\PTvect}{\ensuremath{\vec{p}_\mathrm{T}}\xspace}
+\newcommand{\ptVect}[1]{\ensuremath{\vec{p}_\mathrm{T}^\mathrm{\,#1}}\xspace}
+\newcommand{\pTvec}{\ensuremath{\vv{p}_\mathrm{T}}\xspace}
+\newcommand{\ptvec}{\ensuremath{\vv{p}_\mathrm{T}}\xspace}
+\newcommand{\PTvec}{\ensuremath{\vv{p}_\mathrm{T}}\xspace}
+\newcommand{\MHT}{\ensuremath{H_{\mathrm{T}}^{\text{miss}}}\xspace}
+\newcommand{\MHTvect}{\ensuremath{\vec{H}_{\mathrm{T}}^{\text{miss}}}\xspace}
+\newcommand{\MHTvec}{\ensuremath{\vv{H}_{\mathrm{T}}^{\text{miss}}}\xspace}
+\newcommand{\ET}{\ensuremath{E_{\mathrm{T}}}\xspace}
+\newcommand{\units}[1]{\ensuremath{\text{\,#1}}\xspace}
+\newcommand{\unitsnt}[1]{\ensuremath{\,#1}\xspace}
+\newcommand{\Unit}[2]{\ensuremath{#1\text{\,#2}}\xspace}
+\newcommand{\Units}[3]{\ensuremath{#1=#2\text{\,#3}}\xspace}
+%example: \UNIT{\sqrt{s}}{8}{TeV}
+\newcommand{\LumiI}{\ensuremath{\Unit{19.5}{\fbinv}}\xspace}%8 TeV
+\newcommand{\LumiIo}{\ensuremath{\Unit{4.73}{\fbinv}}\xspace}%7 TeV
+\newcommand{\DeltaPhi}[2]{\ensuremath{\Delta\phi(\text{#1,~#2})}\xspace}
+\newcommand{\Deltaphi}{\ensuremath{\Delta\phi}\xspace}
+\newcommand{\VSPT}{\ensuremath{|\METvec-\MHTvec|}\xspace}
+\newcommand{\vspt} {\ensuremath{|\stackrel{\longrightarrow}{\MET} - \stackrel{\longrightarrow}{\MHT}|}}
+\newcommand{\sqrtS}{\ensuremath{\sqrt{s}}\xspace}
+\newcommand{\sqrts}{\ensuremath{\sqrt{s}}\xspace}
+\newcommand{\sqrtsII}{\ensuremath{\Units{\sqrt{s}}{14}{TeV}}\xspace}
+\newcommand{\sqrtsIIo}{\ensuremath{\Units{\sqrt{s}}{13}{TeV}}\xspace}
+\newcommand{\sqrtsI}{\ensuremath{\Units{\sqrt{s}}{8}{TeV}}\xspace}
+\newcommand{\sqrtsIo}{\ensuremath{\Units{\sqrt{s}}{7}{TeV}}\xspace}
+\newcommand{\cmsRunII}{\ensuremath{\Units{\sqrt{s}}{14}{TeV}}\xspace}%
+\newcommand{\cmsRunIIo}{\ensuremath{\Units{\sqrt{s}}{13}{TeV}}\xspace}
+\newcommand{\cmsRunI}{\ensuremath{\Units{\sqrt{s}}{8}{TeV}}\xspace}
+\newcommand{\cmsRunIo}{\ensuremath{\sqrt{s}=7\units{TeV}}\xspace}
+\newcommand{\Mass}[1]{\ensuremath{M_{#1}}\xspace}
+\newcommand{\mass}[1]{\ensuremath{m_{#1}}\xspace}
+\newcommand{\MassExt}[1]{\ensuremath{M(#1)}\xspace}
+\newcommand{\massExt}[1]{\ensuremath{m_{(#1)}}\xspace}
+\newcommand{\METvector}{\ensuremath{\vec{E}_\mathrm{T}^\mathrm{miss}}\xspace}
+\newcommand{\ptmissvector}{\ensuremath{\vec{p}_\mathrm{T}^\mathrm{miss}}\xspace}
+\newcommand{\MHTvector}{\ensuremath{\vec{H}_{\mathrm{T}}^{\text{miss}}}\xspace}
+
+\newcommand{\abseta}{\ensuremath{|\eta|}\xspace}
+\newcommand{\psrad}{\ensuremath{\eta}\xspace}
+\newcommand{\deta}{\ensuremath{\Delta\eta}\xspace}
+\newcommand{\dphi}{\ensuremath{\Delta\phi}\xspace}
+\newcommand{\mindphi}{\ensuremath\min\Delta\phi(\text{jets, }\MET)\xspace}
+\newcommand{\CLs}{\ensuremath{\text{CL}_\mathrm{s}}\xspace}
+\newcommand{\NJ}{\ensuremath{N_\mathrm{j}}\xspace}
+\newcommand{\NB}{\ensuremath{N_\mathrm{b}}\xspace}
+%\newcommand{\CL}{95\% C.L.}
+
+%particle decays
+\newcommand{\Znunu}{\ensuremath{Z(\nu\nu)}\xspace}
+\newcommand{\Znn}{\ensuremath{Z(\nu\overline{\nu})}\xspace}%use this
+\newcommand{\znunu}{\ensuremath{Z_{\nu\nu}}\xspace}
+\newcommand{\znn}{\ensuremath{Z_{\nu\overline{\nu}}}\xspace}%alternative 1
+\newcommand{\Zll}{\ensuremath{Z(ll)}\xspace}
+\newcommand{\Zllpm}{\ensuremath{Z(l^{+}l^{-})}\xspace}
+\newcommand{\zll}{\ensuremath{Z_{ll}}\xspace}
+\newcommand{\zllpm}{\ensuremath{Z_{l^{+}l^{-}}}\xspace}
+\newcommand{\Wlnu}{\ensuremath{W(l\nu)}\xspace}
+\newcommand{\wlnu}{\ensuremath{W_{l\nu}}\xspace}
+\newcommand{\nhbb}{\ensuremath{h^{0}(b\overline{b})}\xspace}
+\newcommand{\hbb}{\ensuremath{h(b\overline{b})}\xspace}
+\newcommand{\nHbb}{\ensuremath{H^{0}(b\overline{b})}\xspace}
+\newcommand{\Hbb}{\ensuremath{H(b\overline{b})}\xspace}
+
+%invariant masses
+\newcommand{\Mbb}{\ensuremath{M(bb)}\xspace}
+\newcommand{\Mbbbar}{\ensuremath{M(b\overline{b})}\xspace}
+\newcommand{\uMbb}{\ensuremath{M_{bb}}\xspace}
+\newcommand{\uMbbbar}{\ensuremath{M_{b\overline{b}}}\xspace}
+\newcommand{\Mll}{\ensuremath{M(ll)}\xspace}
+\newcommand{\Mllpm}{\ensuremath{M(l^{+}l^{-})}\xspace}
+\newcommand{\uMll}{\ensuremath{M_{ll}}\xspace}
+\newcommand{\uMllpm}{\ensuremath{M_{l^{+}l^{-}}}\xspace}
+
+%standard model particles
+\newcommand{\phot}{\ensuremath{\gamma}\xspace}
+\newcommand{\Zboson}{\ensuremath{Z^{0}}\xspace}
+\newcommand{\Wboson}{\ensuremath{W^{0}}\xspace}
+\newcommand{\Bboson}{\ensuremath{B^{0}}\xspace}
+\newcommand{\Wpm}{\ensuremath{W^{\pm}}\xspace}
+\newcommand{\Wp}{\ensuremath{W^{+}}\xspace}
+\newcommand{\Wm}{\ensuremath{W^{i}}\xspace}
+\newcommand{\ppbar}{\ensuremath{p\overline{p}}\xspace}
+\newcommand{\qqbar}{\ensuremath{q\overline{q}}\xspace}
+\newcommand{\ttbar}{\ensuremath{t\overline{t}}\xspace}
+\newcommand{\bbbar}{\ensuremath{b\overline{b}}\xspace}
+\newcommand{\ccbar}{\ensuremath{c\overline{c}}\xspace}
+\newcommand{\pbar}{\ensuremath{\overline{p}}\xspace}
+\newcommand{\qbar}{\ensuremath{\overline{q}}\xspace}
+\newcommand{\tbar}{\ensuremath{\overline{t}}\xspace}
+\newcommand{\bbar}{\ensuremath{\overline{b}}\xspace}
+\newcommand{\cbar}{\ensuremath{\overline{c}}\xspace}
+\newcommand{\nubar}{\ensuremath{\overline{\nu}}\xspace}
+\newcommand{\higgs}{\ensuremath{h^{0}}\xspace}
+\newcommand{\Higgs}{\ensuremath{H^{0}}\xspace}
+\newcommand{\Ahiggs}{\ensuremath{A^{0}}\xspace}
+\newcommand{\HiggsPM}{\ensuremath{H^{\pm}}\xspace}
+\newcommand{\HiggsP}{\ensuremath{H^{+}}\xspace}
+\newcommand{\HiggsM}{\ensuremath{H^{-}}\xspace}
+\newcommand{\graviton}{\ensuremath{G}\xspace}
+
+%processes
+\newcommand{\Wbb}{\ensuremath{W+b\overline{b}}\xspace}
+\newcommand{\Wcc}{\ensuremath{W+c\overline{c}}\xspace}
+\newcommand{\Wb}{\ensuremath{W+b}\xspace}
+\newcommand{\Wc}{\ensuremath{W+c}\xspace}
+\newcommand{\Zbb}{\ensuremath{Z+b\overline{b}}\xspace}
+\newcommand{\Zcc}{\ensuremath{Z+c\overline{c}}\xspace}
+\newcommand{\Zb}{\ensuremath{Z+b}\xspace}
+\newcommand{\Zc}{\ensuremath{Z+c}\xspace}
+\newcommand{\Gbb}{\ensuremath{\gamma+b\overline{b}}\xspace}
+\newcommand{\Gcc}{\ensuremath{\gamma+c\overline{c}}\xspace}
+\newcommand{\Gb}{\ensuremath{\gamma+b}\xspace}
+\newcommand{\Gc}{\ensuremath{\gamma+c}\xspace}
+
+
+%squarks and gluinos
+\newcommand{\gluino}{\ensuremath{\widetilde{g}}\xspace}
+\newcommand{\sQ}{\ensuremath{\widetilde{q}}\xspace}
+%\newcommand{\sQbar}{\ensuremath{\overline{\widetilde{q}}}\xspace}
+\newcommand{\sQbar}{\ensuremath{\widetilde{q}^{*}}\xspace}
+\newcommand{\sQbarP}{\ensuremath{\widetilde{q}^{\prime *}}\xspace}
+\newcommand{\sU}{\ensuremath{\widetilde{u}}\xspace}
+\newcommand{\sD}{\ensuremath{\widetilde{d}}\xspace}
+\newcommand{\sS}{\ensuremath{\widetilde{s}}\xspace}
+\newcommand{\sC}{\ensuremath{\widetilde{c}}\xspace}
+\newcommand{\sB}{\ensuremath{\widetilde{b}}\xspace}
+%\newcommand{\sBbar}{\ensuremath{\overline{\widetilde{b}}}\xspace}
+\newcommand{\sBbar}{\ensuremath{\widetilde{b}^{*}}\xspace}
+\newcommand{\sT}{\ensuremath{\widetilde{t}}\xspace}
+%\newcommand{\sTbar}{\ensuremath{\overline{\widetilde{t}}}\xspace}
+\newcommand{\sTbar}{\ensuremath{\widetilde{t}^{*}}\xspace}
+\newcommand{\sTone}{\ensuremath{\widetilde{t}_{1}}\xspace}
+\newcommand{\sTtwo}{\ensuremath{\widetilde{t}_{2}}\xspace}
+\newcommand{\sTL}{\ensuremath{\widetilde{t}_\mathrm{L}}\xspace}
+\newcommand{\sTR}{\ensuremath{\widetilde{t}_\mathrm{R}}\xspace}
+%\newcommand{\sTonebar}{\ensuremath{\overline{\widetilde{t}}_{1}}\xspace}
+%\newcommand{\sTtwobar}{\ensuremath{\overline{\widetilde{t}}_{2}}\xspace}
+%\newcommand{\sTLbar}{\ensuremath{\overline{\widetilde{t}}_\mathrm{L}}\xspace}
+%\newcommand{\sTRbar}{\ensuremath{\overline{\widetilde{t}}_\mathrm{R}}\xspace}
+%\newcommand{\sTTbar}{\ensuremath{\widetilde{t}\overline{\widetilde{t}}}\xspace}
+%\newcommand{\sBBbar}{\ensuremath{\widetilde{b}\overline{\widetilde{b}}}\xspace}
+%\newcommand{\sQQbar}{\ensuremath{\widetilde{q}\overline{\widetilde{q}}}\xspace}
+%\newcommand{\sTTbarOne}{\ensuremath{\widetilde{t}_{1}\overline{\widetilde{t}}_{1}}\xspace}
+%\newcommand{\sTTbarLR}{\ensuremath{\widetilde{t}_\mathrm{L}\overline{\widetilde{t}}_\mathrm{R}}\xspace}
+%\newcommand{\sTTbarRL}{\ensuremath{\widetilde{t}\mathrm{R}\overline{\widetilde{t}}_\mathrm{L}}\xspace}
+%\newcommand{\sTTbarTwo}{\ensuremath{\widetilde{t}_{2}\overline{\widetilde{t}}_{2}}\xspace}
+\newcommand{\sTonebar}{\ensuremath{\widetilde{t}_{1}^{*}}\xspace}
+\newcommand{\sTtwobar}{\ensuremath{\widetilde{t}_{2}^{*}}\xspace}
+\newcommand{\sTLbar}{\ensuremath{\widetilde{t}_\mathrm{L}^{*}}\xspace}
+\newcommand{\sTRbar}{\ensuremath{\widetilde{t}}\mathrm{R}^{*}\xspace}
+\newcommand{\sTTbar}{\ensuremath{\widetilde{t}\widetilde{t}^{*}}\xspace}
+\newcommand{\sBBbar}{\ensuremath{\widetilde{b}\widetilde{b}^{*}}\xspace}
+\newcommand{\sQQbar}{\ensuremath{\widetilde{q}\widetilde{q}^{*}}\xspace}
+\newcommand{\sTTbarOne}{\ensuremath{\widetilde{t}_{1}\widetilde{t}^{*}_{1}}\xspace}
+\newcommand{\sTTbarLR}{\ensuremath{\widetilde{t}_\mathrm{L}\widetilde{t}_\mathrm{R}^{*}}\xspace}
+\newcommand{\sTTbarRL}{\ensuremath{\widetilde{t}\mathrm{R}\widetilde{t}_\mathrm{L}^{*}}\xspace}
+\newcommand{\sTTbarTwo}{\ensuremath{\widetilde{t}_{2}\widetilde{t}_{2}^{*}}\xspace}
+\newcommand{\sBone}{\ensuremath{\widetilde{b}_{1}}\xspace}
+\newcommand{\sBtwo}{\ensuremath{\widetilde{b}_{2}}\xspace}
+\newcommand{\sBL}{\ensuremath{\widetilde{b}_\mathrm{L}}\xspace}
+\newcommand{\sBR}{\ensuremath{\widetilde{b}_\mathrm{R}}\xspace}
+%\newcommand{\sBonebar}{\ensuremath{\overline{\widetilde{b}}_{1}}\xspace}
+%\newcommand{\sBtwobar}{\ensuremath{\overline{\widetilde{b}}_{2}}\xspace}
+%\newcommand{\sBLbar}{\ensuremath{\overline{\widetilde{b}}_\mathrm{L}}\xspace}
+%\newcommand{\sBRbar}{\ensuremath{\overline{\widetilde{b}}_\mathrm{R}}\xspace}
+\newcommand{\sBonebar}{\ensuremath{\widetilde{b}^{*}_{1}}\xspace}
+\newcommand{\sBtwobar}{\ensuremath{\widetilde{b}^{*}_{2}}\xspace}
+\newcommand{\sBLbar}{\ensuremath{\widetilde{b}^{*}_\mathrm{L}}\xspace}
+\newcommand{\sBRbar}{\ensuremath{\widetilde{b}^{*}_\mathrm{R}}\xspace}
+\newcommand{\sSL}{\ensuremath{\widetilde{s}_\mathrm{L}}\xspace}
+\newcommand{\sSR}{\ensuremath{\widetilde{s}_\mathrm{R}}\xspace}
+%\newcommand{\sSbar}{\ensuremath{\overline{\widetilde{s}}_\mathrm{L}}\xspace}
+%\newcommand{\sSRbar}{\ensuremath{\overline{\widetilde{s}}_\mathrm{R}}\xspace}
+\newcommand{\sSbar}{\ensuremath{\widetilde{s}^{*}_\mathrm{L}}\xspace}
+\newcommand{\sSRbar}{\ensuremath{\widetilde{s}^{*}_\mathrm{R}}\xspace}
+\newcommand{\sCL}{\ensuremath{\widetilde{c}_\mathrm{L}}\xspace}
+\newcommand{\sCR}{\ensuremath{\widetilde{c}_\mathrm{R}}\xspace}
+%\newcommand{\sCLbar}{\ensuremath{\overline{\widetilde{c}}_\mathrm{L}}\xspace}
+%\newcommand{\sCRbar}{\ensuremath{\overline{\widetilde{c}}_\mathrm{R}}\xspace}
+\newcommand{\sCLbar}{\ensuremath{\widetilde{c}^{*}_\mathrm{L}}\xspace}
+\newcommand{\sCRbar}{\ensuremath{\widetilde{c}^{*}_\mathrm{R}}\xspace}
+\newcommand{\sDL}{\ensuremath{\widetilde{d}_\mathrm{L}}\xspace}
+\newcommand{\sDR}{\ensuremath{\widetilde{d}_\mathrm{R}}\xspace}
+%\newcommand{\sDLbar}{\ensuremath{\overline{\widetilde{d}}_\mathrm{L}}\xspace}
+%\newcommand{\sDRbar}{\ensuremath{\overline{\widetilde{d}}_\mathrm{R}}\xspace}
+\newcommand{\sDLbar}{\ensuremath{\widetilde{d}^{*}_\mathrm{L}}\xspace}
+\newcommand{\sDRbar}{\ensuremath{\widetilde{d}^{*}_\mathrm{R}}\xspace}
+\newcommand{\sUL}{\ensuremath{\widetilde{u}_\mathrm{L}}\xspace}
+\newcommand{\sUR}{\ensuremath{\widetilde{u}_\mathrm{R}}\xspace}
+%\newcommand{\sULbar}{\ensuremath{\overline{\widetilde{u}}_\mathrm{L}}\xspace}
+%\newcommand{\sURbar}{\ensuremath{\overline{\widetilde{u}}_\mathrm{R}}\xspace}
+\newcommand{\sULbar}{\ensuremath{\widetilde{u}^{*}_\mathrm{L}}\xspace}
+\newcommand{\sURbar}{\ensuremath{\widetilde{u}^{*}_\mathrm{R}}\xspace}
+\newcommand{\sQL}{\ensuremath{\widetilde{q}_\mathrm{L}}\xspace}
+\newcommand{\sQR}{\ensuremath{\widetilde{q}_\mathrm{R}}\xspace}
+%\newcommand{\sQLbar}{\ensuremath{\overline{\widetilde{q}}_\mathrm{L}}\xspace}
+%\newcommand{\sQRbar}{\ensuremath{\overline{\widetilde{q}}_\mathrm{R}}\xspace}
+\newcommand{\sQLbar}{\ensuremath{\widetilde{q}^{*}_\mathrm{L}}\xspace}
+\newcommand{\sQRbar}{\ensuremath{\widetilde{q}^{*}_\mathrm{R}}\xspace}
+\newcommand{\gravitino}{\ensuremath{\widetilde{G}}\xspace}
+
+%neutralinos and charginos
+\newcommand{\LSP}{\ensuremath{\widetilde{\chi}_{1}^{0}}\xspace}
+\newcommand{\neut}{\ensuremath{\widetilde{\chi}^{0}}\xspace}
+\newcommand{\neutOne}{\ensuremath{\widetilde{\chi}^{0}_{1}}\xspace}
+\newcommand{\neutTwo}{\ensuremath{\widetilde{\chi}^{0}_{2}}\xspace}
+\newcommand{\neutThree}{\ensuremath{\widetilde{\chi}^{0}_{3}}\xspace}
+\newcommand{\neutFour}{\ensuremath{\widetilde{\chi}^{0}_{4}}\xspace}
+\newcommand{\bino}{\ensuremath{\widetilde{B}}\xspace}
+\newcommand{\wino}{\ensuremath{\widetilde{W}}\xspace}
+\newcommand{\zino}{\ensuremath{\widetilde{Z}}\xspace}
+\newcommand{\binoO}{\ensuremath{\widetilde{B}^{0}}\xspace}
+\newcommand{\winoO}{\ensuremath{\widetilde{W}^{0}}\xspace}
+\newcommand{\zinoO}{\ensuremath{\widetilde{Z}^{0}}\xspace}
+\newcommand{\photino}{\ensuremath{\widetilde{\gamma}}\xspace}
+\newcommand{\chargino}{\ensuremath{\widetilde{\chi}^{\pm}}\xspace}
+\newcommand{\charginoP}{\ensuremath{\widetilde{\chi}^{+}}\xspace}
+\newcommand{\charginoM}{\ensuremath{\widetilde{\chi}^{-}}\xspace}
+\newcommand{\charginoOne}{\ensuremath{\widetilde{\chi}^{\pm}_{1}}\xspace}
+\newcommand{\charginoOneP}{\ensuremath{\widetilde{\chi}^{+}_{1}}\xspace}
+\newcommand{\charginoOneM}{\ensuremath{\widetilde{\chi}^{-}_{1}}\xspace}
+\newcommand{\charginoTwo}{\ensuremath{\widetilde{\chi}^{\pm}_{2}}\xspace}
+\newcommand{\charginoTwoP}{\ensuremath{\widetilde{\chi}^{+}_{2}}\xspace}
+\newcommand{\charginoTwoM}{\ensuremath{\widetilde{\chi}^{-}_{2}}\xspace}
+\newcommand{\winoPM}{\ensuremath{\widetilde{W}^{\pm}}\xspace}
+\newcommand{\winoP}{\ensuremath{\widetilde{W}^{+}}\xspace}
+\newcommand{\winoM}{\ensuremath{\widetilde{W}^{-}}\xspace}
+\newcommand{\higgsinoU}{\ensuremath{\widetilde{H}_{u}^{0}}\xspace}
+\newcommand{\higgsinoD}{\ensuremath{\widetilde{H}_{d}^{0}}\xspace}
+\newcommand{\HiggsinoP}{\ensuremath{\widetilde{H}^{+}_{u}}\xspace}
+\newcommand{\HiggsinoM}{\ensuremath{\widetilde{H}^{-}_{d}}\xspace}
+
+%sleptons
+\newcommand{\sfer}{\ensuremath{\widetilde{f}}\xspace}
+\newcommand{\sferbar}{\ensuremath{\widetilde{f}^{*}}\xspace}
+\newcommand{\slep}{\ensuremath{\widetilde{l}}\xspace}
+\newcommand{\slepPM}{\ensuremath{\widetilde{l}^{\pm}}\xspace}
+\newcommand{\slepP}{\ensuremath{\widetilde{l}^{+}}\xspace}
+\newcommand{\slepM}{\ensuremath{\widetilde{l}^{-}}\xspace}
+\newcommand{\slepL}{\ensuremath{\widetilde{l}_\mathrm{L}}\xspace}
+\newcommand{\slepR}{\ensuremath{\widetilde{l}_\mathrm{R}}\xspace}
+\newcommand{\sele}{\ensuremath{\widetilde{e}}\xspace}
+\newcommand{\selePM}{\ensuremath{\widetilde{e}^{\pm}}\xspace}
+\newcommand{\seleP}{\ensuremath{\widetilde{e}^{+}}\xspace}
+\newcommand{\seleM}{\ensuremath{\widetilde{e}^{-}}\xspace}
+\newcommand{\seleL}{\ensuremath{\widetilde{e}_\mathrm{L}}\xspace}
+\newcommand{\seleR}{\ensuremath{\widetilde{e}_\mathrm{R}}\xspace}
+\newcommand{\smuo}{\ensuremath{\widetilde{\mu}}\xspace}
+\newcommand{\smuoPM}{\ensuremath{\widetilde{\mu}^{\pm}}\xspace}
+\newcommand{\smuoP}{\ensuremath{\widetilde{\mu}^{+}}\xspace}
+\newcommand{\smuoM}{\ensuremath{\widetilde{\mu}^{-}}\xspace}
+\newcommand{\smuoL}{\ensuremath{\widetilde{\mu}_\mathrm{L}}\xspace}
+\newcommand{\smuoR}{\ensuremath{\widetilde{\mu}_\mathrm{R}}\xspace}
+\newcommand{\stau}{\ensuremath{\widetilde{\tau}}\xspace}
+\newcommand{\stauPM}{\ensuremath{\widetilde{\tau}^{\pm}}\xspace}
+\newcommand{\stauP}{\ensuremath{\widetilde{\tau}^{+}}\xspace}
+\newcommand{\stauM}{\ensuremath{\widetilde{\tau}^{-}}\xspace}
+\newcommand{\stauL}{\ensuremath{\widetilde{\tau}_\mathrm{L}}\xspace}
+\newcommand{\stauR}{\ensuremath{\widetilde{\tau}_\mathrm{R}}\xspace}
+\newcommand{\snu}{\ensuremath{\widetilde{\nu}}\xspace}
+\newcommand{\snubar}{\ensuremath{\overline{\widetilde{\nu}}}\xspace}
+\newcommand{\snuL}{\ensuremath{\widetilde{\nu}_\mathrm{L}}\xspace}
+\newcommand{\snuR}{\ensuremath{\widetilde{\nu}_\mathrm{R}}\xspace}
+
+%SUSYParameter
+\newcommand{\Mscalar}{\ensuremath{M_{0}}\xspace}
+\newcommand{\Mgaugino}{\ensuremath{M_{1/2}}\xspace}
+\newcommand{\Triple}{\ensuremath{A_{0}}\xspace}
+\newcommand{\tanbeta}{\ensuremath{\tan\beta}\xspace}
+\newcommand{\MGUT}{\ensuremath{M_\mathrm{GUT}}\xspace}
+
+% Measurements and units...
+\newcommand{\de}{\ensuremath{^\circ}\xspace}
+\newcommand{\ten}[1]{\ensuremath{\times \text{10}^\text{#1}}\xspace}
+
+% General equation shortcuts
+\newcommand{\bi}   {\begin{itemize}}
+\newcommand{\ei}   {\end{itemize}}
+\newcommand{\bn}   {\begin{enumerate}}
+\newcommand{\en}   {\end{enumerate}}
+\newcommand{\bs}   {\begin{frame}}%begin slide
+\newcommand{\es}   {\end{frame}}%end slide
+\newcommand{\be}   {\begin{equation}}
+\newcommand{\ee}   {\end{equation}}
+\newcommand{\bea}  {\begin{eqnarray}}
+\newcommand{\eea}  {\end{eqnarray}}
+\newcommand{\beq}  {\begin{equation}}
+\newcommand{\eeq}  {\end{equation}} 
+\newcommand{\beqa} {\begin{eqnarray}}
+\newcommand{\eeqa} {\end{eqnarray}}
+\newcommand{\bey}  {\begin{eqnarray}}
+\newcommand{\eey}  {\end{eqnarray}}
+\newcommand{\nn}   {\nonumber\\}
+\newcommand{\no}   {\nonumber}
+\newcommand{\ds}   {\displaystyle}
+\newcommand{\bal}   {\begin{align}}
+\newcommand{\eal}   {\end{align}}
+\newcommand{\bt}   {\begin{table}}
+\newcommand{\bta}   {\begin{table}[!htb]}
+\newcommand{\et}   {\end{table}}
+\newcommand{\bc}   {\begin{center}}
+\newcommand{\ec}   {\end{center}}
+\newcommand{\btab}   {\begin{tabular}}
+\newcommand{\etab}   {\end{tabular}}
+\newcommand{\bfig}   {\begin{figure}}
+\newcommand{\bfi}   {\begin{figure}[!htb]}
+\newcommand{\efig}   {\end{figure}}
+\newcommand{\onegraph}[1]{\includegraphics[width=0.80\textwidth]{#1}}
+\newcommand{\twograph}[2]{\includegraphics[width=0.49\textwidth]{#1}\includegraphics[width=0.49\textwidth]{#2}}
+\newcommand{\threegraph}[3]{\includegraphics[width=0.32\textwidth]{#1}\includegraphics[width=0.32\textwidth]{#2}\includegraphics[width=0.32\textwidth]{#3}}
+\newcommand{\graph}[2]{\includegraphics[width=#1\textwidth]{#2}}
+\newcommand{\bmp}[1]{\begin{minipage}[h]{#1\textwidth}}
+\newcommand{\emp}{\end{minipage}}
+\newcommand{\bcol}{\begin{columns}[T]}
+\newcommand{\ecol}{\end{columns}}
+\newcommand{\col}[1]{\column{#1\textwidth}}
+\newcommand{\colhalf}{\column{0.475\textwidth}}
+\newcommand{\colthird}{\column{0.32\textwidth}}
+\newcommand{\coltwothird}{\column{0.65\textwidth}}
+
+\newcommand{\ft}[1]{\frametitle{#1}}
+
+
+%colors
+\newcommand{\txtcol[2]}{\textcolor{#1}{#2}}
+\newcommand{\txtred[1]}{\textcolor{red}{#1}}
+\newcommand{\txtwhite[1]}{\textcolor{white}{#1}}
+\newcommand{\txtblue[1]}{\textcolor{blue}{#1}}
+\newcommand{\txtgreen[1]}{\textcolor{Green}{#1}}
+\newcommand{\txtviolet[1]}{\textcolor{violet}{#1}}
+\newcommand{\txtblack[1]}{\textcolor{black}{#1}}
+\newcommand{\txtwith[1]}{\textcolor{white}{#1}}
+\newcommand{\txtorange[1]}{\textcolor{orange}{#1}}
+\newcommand{\txtyellow[1]}{\textcolor{yellow}{#1}}
+\newcommand{\colour}[1]{\color{#1}}
+\newcommand{\whitee}{\color{white}}
+\newcommand{\red}{\color{red}}
+\newcommand{\blue}{\color{blue}}
+\newcommand{\green}{\color{Green}}
+\newcommand{\violet}{\color{violet}}
+\newcommand{\black}{\color{black}}
+\newcommand{\white}{\color{white}}
+\newcommand{\orange}{\color{orange}}
+\newcommand{\yellow}{\color{yellow}}
+\newcommand{\gray}{\color{gray}}
+\newcommand{\boxcol[2]}{\colorbox{#1}{#2}}
+\newcommand{\boxred[1]}{\colorbox{red}{#1}}
+\newcommand{\boxblue[1]}{\colorbox{blue}{#1}}
+\newcommand{\boxgreen[1]}{\colorbox{Green}{#1}}
+\newcommand{\boxviolet[1]}{\colorbox{violet}{#1}}
+\newcommand{\boxblack[1]}{\colorbox{black}{#1}}
+\newcommand{\boxwith[1]}{\colorbox{white}{#1}}
+\newcommand{\boxorange[1]}{\colorbox{orange}{#1}}
+\newcommand{\boxyellow[1]}{\colorbox{yellow}{#1}}
+\newcommand{\frbxcol[3]}{\fcolorbox{#1}{#2}{#3}}
+\newcommand{\frbxblueyellow[1]}{\fcolorbox{blue}{yellow}{#1}}
+\newcommand{\frbxredyellow[1]}{\fcolorbox{red}{yellow}{#1}}
+\newcommand{\frbxblackyellow[1]}{\fcolorbox{black}{yellow}{#1}}
+\newcommand{\framecol[2]}{\fcolorbox{#1}{white}{#2}}
+\newcommand{\frameblack[1]}{\fcolorbox{black}{white}{#1}}
+%\newcommand{\frameblack[1]}{\framebox[1.2\width]{#1}}
+\newcommand{\framegreen[1]}{\fcolorbox{green}{white}{#1}}
+\newcommand{\framered[1]}{\fcolorbox{red}{white}{#1}}
+\newcommand{\frameblue[1]}{\fcolorbox{blue}{white}{#1}}
+%textbf %bf
+%textit %it
+%textsc %sc
+
+
+% Standard referencing
+\newcommand{\eq}[1]  {(\ref{#1})}
+\newcommand{\eqn}[1]  {equation~(\ref{#1})}
+\newcommand{\eqns}[1]  {equations~(\ref{#1})}
+\newcommand{\equ}[1]  {eq.~(\ref{#1})}
+\newcommand{\eqs}[1]  {eqs.~(\ref{#1})}
+\newcommand{\Eqn}[1]  {Equation~(\ref{#1})}
+\newcommand{\Eqns}[1]  {Equations~(\ref{#1})}
+\newcommand{\Eq}[1]  {Eq.~(\ref{#1})}
+\newcommand{\Eqs}[1]  {Eqs.~(\ref{#1})}
+\newcommand{\Fg}[1] {Fig.~\ref{#1}}
+\newcommand{\Fig}[1] {Figure~\ref{#1}}
+\newcommand{\Figs}[1] {Figures~\ref{#1}}
+\newcommand{\fg}[1] {fig.~\ref{#1}}
+\newcommand{\fig}[1] {figure~\ref{#1}}
+\newcommand{\figs}[1] {figures~\ref{#1}}
+\newcommand{\Tab}[1] {Table~\ref{#1}}
+\newcommand{\Tabs}[1] {Tables~\ref{#1}}
+\newcommand{\tab}[1] {table~\ref{#1}}
+\newcommand{\tabs}[1] {tables~\ref{#1}}
+\newcommand{\Tb}[1] {Tab.~\ref{#1}}
+\newcommand{\tb}[1] {tab.~\ref{#1}}
+\newcommand{\sect}[1] {section~\ref{#1}}
+\newcommand{\sects}[1] {sections~\ref{#1}}
+\newcommand{\Sect}[1] {Section~\ref{#1}}
+\newcommand{\Sects}[1] {Sections~\ref{#1}}
+\newcommand{\subsect}[1] {subsection~\ref{#1}}
+\newcommand{\chapt}[1] {chapter~\ref{#1}}
+\newcommand{\chapts}[1] {chapters~\ref{#1}}
+\newcommand{\Chapt}[1] {Chapter~\ref{#1}}
+\newcommand{\Chapts}[1] {Chapters~\ref{#1}}
+\newcommand{\page}[1] {page~\pageref{#1}}
+
+% Asymmetric errors, example: \epm{2}{3} gives +2 stacked on -3  
+\newcommand{\epm}[2]{\raisebox{-0.5ex}{\shortstack[l]{$\scriptstyle+#1$\\$\scriptstyle-#2$}}}
+
+%other shortcuts
+\newcommand{\eps}{\ensuremath{\varepsilon}\xspace}
+\newcommand{\eff}[1]{\ensuremath{\varepsilon}_{#1}\xspace}
+\newcommand{\lt}{\ensuremath{<}\xspace}
+\newcommand{\gt}{\ensuremath{>}\xspace}
+\newcommand{\loe}{\ensuremath{\leq}\xspace}
+\newcommand{\goe}{\ensuremath{\geq}\xspace}
+\newcommand{\mum}{\ensuremath{\upmu\text{m}\xspace}}
+\newcommand{\mus}{\ensuremath{\upmu\text{s}\xspace}}

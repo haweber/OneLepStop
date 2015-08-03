@@ -1,0 +1,247 @@
+\input{/Users/haweber/Postdoc/presentation_format}
+\input{/Users/haweber/Postdoc/presentation_shortcuts}
+
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\setbeamertemplate{title page}[customized]%full SnT list
+\setbeamertemplate{title page}[multiauthor]
+\title[]{Investigation on IsoTkMu20} % The short title appears at the bottom of every slide, the full title is only on the title page
+
+\author{Hannsj\"org Weber (Fermilab), Dominick Olivito (UCSD)} % Your name
+\institute[Fermilab] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+{Fermilab\\ % Your institution for the title page
+\medskip
+\textit{} % Your email address
+}
+\date{2015/08/03} % Date, can be changed to a custom date
+%\titlegraphic{\hspace{-50pt}\includegraphics[width=48pt]{CMS-Color-Label.pdf}\hspace{2pt} \includegraphics[width=48pt]{CMS-Color-Label.pdf}}
+\setbeamertemplate{headline}[myheader-date-namenoinstitute-pagenr]
+
+%\titlegraphic{\includegraphics[width=80pt]{\fnalpic}}
+%\titlegraphic{\hspace{-325pt}\includegraphics[width=120pt]{\fnalpic}\hfill\includegraphics[width=50pt]{\cmspic}}
+\titlegraphic{\hspace{-325pt}\includegraphics[width=120pt]{\fnalpic}\hfill\hspace{50pt}$~$}%\includegraphics[width=50pt]{\cmspic}}
+\begin{document}
+
+{
+\setbeamertemplate{headline}[myheader-nothing]
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+}
+
+%--------------------------------
+
+
+\begin{frame}[fragile=singleslide]
+\frametitle{Muon and data selection}
+\label{slide:evtsel}
+\bi
+\item Tag: Event triggered by single muon triggers:
+\begin{verbatim*}
+HLT_IsoMu20||HLT_IsoTkMu20
+\end{verbatim*}
+\item For probe muon, we check separately ``HLT\_IsoMu20'' and ``HLT\_IsoTkMu20''.
+%\item Tag muon has to be matched.
+%\item Probe: under study
+%\item {\small Efficiency = $\displaystyle\frac{N_{probes}(\text{probe matched to trigger and a tag muon is in the same event})}{N_{probes}(\text{all probes and a tag muon is in the same event})}$.}
+\item Select dimuon events with $75<M_{\mu\mu}<105$ GeV (not Z boson fits done here).
+%\item Study as function of offline-\pt/$\eta$/$\phi$/iso.
+%\item Separate ``IsoMu20'' and ``IsoTkMu20''.
+\item Muons need to pass
+	\bi
+	\item tight ID, $|\eta|<2.4$, relIso $<$ 0.12 (pf, $\Delta R<0.3$)
+	\item for tag: $\pt>25$ GeV
+	\item for probe: $\pt > 24$ GeV (4 GeV above trigger threshold).
+	\ei
+\emptyitemspace
+\item Use golden JSON with runs 251244, 251251, 251252, 251561, 251562, 251643, 251721, 251883:
+\begin{verbatim*}
+Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2.txt
+\end{verbatim*}
+\item Plots done with /SingleMuon/Run2015B-PromptReco-v1/MINIAOD.
+\item L1 Plots done with the RECO version of selected events.
+\ei
+\end{frame}
+
+%\begin{frame}[fragile=singleslide]
+%\frametitle{Data selection}
+%\bi
+%\item Use golden JSON with runs 251244, 251251, 251252, 251561, 251562, 251643, 251721, 251883:
+%\begin{verbatim*}
+%Cert_246908-251883_13TeV_PromptReco_Collisions15_JSON_v2.txt
+%\end{verbatim*}
+%\item Plots done with /SingleMuon/Run2015B-PromptReco-v1/MINIAOD.
+%\item L1 Plots done with the RECO version of selected events.
+%\ei
+%\end{frame}
+
+%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile=singleslide]
+\frametitle{Efficiency vs. \pt / rel.iso}
+\bc
+\vspace{-8pt}
+\graph{0.45}{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/TriggerEff_PureIsoMu20_Pt.pdf}
+\graph{0.45}{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/TriggerEff_IsoTkMu20_Pt.pdf}\\\vspace{-8pt}
+\graph{0.45}{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/TriggerEff_PureIsoMu20_RelIso03.pdf}
+\graph{0.45}{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/TriggerEff_IsoTkMu20_RelIso03.pdf}\\
+\bi
+\vspace{-4pt}
+\item Left: IsoMu20, Right: IsoTkMu20.
+\item No strong feature observed.
+\ei
+\ec
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+\frametitle{Efficiency vs. $\phi$}
+\bc
+\graph{0.49}{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/TriggerEff_PureIsoMu20_Phi.pdf}
+\begin{overpic}[width=0.49\textwidth]{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/TriggerEff_IsoTkMu20_Phi.pdf}
+\put(62,32){\orange\vector(2,1){20}}
+\end{overpic}
+\ec
+\bi
+\item Left: IsoMu20, Right: IsoTkMu20.
+\item Feature at $\phi\approx2.5$ identified due to problems in second layer of the pixels. Stronger in earlier runs. %(see backup).
+\item Previously observed, see slides by Hugues Brun (\href{https://indico.cern.ch/event/435170/session/0/contribution/1/attachments/1131262/1618197/muonHLTefficiencies.pdf}{\green link}).
+\ei
+\end{frame}
+
+%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile=singleslide]
+\frametitle{IsoTkMu20 - around affected $\eta$ region}
+\bcol
+\col{0.5}
+\bi
+\item The feature is {\blue not correlated} with $\pt$, $\phi$, or relative isolation.
+\item Top right: muon \pt,
+\item Bottom left: muon $\phi$,
+\item Bottom right: muon relative isolation.
+\ei
+\col{0.5}
+\begin{overpic}[width=0.99\textwidth]{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/TriggerEff_IsoTkMu20_Pt_etarestrict.pdf}
+\end{overpic}
+\ecol
+\bcol
+\col{0.5}
+\begin{overpic}[width=0.99\textwidth]{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/TriggerEff_IsoTkMu20_Phi_etarestrict.pdf}
+\end{overpic}\\
+\col{0.5}
+\begin{overpic}[width=0.99\textwidth]{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/TriggerEff_IsoTkMu20_RelIso03_etarestrict.pdf}
+\end{overpic}
+\ecol
+\end{frame}
+
+%%%%%%%%%%%%%%%%%
+
+\begin{frame}[fragile=singleslide]
+\frametitle{IsoTkMu20 - looking at L1}
+\bc
+\begin{overpic}[width=0.49\textwidth]{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/L1checks/h_l1phi_recophi.pdf}
+\end{overpic}
+\begin{overpic}[width=0.49\textwidth]{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/L1checks/h_l1eta_recoeta.pdf}
+\put(62,54.5){\green\circle{12}}
+\end{overpic}
+\ec
+\bi
+\vspace{-12pt}
+\item For offline muons, that do not pass the IsoTkMu20:
+	\bi
+	\item Left: L1 $\phi$ vs. offline $\phi$.
+	\item Reco: L1 $\eta$ vs. offline $\eta$.
+	\ei
+\ei
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+\frametitle{IsoTkMu20 - looking at L1}
+\bc
+\begin{overpic}[width=0.49\textwidth]{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/L1checks/h_dphi_l1reco.pdf}
+\put(48.5,9.5){\orange\rule{1pt}{83pt}}
+\put(64,9.5){\orange\rule{1pt}{83pt}}
+\end{overpic}
+\begin{overpic}[width=0.49\textwidth]{/Users/haweber/Postdoc/Muons/plots/first_20150727/SingleMuon/L1checks/h_deta_l1reco.pdf}
+\put(50.7,9.5){\orange\rule{1pt}{83pt}}
+\put(61.9,9.5){\orange\rule{1pt}{83pt}}
+\end{overpic}
+\ec
+\bi
+\item For offline muons, that do not pass the IsoTkMu20:
+	\bi
+	\item Left: $|\Delta\phi$(L1, offline)$|$: {\blue HLT runs within $|\Delta\phi|<0.2$ around L1 candidate.}
+	\item Reco: $|\Delta\eta$(L1, offline)$|$: {\blue HLT runs within $|\Delta\eta|<0.15$ around L1 candidate.}
+	\ei
+\ei
+\end{frame}
+
+\begin{frame}[fragile=singleslide]
+\frametitle{Fixing the problem at HLT}
+\bi
+\item The change in timing was studied for increasing $|\Delta\eta|<0.15$ to $|\Delta\eta|<0.35$:
+\ei
+\begin{center}
+\begin{tabular}{|l|l|c@{\hskip 3pt}c@{\hskip 3pt}c|}
+\hline
+sample & trigger & old & & new \\
+\hline
+25ns 7e33 MC & HLT\_IsoTkMu20\_v2 & 4.4 ms & $\longrightarrow$ & 4.5 ms \\
+25ns 1.4e34 MC & HLTIsoTkMu24\_eta2p1\_v2 & 3.9 ms & $\longrightarrow$ & 4.3 ms \\
+50ns data HLTPhysics & HLT\_IsoTkMu20\_v2 & 2.4 ms & $\longrightarrow$ & 2.5 ms \\
+ (run 251250) & & & & \\
+\hline
+\end{tabular}
+\end{center}
+\bi
+\item The triggers studied are the lowest threshold unprescaled ones in each scenario.
+\item {\red Timing increases only marginally.}  Numbers measured on vocms003.
+\item Submitted a JIRA ticket increasing the $|\Delta\eta|$ window from 0.15 to 0.35, to give this safe margin:
+\emptyitem {\green https://its.cern.ch/jira/browse/CMSHLT-511}
+\ei
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+\frametitle{Summary}
+\bi
+\item A dip at $\eta\sim-0.2$ at the trigger efficiency of HLT\_IsoTkMu20 has been observed.
+\item The problem is {\red likely due to coarse binning in L1 $\eta$ assignment of the DTTF}.
+\item Thus, the GMT uses the RPC information, which is {\red mapped to the bin with center at $\eta = 0.05$}.
+\item This results the dip observed in the trigger effiency.
+\emptyitemspace
+\item {\blue A possible fix of widening $\Delta\eta$ to 0.35 for seeding the HLT tracking region was investigated.}
+\item {\red The timing increased only marginally.} Thus, we propose to do this change.
+\item A JIRA ticket has been submitted.
+\emptyitemspace
+%\item Additional plots in the backup.
+\ei
+\end{frame}
+
+%%%%%%%%%%%%%%%%%
+
+\appendix
+\backupbegin
+
+\begin{frame}
+\frametitle{Backup}
+\end{frame}
+
+%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%
+
+
+
+\backupend
+
+\end{document}

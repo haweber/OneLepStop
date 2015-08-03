@@ -21,11 +21,11 @@
 
 //MT2 variants
 #include "StopAnalysis/StopBabyMaker/stop_variables/Davismt2.h"
-#include "StopAnalysis/StopBabyMaker/stop_variables/topness.h"
 #include "StopAnalysis/StopBabyMaker/stop_variables/MT2_implementations.h"
 #include "StopAnalysis/StopBabyMaker/stop_variables/JetUtil.h"
 #include "StopAnalysis/StopBabyMaker/stop_variables/mt2w.h"
 #include "StopAnalysis/StopBabyMaker/stop_variables/mt2w_bisect.h"
+#include "StopAnalysis/StopBabyMaker/stop_variables/topness.h"
 
 using namespace std;
 using namespace tas;
@@ -33,6 +33,23 @@ using namespace tas;
 inline float getMT(LorentzVector lep,LorentzVector met){
   // From cmssw reco::deltaPhi()
   return TMath::Sqrt(2*met.Et()*lep.Et()*(1-TMath::Cos(JetUtil::deltaPhi(lep,met) ) ) );
+}
+
+float calculateMt(LorentzVector p4, LorentzVector met){
+  float phi1 = p4.Phi();
+  float phi2 = met.Phi();
+  float Et1  = p4.Et();
+  float Et2  = met.Et();
+
+  return sqrt(2*Et1*Et2*(1.0 - cos(phi1-phi2)));
+}
+
+float DPhi_W_lep(LorentzVector metlv, LorentzVector p4){
+  const TVector3 lep(p4.x(), p4.y(), p4.z());
+  const TVector3 met(metlv.x(),metlv.y(),0);
+  const TVector3 w = lep+met;
+  double dphi = fabs(w.DeltaPhi(lep));
+  return dphi;
 }
 
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
@@ -51,10 +68,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   vector<float> hlow; hlow.clear();
   vector<float> hup; hup.clear();
 
-  int bsel = -2;
+  int bsel = 2;
   //1: 1b, //2: 2b, //-1: 1j, //-2: 2j
 
   //histonames.push_back("MyVal");          hbins.push_back(32); hlow.push_back(  0.); hup.push_back(3.2);
+  histonames.push_back("DeltaPhiWl_noMT_2Xres");    hbins.push_back(32); hlow.push_back(  0.); hup.push_back(3.2);
+  histonames.push_back("MT_2Xres");                 hbins.push_back(24); hlow.push_back(  0.); hup.push_back(600);
+  histonames.push_back("MyDeltaPhiWl_noMT");        hbins.push_back(32); hlow.push_back(  0.); hup.push_back(3.2);
+  histonames.push_back("MyMT");                     hbins.push_back(24); hlow.push_back(  0.); hup.push_back(600);
   histonames.push_back("DeltaPhiWl_noMT");          hbins.push_back(32); hlow.push_back(  0.); hup.push_back(3.2);
   histonames.push_back("MT");                       hbins.push_back(24); hlow.push_back(  0.); hup.push_back(600);
   histonames.push_back("MET");                      hbins.push_back(30); hlow.push_back(  0.); hup.push_back(750);
@@ -100,7 +121,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(c==1||c==3||c==5||c==7) prestring = "Print_";
       for(unsigned int i = 0; i<histonames.size(); ++i){
 	int nbins = hbins[i];
-	if(c==1||c==3||c==5||c==7) nbins *=5;
+	if(c==1||c==3||c==5||c==7) nbins *=10;
 	string mapname;
 	mapname = prestring + histonames[i] + "_"+samplename;
 	if(c==2||c==3) mapname = prestring + "MET300_" + histonames[i] + "_"+samplename;
@@ -285,24 +306,84 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       histos["MET_" + samplename]->Fill(val["MET" ],weight);
       histos["Print_MET_" + samplename]->Fill(val["MET" ],weight);
 
+      float METx = pfmet()*TMath::Cos(pfmet_phi());
+      float METy = pfmet()*TMath::Sin(pfmet_phi());
+      float gMETx = genmet()*TMath::Cos(genmet_phi());
+      float gMETy = genmet()*TMath::Sin(genmet_phi());
+
+      float METresX = METx - gMETx;
+      float METresY = METy - gMETy;
+      float METxRes2 = gMETx + 2.*METresX;
+      float METyRes2 = gMETy + 2.*METresY;
+      LorentzVector METres2;
+      LorentzVector METlv;
+      METres2.SetPxPyPzE(METxRes2,METyRes2,0,sqrt(METxRes2*METxRes2 + METyRes2*METyRes2));
+      METlv.SetPxPyPzE(METx,METy,0,sqrt(METx*METx + METy*METy));
+      float MTres2 = calculateMt(leplv,METres2);
+      float DeltaPhiWlres2 = DPhi_W_lep(METres2,leplv);
+      float myMT = calculateMt(leplv,METlv);
+      float myDeltaPhiWl = DPhi_W_lep(METlv,leplv);
+
+      if(METres2.Pt()>200.){
+	histos["MT_2Xres_" + samplename]->Fill(MTres2,weight);
+	histos["Print_MT_2Xres_" + samplename]->Fill(MTres2,weight);
+	histos["DeltaPhiWl_noMT_2Xres_" + samplename]->Fill(DeltaPhiWlres2,weight);
+	histos["Print_DeltaPhiWl_noMT_2Xres_" + samplename]->Fill(DeltaPhiWlres2,weight);
+	if(METres2.Pt()>300.){
+	  ++cmet;
+	  histos["MET300_MT_2Xres_" + samplename]->Fill(MTres2,weight);
+	  histos["Print_MET300_MT_2Xres_" + samplename]->Fill(MTres2,weight);
+	  histos["MET300_DeltaPhiWl_noMT_2Xres_" + samplename]->Fill(DeltaPhiWlres2,weight);
+	  histos["Print_MET300_DeltaPhiWl_noMT_2Xres_" + samplename]->Fill(DeltaPhiWlres2,weight);
+	  if(hadronic_top_chi2()<10){//not recalculate chi2
+	    histos["chi210_MT_2Xres_" + samplename]->Fill(MTres2,weight);
+	    histos["Print_chi210_MT_2Xres_" + samplename]->Fill(MTres2,weight);
+	    histos["chi210_DeltaPhiWl_noMT_2Xres_" + samplename]->Fill(DeltaPhiWlres2,weight);
+	    histos["Print_chi210_DeltaPhiWl_noMT_2Xres_" + samplename]->Fill(DeltaPhiWlres2,weight);
+	    if(MT2W()>200){//not recalculate MT2W
+	      histos["MT2W200_MT_2Xres_" + samplename]->Fill(MTres2,weight);
+	      histos["Print_MT2W200_MT_2Xres_" + samplename]->Fill(MTres2,weight);
+	      histos["MT2W200_DeltaPhiWl_noMT_2Xres_" + samplename]->Fill(DeltaPhiWlres2,weight);
+	      histos["Print_MT2W200_DeltaPhiWl_noMT_2Xres_" + samplename]->Fill(DeltaPhiWlres2,weight);
+	    }
+	  }
+	}
+      }
+      
       if(pfmet()<200)       continue;
 
+      histos["MyMT_" + samplename]->Fill(myMT,weight);
+      histos["Print_MyMT_" + samplename]->Fill(myMT,weight);
+      histos["MyDeltaPhiWl_noMT_" + samplename]->Fill(myDeltaPhiWl,weight);
+      histos["Print_MyDeltaPhiWl_noMT_" + samplename]->Fill(myDeltaPhiWl,weight);
       histos["MT_" + samplename]->Fill(mt_met_lep(),weight);
       histos["Print_MT_" + samplename]->Fill(mt_met_lep(),weight);
       histos["DeltaPhiWl_noMT_" + samplename]->Fill(val["DeltaPhiWl" ],weight);
       histos["Print_DeltaPhiWl_noMT_" + samplename]->Fill(val["DeltaPhiWl" ],weight);
       if(pfmet()>300){
-	 ++cmet;
+	++cmet;
+	histos["MET300_MyMT_" + samplename]->Fill(myMT,weight);
+	histos["Print_MET300_MyMT_" + samplename]->Fill(myMT,weight);
+	histos["MET300_MyDeltaPhiWl_noMT_" + samplename]->Fill(myDeltaPhiWl,weight);
+	histos["Print_MET300_MyDeltaPhiWl_noMT_" + samplename]->Fill(myDeltaPhiWl,weight);
 	histos["MET300_MT_" + samplename]->Fill(val["MT" ],weight);
 	histos["Print_MET300_MT_" + samplename]->Fill(val["MT" ],weight);
 	histos["MET300_DeltaPhiWl_noMT_" + samplename]->Fill(val["DeltaPhiWl" ],weight);
 	histos["Print_MET300_DeltaPhiWl_noMT_" + samplename]->Fill(val["DeltaPhiWl" ],weight);
 	if(hadronic_top_chi2()<10){
+	  histos["chi210_MyMT_" + samplename]->Fill(myMT,weight);
+	  histos["Print_chi210_MyMT_" + samplename]->Fill(myMT,weight);
+	  histos["chi210_MyDeltaPhiWl_noMT_" + samplename]->Fill(myDeltaPhiWl,weight);
+	  histos["Print_chi210_MyDeltaPhiWl_noMT_" + samplename]->Fill(myDeltaPhiWl,weight);
 	  histos["chi210_MT_" + samplename]->Fill(val["MT" ],weight);
 	  histos["Print_chi210_MT_" + samplename]->Fill(val["MT" ],weight);
 	  histos["chi210_DeltaPhiWl_noMT_" + samplename]->Fill(val["DeltaPhiWl" ],weight);
 	  histos["Print_chi210_DeltaPhiWl_noMT_" + samplename]->Fill(val["DeltaPhiWl" ],weight);
 	  if(MT2W()>200){
+	    histos["MT2W200_MyMT_" + samplename]->Fill(myMT,weight);
+	    histos["Print_MT2W200_MyMT_" + samplename]->Fill(myMT,weight);
+	    histos["MT2W200_MyDeltaPhiWl_noMT_" + samplename]->Fill(myDeltaPhiWl,weight);
+	    histos["Print_MT2W200_MyDeltaPhiWl_noMT_" + samplename]->Fill(myDeltaPhiWl,weight);
 	    histos["MT2W200_MT_" + samplename]->Fill(val["MT" ],weight);
 	    histos["Print_MT2W200_MT_" + samplename]->Fill(val["MT" ],weight);
 	    histos["MT2W200_DeltaPhiWl_noMT_" + samplename]->Fill(val["DeltaPhiWl" ],weight);

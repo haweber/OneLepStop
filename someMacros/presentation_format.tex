@@ -1,0 +1,369 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass[t,xcolor={usenames,dvipsnames,svgnames,table},graphicx={pdftex},graphics={dvips},10pt]{beamer}
+%\RequirePackage{tikz}
+%\usepackage{pgf,pgfarrows,pgfnodes}
+
+%\usepackage[T1]{fontenc}
+%\usepackage{lmodern}
+%\usepackage{bold-extra}
+%\usepackage{graphicx} % Allows including images
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+\usepackage{txfonts}
+%\usepackage[dvips]{graphics}
+%\usepackage[pdftex]{color, graphicx}
+\usepackage{etex}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usepackage{amsmath, amsthm}
+\usepackage{amssymb}
+%\usepackage[T1]{fontenc}
+\usepackage{pifont}
+\usepackage[percent]{overpic}
+%
+%\usepackage[dvips]{graphics}
+%\usepackage[pdftex]{color, graphicx}
+\usepackage{rotating}
+%\usepackage{morefloats}
+\usepackage{multirow}
+\usepackage{units}
+\usepackage{fix-cm}
+%\usepackage{cite}
+%\usepackage[pdfauthor={Hannsj\"org Weber},pdftitle={presentation}, bookmarks=true,colorlinks=true,citecolor=deepgreen,linkcolor=deepblue,urlcolor=deepmagenta, anchorcolor=black,filecolor=deepcyan,runcolor=black, breaklinks=true]{hyperref} % bookmarks
+\usepackage{hyperref}
+\usepackage{cancel}
+\usepackage{xspace}
+%\usepackage[pagestyles]{titlesec} 
+\usepackage{moresize}
+\usepackage{subfigure}
+\usepackage{pdfpages}
+\usepackage{setspace}
+\usepackage{slashed}
+\usepackage{array}
+\usepackage{bbold}
+\usepackage{upgreek}
+\usepackage[a]{esvect}
+\usepackage{hhline}
+%\usepackage{xcolor}
+\RequirePackage{lineno}
+%\usepackage{enumitem}
+\usepackage[absolute,overlay]{textpos}
+
+
+
+\makeatletter
+\newcommand{\saveframenumber}[1]{%
+  \expandafter\edef\csname r@#1\endcsname{\theframenumber}% Store frame number
+}
+\newcommand{\useframenumber}[1]{%
+  \addtocounter{framenumber}{-1}% Decrease framenumber counter
+  \renewcommand{\insertframenumber}{%
+    \csname r@#1\endcsname%
+  }%
+}
+\makeatother
+\newcommand{\restoreframenumberdefault}{%
+  \renewcommand{\insertframenumber}{%
+    \arabic{framenumber}%
+  }%
+}
+
+\mode<presentation> {
+
+\usetheme{Boadilla} 
+\usecolortheme{lily}
+%\usefonttheme[onlylarge]{structurebold}
+%\usefonttheme[onlylarge]{structuresmallcapsserif}
+\useoutertheme{infolines}
+\useinnertheme{circles}
+
+\definecolor{titlered}{cmyk}{0.01,0.88,0.8,0.02}
+\definecolor{titlegray}{cmyk}{0.73,0.65,0.6,0.16}
+\definecolor{itemgray}{RGB}{122,122,122}
+\definecolor{headblue}{RGB}{24,57,255}
+
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{frametitle}{fg=titlered}
+\setbeamercolor{structure}{bg=white, fg=headblue} %the bottom line
+\setbeamercolor{titlelike}{fg=titlered}
+\setbeamercolor{title}{fg=titlered}
+\setbeamercolor{titleaddition}{fg=titlegray}
+\setbeamercolor{itemize item}{fg=itemgray} 
+\setbeamercolor{itemize subitem}{fg=itemgray} 
+\setbeamercolor{itemize subsubitem}{fg=itemgray} 
+\setbeamercolor{enumerate item}{bg=itemgray,fg=itemgray} 
+\setbeamercolor{enumerate subitem}{bg=itemgray,fg=itemgray} 
+\setbeamercolor{enumerate subitem}{bg=itemgray,fg=itemgray} 
+\setbeamercolor*{author in head/foot}{parent=palette tertiary}
+\setbeamercolor*{title in head/foot}{parent=palette secondary}
+\setbeamercolor*{date in head/foot}{parent=palette primary}
+\setbeamercolor{headercolor}{fg=white,bg=headblue}
+
+
+
+\setbeamertemplate{enumerate items}[default]
+\newcommand{\myitem}{\item[\ding{226}]}
+\newcommand{\emptyitem}{\item[\color{white}]}
+\newcommand{\emptyitemspace}{\item[\color{white}] $ $}
+\newcommand{\emptyitemspacesm}{{\itemsep -6pt \emptyitemspace}}
+
+\setbeamerfont{itemize/enumerate body}{}
+\setbeamerfont{itemize/enumerate subbody}{size=\normalsize}
+\setbeamerfont{itemize/enumerate subsubbody}{size=\small}
+\setbeamerfont{frametitle}{size=\tiny}
+
+
+\defbeamertemplate{headline}{myheader-date-name-pagenr}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=12pt]{headercolor}%
+	\insertshortdate[center]
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,center]{headercolor}%
+    \insertshortauthor~\,(\insertshortinstitute)
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,right,rightskip=24pt]{headercolor}%
+    \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+  }
+}
+\defbeamertemplate{headline}{myheader-date-conf-pagenr}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=12pt]{headercolor}%
+	\insertshortdate[center]
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,center]{headercolor}%
+    Insert here the conference name
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,right,rightskip=24pt]{headercolor}%
+    \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+  }
+}
+\defbeamertemplate{headline}{myheader-nodate-conf-pagenr}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=12pt]{headercolor}%
+
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,center]{headercolor}%
+    Insert here the conference name
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,right,rightskip=24pt]{headercolor}%
+    \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+  }
+}
+\defbeamertemplate{headline}{myheader-nodate-name-pagenr}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=12pt]{headercolor}%
+
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,center]{headercolor}%
+    \insertshortauthor~\,(\insertshortinstitute)
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,right,rightskip=24pt]{headercolor}%
+    \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+  }
+}
+\defbeamertemplate{headline}{myheader-date-noname-pagenr}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=12pt]{headercolor}%
+	\insertshortdate[center]
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,center]{headercolor}%
+    
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,right,rightskip=24pt]{headercolor}%
+    \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+  }
+}
+\defbeamertemplate{headline}{myheader-date-namenoinstitute-pagenr}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=12pt]{headercolor}%
+	\insertshortdate[center]
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,center]{headercolor}%
+        \insertshortauthor
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,right,rightskip=24pt]{headercolor}%
+    \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+  }
+}
+\defbeamertemplate{headline}{myheader-nodate-noname-pagenr}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=12pt]{headercolor}%
+
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,center]{headercolor}%
+
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,right,rightskip=24pt]{headercolor}%
+    \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+  }
+}
+\defbeamertemplate{headline}{myheader-nothing}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=1\paperwidth,ht=2.5ex,dp=1.125ex]{headercolor}%
+    \end{beamercolorbox}%
+  }
+}
+\setbeamertemplate{headline}[myheader-date-name-pagenr]
+
+\defbeamertemplate{headline}{myheader-nodate-noname-truepagenr}{%
+\leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,leftskip=12pt]{headercolor}%
+
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,center]{headercolor}%
+
+    \end{beamercolorbox}%
+\hspace{-0.1\baselineskip}%
+    \begin{beamercolorbox}[wd=0.34\paperwidth,ht=2.5ex,dp=1.125ex,right,rightskip=24pt]{headercolor}%
+    \insertframenumber/\inserttotalframenumber
+    \end{beamercolorbox}%
+  }
+
+
+
+}
+%professionalfonts
+
+\newcommand{\backupbegin}{
+   \newcounter{framenumberappendix}
+   \setcounter{framenumberappendix}{\value{framenumber}}
+}
+\newcommand{\backupend}{
+   \addtocounter{framenumberappendix}{-\value{framenumber}}
+   \addtocounter{framenumber}{\value{framenumberappendix}} 
+}
+
+\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+\beamertemplatenavigationsymbolsempty
+
+
+
+%\setbeamertemplate{title page}[default]
+\defbeamertemplate*{title page}{private}[1][]
+{
+\vfill
+\leftskip=24pt\rightskip=0.05\textwidth
+  %\parindent=24pt\hangindent=24pt
+\usebeamerfont{title}\usebeamercolor[fg]{title}\Huge{\textsc{\inserttitle}}\par
+  \usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par
+  \vspace{6pt}
+  \rule[0.5ex]{0.9\linewidth}{1.pt}
+%\leftskip=0pt\rightskip=0.05\textwidth
+\vspace{1pt}
+\begin{columns}[c]
+\column{.6\textwidth}
+  \vspace{36pt}
+\leftskip=24pt\rightskip=0.05\textwidth
+  \usebeamerfont{institute}\usebeamercolor[fg]{titleaddition}\normalsize\insertauthor~(\insertshortinstitute)\par\vspace{3pt}
+  %\usebeamerfont{date}\insertdate\par
+\column{.35\textwidth}
+  %\leftskip=64pt\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic
+  \hfill\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic\rightskip=10pt
+\end{columns}
+}
+
+%\setbeamertemplate{title page}[default]
+\defbeamertemplate*{title page}{mySnT}[1][]
+{
+\vfill
+\leftskip=24pt\rightskip=0.05\textwidth
+  %\parindent=24pt\hangindent=24pt
+\usebeamerfont{title}\usebeamercolor[fg]{title}\Huge{\textsc{\inserttitle}}\par
+  \usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\small\par
+  \vspace{6pt}
+  \rule[0.5ex]{0.9\linewidth}{1.pt}
+%\leftskip=0pt\rightskip=0.05\textwidth
+\vspace{1pt}
+  \usebeamerfont{institute}\usebeamercolor[fg]{titleaddition}\footnotesize\begin{center}
+  N. Amin, C. Campagnari, A. George, F. Golf, J. Gran, I. Suarez\\ 
+  (UCSB)\\ 
+  \vspace{0.4cm} 
+  G. Cerati, I. Dyckes, M. Derdzinski, D. Klein, I. MacNeill, D. Olivito, \\ 
+  G. Zevi Della Porta, C. Welke, J. Wood, F. W\"urthwein, A. Yagil \\ 
+  (UCSD)\\ 
+  \vspace{0.4cm} 
+  L. Bauerdick, K. Burkett, O. Gutsche, S. Jindariani, \\
+  J. Linacre, M. Liu, R. Lopes de Sa, \underline{\smash{\textbf{H. Weber}}}  \\ 
+  (FNAL) \\ 
+  \end{center}
+}
+
+\defbeamertemplate*{title page}{multiauthor}[1][]
+{
+\vfill
+\leftskip=24pt\rightskip=0.05\textwidth
+  %\parindent=24pt\hangindent=24pt
+\usebeamerfont{title}\usebeamercolor[fg]{title}\Huge{\textsc{\inserttitle}}\par
+  \usebeamerfont{subtitle}\usebeamercolor[fg]{subtitle}\insertsubtitle\par
+  \vspace{6pt}
+  \rule[0.5ex]{0.9\linewidth}{1.pt}
+%\leftskip=0pt\rightskip=0.05\textwidth
+\vspace{0pt}
+
+\leftskip=24pt\rightskip=0.01\textwidth
+  \usebeamerfont{institute}\usebeamercolor[fg]{titleaddition}\normalsize\insertauthor
+
+}
+
+
+\setbeamertemplate{title page}[private]
+
+\defbeamertemplate*{frametitle}{customized}[1][]
+{
+\vspace{8pt}
+\usebeamerfont{title}\usebeamercolor[fg]{title}\huge{\insertframetitle}\par
+}
+
+\leftskip=6pt
+
+}
