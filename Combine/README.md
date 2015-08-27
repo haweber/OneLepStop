@@ -16,8 +16,9 @@ You can give input which scan you want to do (default T2tt), if you want to use 
 (false, false - first one needs to be true if no data available), and the areas of the scan
 Note, that in the function load() the correlations for background uncertainties are decided!!
 Here, the code needs to be adjusted for uncertainties.
-Also, as 1. is still in progress, possible adjustments here might be needed.
-Need to think to implement shape uncertainties.
+
+Also, as 1. is still in progress, possible adjustments here might be needed,
+i.e. need to think to implement shape uncertainties.
 
 3. create limits/significances
 done with getLimits.sh/getSignificances.sh
