@@ -44,14 +44,14 @@ Double_t ReadoutLimit(TString sample, int mstop, int mlsp, int mcharg, double xv
 
   TString signalname;
   if(mcharg>=0) signalname = Form("%s_%d_%d_%d",sample.Data(),mstop,mcharg,mlsp);
-  else if(xval>=0){
+  /*else if(xval>=0){
     string s = to_string(xval);
     while(s[s.size()-1] == '0'){
       s.erase(s.end()-1);
     }
     signalname = Form("%s_%d_%d_",sample.Data(),mstop,mlsp)+s;
     signalname.ReplaceAll(".","p");
-  }
+  }*/
   else signalname = Form("%s_%d_%d",sample.Data(),mstop,mlsp);
 
   return readoutlimit(signalname, prefix, method, directory, seed, islimit, quantile, limiterr);

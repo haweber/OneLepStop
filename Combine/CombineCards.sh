@@ -62,23 +62,25 @@ Name=`echo ${signal}`
 combinestring=combineCards.py
 validcommand=true
 
-BinArray=("met250_mt2w0" "met250_mt2w200" "met300_mt2w0" "met300_mt2w200" "met350_mt2w0" "met350_mt2w200" "met400_mt2w0" "met400_mt2w200" "met500_mt2w200")
-for i in "${!BinArray[@]}"
+maxbins=5
+#BinArray=("met250_mt2w0" "met250_mt2w200" "met300_mt2w0" "met300_mt2w200" "met350_mt2w0" "met350_mt2w200" "met400_mt2w0" "met400_mt2w200" "met500_mt2w200")
+#for i in "${!BinArray[@]}"
+for i in `seq 1 ${maxbins}`;
 do
     #echo $i
     #echo "${thedir}${Name}_${i}.txt"
-    #if [ ! -e "${thedir}${Name}_bin${i}.txt" ] && [ ! -f "${thedir}${Name}_bin${i}.txt" ] && [ ! -s "${thedir}${Name}_bin${i}.txt" ]
-    if [ ! -e "${thedir}${Name}_${BinArray[$i]}.txt" ] && [ ! -f "${thedir}${Name}_${BinArray[$i]}.txt" ] && [ ! -s "${thedir}${Name}_${BinArray[$i]}.txt" ]
+    if [ ! -e "${thedir}${Name}_b${i}.txt" ] && [ ! -f "${thedir}${Name}_b${i}.txt" ] && [ ! -s "${thedir}${Name}_b${i}.txt" ]
+    #if [ ! -e "${thedir}${Name}_${BinArray[$i]}.txt" ] && [ ! -f "${thedir}${Name}_${BinArray[$i]}.txt" ] && [ ! -s "${thedir}${Name}_${BinArray[$i]}.txt" ]
     then
 	validcommand=false
-	#nonvalidfile=`echo ${thedir}${Name}_bin${i}.txt`
-	nonvalidfile=`echo ${thedir}${Name}_${BinArray[$i]}.txt`
+	nonvalidfile=`echo ${thedir}${Name}_b${i}.txt`
+	#nonvalidfile=`echo ${thedir}${Name}_${BinArray[$i]}.txt`
 	#echo "file ${thedir}${Name}_${BinArray[$i]}.txt does not exist. dont combine"
 	break
     fi
     chnum=$(($i + 1))
-    #combinestring=`echo ${combinestring} ch${i}=${thedir}${Name}_bin${i}.txt`
-    combinestring=`echo ${combinestring} ch${chnum}=${thedir}${Name}_${BinArray[$i]}.txt`
+    combinestring=`echo ${combinestring} ch${i}=${thedir}${Name}_b${i}.txt`
+    #combinestring=`echo ${combinestring} ch${chnum}=${thedir}${Name}_${BinArray[$i]}.txt`
     #echo ${combinestring}
 done
 

@@ -35,11 +35,14 @@ using namespace std;
 
 // do this more correctly - want this as global variables
 const int bgsize = 5;
-TString sample_type[bgsize] = {"TTbar2l","TTbar1l", "WJets", "SingleTop", "TTV"};
+TString sample_type[bgsize] = {"TTbar2l","TTbar1l", "WJets", "SingleTop", "Rare"};
 int sample_id[bgsize] = {1, 2, 3, 4, 5};
-const int maxsignal = 9;
-unsigned int binnumbertranslate[maxsignal] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-TString binname[maxsignal] = {"met250_mt2w0", "met250_mt2w200", "met300_mt2w0", "met300_mt2w200", "met350_mt2w0", "met350_mt2w200", "met400_mt2w0", "met400_mt2w200", "met500_mt2w200"};
+bool maxbincheck = true;
+string inputdir = "inputfiles/";
+string outputdir = "datacards/";
+const int maxsignal = 5;
+unsigned int binnumbertranslate[maxsignal] = {1, 2, 3, 4, 5};
+TString binname[maxsignal] = {"met250_mt2w0", "met325_mt2w0", "met250_mt2w200", "met350_mt2w200", "met450_mt2w200"};
 //unsigned int binnumbertranslate[maxsignal] = {1, 3, 5, 7, 2, 4, 6, 8, 9};
 //TString binname[maxsignal] = {"met250_mt2w0", "met300_mt2w0", "met350_mt2w0", "met400_mt2w0", "met250_mt2w200", "met300_mt2w200", "met350_mt2w200", "met400_mt2w200", "met500_mt2w200"};
 
@@ -76,12 +79,33 @@ struct entry{
 
 
 int setsampleid(TString sample);
+string setinputstring( string setinput);
 bool SortEntrybyBin(entry const& lhs, entry const& rhs);
 bool SortEntrybyBinAndProcess(entry const& lhs, entry const& rhs);
 double rnd(double d);
 void makeDataCards(int bin, TString signaltype, TString signalname, bool overrightdatawithBG=false, bool overrightdatawithBGplusSIG=false);
 entry load(unsigned int bin, string filedir, string sample, bool issignal=false, string signalname="");
-void makeDataCardsScan(TString signaltype="T2tt", bool overrightdatawithBG=false, bool overrightdatawithBGplusSIG=false, int stoplow=100, int stophigh=1000, int stopstep=25, int LSPlow=0, int LSPhigh=500, int LSPstep=25, int chargLow=-1, int chargHigh=-1, int chargStep=-1, double xval=-1);
+int checkmaxbin(string filedir, string sample, bool issignal=false, string signalname="");
+void makeDataCardsScan(TString signaltype="T2tt", bool overrightdatawithBG=false, bool overrightdatawithBGplusSIG=false, int stoplow=100, int stophigh=1000, int stopstep=25, int LSPlow=0, int LSPhigh=500, int LSPstep=25, int chargLow=-1, int chargHigh=-1, int chargStep=-1);
+
+
+int checkmaxbin(string filedir, string sample, bool issignal, string signalname){
+  string filename = filedir + sample + ".root";
+  if(issignal) filename = filedir + "Signal_" + signalname + ".root";//MODIFY INPUT HERE?
+  TFile *f = new TFile(filename.c_str(),"READ");
+  if(f->IsZombie()) {
+    f->Close();
+    delete f;
+    return -1;
+  }
+  string mapname = "SRyield_"+sample;
+  if(issignal) mapname = "SRyield_"+sample;
+  TH1F *h = (TH1F*)f->Get(mapname.c_str());
+  int bin = h->GetNbinsX();
+  f->Close();
+  delete f;
+  return bin;
+}
 
 //filename - of rootfile
 //only for signal we need to specify the masses
@@ -98,7 +122,7 @@ entry load(unsigned int bin, string filedir, string sample, bool issignal, strin
   result.bin = bin;
 
   string filename = filedir + sample + ".root";
-  if(issignal) filename = filedir + "Signal_" + sample + ".root";//MODIFY INPUT HERE?
+  if(issignal) filename = filedir + "Signal_" + signalname + ".root";//MODIFY INPUT HERE?
   TFile *f = new TFile(filename.c_str(),"READ");
   if(f->IsZombie()) {
     f->Close();
@@ -115,6 +139,12 @@ entry load(unsigned int bin, string filedir, string sample, bool issignal, strin
   mapname = "CRyield_"+samplename; histos[mapname] = (TH1F*)f->Get(mapname.c_str());
   mapname = "StatUnc_"+samplename; histos[mapname] = (TH1F*)f->Get(mapname.c_str());
   mapname = "SystUnc_"+samplename; histos[mapname] = (TH1F*)f->Get(mapname.c_str());
+  if((int)bin>(histos["SRyield_"+samplename]->GetNbinsX())){
+    result.sample = "ToHighBin_"+result.sample;
+    f->Close();
+    delete f;
+    return result;
+  }
   
   if(histos["SRyield_"+samplename]->Integral()<=0) {
     f->Close();
@@ -167,7 +197,7 @@ void makeDataCards(int bin, TString signaltype, TString signalname, bool overrig
   entry data;
   entry signal;
   //string inputdir = "/home/users/haweber/StopAnalysis/CombineCode/inputfiles/";//need slash at the end
-  string inputdir = "inputfiles/";//need slash at the end
+  if(maxbincheck&&bin>checkmaxbin(inputdir,signaltype.Data(),true,signalname.Data()) ) return;
   if(loadData){
     data = load(bin,inputdir,"Data",false,"");
     if(data.sample.Contains("FAILED")) cout << "Failed to load input for making datacard for bin " << bin << " and sample Data -- break" << endl;
@@ -294,14 +324,14 @@ void makeDataCards(int bin, TString signaltype, TString signalname, bool overrig
     }
     *fLogStream << endl;
   }
-  //string binstring = std::to_string(bin);
-  string binstring = binname[bin-1].Data();
+  string binstring = "b" + std::to_string(bin);
+  //string binstring = binname[bin-1].Data();
   //TString logname = "datacards/data/datacard_" + signalname + "_bin" + binstring + ".txt";
   //if(overrightdatawithBGplusSIG) logname = "datacards/fakedata/dataisbgsig/datacard_" + signalname + "_bin" + binstring + ".txt";
   //else if(overrightdatawithBG) logname = "datacards/fakedata/dataisbg/datacard_" + signalname + "_bin" + binstring + ".txt";
-  TString logname = "datacards/data/" + signalname + "_" + binstring + ".txt";
-  if(overrightdatawithBGplusSIG) logname = "datacards/fakedata/dataisbgsig/" + signalname + "_" + binstring + ".txt";
-  else if(overrightdatawithBG) logname = "datacards/fakedata/dataisbg/" + signalname + "_" + binstring + ".txt";
+  TString logname = outputdir + "data/" + signalname + "_" + binstring + ".txt";
+  if(overrightdatawithBGplusSIG) logname = outputdir + "fakedata/dataisbgsig/" + signalname + "_" + binstring + ".txt";
+  else if(overrightdatawithBG) logname = outputdir + "fakedata/dataisbg/" + signalname + "_" + binstring + ".txt";
   //logname = "temp/datacard_" + signalname + "_bin" + binstring + ".txt";
   ofstream f_log (logname.Data(), ios::trunc);
   f_log << fLogStream->str();
@@ -333,22 +363,36 @@ bool SortEntrybyBinAndProcess(entry const& lhs, entry const& rhs) {
   return lhs.sampleid < rhs.sampleid;
 }
 
+string setinputstring( string setinput){
+  inputdir = setinput;
+  return setinput;
+}
+
+string setoutputstring( string setoutput){
+  outputdir = setoutput;
+  return setoutput;
+}
+
 void makeDataCardsAllBins(TString signaltype, TString signalname, bool overrightdatawithBG, bool overrightdatawithBGplusSIG){
 
-  for(unsigned int i = 1; i<=maxsignal; ++i){
+  int maxbin = maxsignal;
+  if(maxbincheck) maxbin = checkmaxbin(inputdir,signaltype.Data(),true,signalname.Data());
+  maxbincheck = false;
+  for(int i = 1; i<=maxbin; ++i){
     makeDataCards(i,signaltype,signalname,overrightdatawithBG,overrightdatawithBGplusSIG);
   }
   
 }
 
-void makeDataCardsScan(TString signaltype, bool overrightdatawithBG, bool overrightdatawithBGplusSIG, int stoplow, int stophigh, int stopstep, int LSPlow, int LSPhigh, int LSPstep, int chargLow, int chargHigh, int chargStep, double xval){
+void makeDataCardsScan(TString signaltype, bool overrightdatawithBG, bool overrightdatawithBGplusSIG, int stoplow, int stophigh, int stopstep, int LSPlow, int LSPhigh, int LSPstep, int chargLow, int chargHigh, int chargStep){
 
   // if x<0 and charginos < 0 parse
   // Signal_SIGNALTYPE_MSTOP_MLSP
   // if charginos>=0 parse
   // Signal_SIGNALTYPE_MSTOP_MCHARG_MLSP
   // else if x>0 parse
-  // Sginal_SIGNALTYPE_MSTOP_MLSP_X
+  // Signal_SIGNALTYPE_MSTOP_MLSP_X
+  // Note: Now signaltype contains xval
   
   for(int t = stoplow; t<=stophigh; t+=stopstep){
     for(int l = LSPlow; l<=LSPhigh; l+=LSPstep){
@@ -362,7 +406,7 @@ void makeDataCardsScan(TString signaltype, bool overrightdatawithBG, bool overri
 	  //cout << signalname << endl;
 	  makeDataCardsAllBins(signaltype,signalname,overrightdatawithBG,overrightdatawithBGplusSIG);
 	}
-      } else if(xval>=0){
+      }/* else if(xval>=0){
 	string s = to_string(xval);
 	while(s[s.size()-1] == '0'){
 	  s.erase(s.end()-1);
@@ -371,7 +415,7 @@ void makeDataCardsScan(TString signaltype, bool overrightdatawithBG, bool overri
 	signalname.ReplaceAll(".","p");
 	//cout << signalname << endl;
 	makeDataCardsAllBins(signaltype,signalname,overrightdatawithBG,overrightdatawithBGplusSIG);
-      } else {
+      }*/ else {
 	signalname = Form("%s_%d_%d",signaltype.Data(),t,l);
 	//cout << signalname << endl;
 	makeDataCardsAllBins(signaltype,signalname,overrightdatawithBG,overrightdatawithBGplusSIG);

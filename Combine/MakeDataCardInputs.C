@@ -26,6 +26,12 @@ using namespace tas;
 
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
+  float MEDBTAG = 0.890;
+  
+  int toplow   = 425; int topup   = 850; int topstep   = 25; 
+  int charglow = 100; int chargup = 550; int chargstep = 25; 
+  int lsplow   =  50; int lspup   = 325; int lspstep   = 25;
+  
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
@@ -44,12 +50,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   //AllBGCorr
   //CorrName1Name2Name3 with NameX being sampleX
   //CorrAllBG CorrAll means correlated among all backgrounds, or everything (bg+sig)
-  histonames.push_back("SRyield");    hbins.push_back(9); hlow.push_back(  0.5); hup.push_back(9.5); storeh.push_back(true);
-  histonames.push_back("CRyield");    hbins.push_back(9); hlow.push_back(  0.5); hup.push_back(9.5); storeh.push_back(true);
-  histonames.push_back("StatUnc");    hbins.push_back(9); hlow.push_back(  0.5); hup.push_back(9.5); storeh.push_back(true);
-  histonames.push_back("SystUnc");    hbins.push_back(9); hlow.push_back(  0.5); hup.push_back(9.5); storeh.push_back(true);
-  //histonames.push_back("MT2W200_MET");    hbins.push_back(30); hlow.push_back(  0.); hup.push_back(750); storeh.push_back(true);
-  //histonames.push_back("MT2Wle200_MET");  hbins.push_back(30); hlow.push_back(  0.); hup.push_back(750); storeh.push_back(true);
+  histonames.push_back("SRyield");    hbins.push_back(5); hlow.push_back(  0.5); hup.push_back(5.5); storeh.push_back(true);
+  histonames.push_back("CRyield");    hbins.push_back(5); hlow.push_back(  0.5); hup.push_back(5.5); storeh.push_back(true);
+  histonames.push_back("StatUnc");    hbins.push_back(5); hlow.push_back(  0.5); hup.push_back(5.5); storeh.push_back(true);
+  histonames.push_back("SystUnc");    hbins.push_back(5); hlow.push_back(  0.5); hup.push_back(5.5); storeh.push_back(true);
  
   for(unsigned int b = 0; b<3; ++b){
     string samplename = skimFilePrefix;
@@ -61,11 +65,17 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     if(skimFilePrefix=="TTbar"&&b==2) samplename = "TTbarH";
     string mapname;
     if(helper.Contains("Signal")){
-      if(helper.Contains("T2tt")){
-	for(int t = 100; t<=1100; t+=25){
-	  for(int l = 0; l<=800; l+=25){
+      for(int t = toplow; t<=topup; t+=topstep){
+	for(int c = charglow; c<=chargup; c+=chargstep){
+	  if(helper.Contains("T2tt")&&c!=charglow) continue;
+	  if(!helper.Contains("T2tt")&&c>t) continue;
+	  for(int l = lsplow; l<=lspup; l+=lspstep){
 	    if(l>t) continue;
-	    TString signalname = Form("%s_%d_%d",skimFilePrefix.c_str(),t,l);
+	    if(!helper.Contains("T2tt")&&l>c) continue;
+	    TString signalname = Form("%s_%d_%d",skimFilePrefix.c_str(),t,l);//%s contains x0p5 etc
+	    if(!helper.Contains("T2tt") && !helper.Contains("x") ) signalname = Form("%s_%d_%d_%d",skimFilePrefix.c_str(),t,c,l);
+	    //if(helper.Contains("x")) signalname = Form("%s_%d_%d",skimFilePrefix.c_str(),t,l);
+	    //else if(!helper.Contains("T2tt")) signalname = Form("%s_%d_%d_%d",skimFilePrefix.c_str(),t,c,l);
 	    for(unsigned int i = 0; i<histonames.size();++i){
 	      mapname = histonames[i] + "_" + signalname.Data();
 	      if(histos.count(mapname) == 0 ) histos[mapname] = new TH1F(mapname.c_str(), "", hbins[i], hlow[i], hup[i]);
@@ -123,15 +133,19 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	else { samplename = "TTbarH"; }// cout << "no gen lep" << " " << genlepsfromtop() << endl; }
       }
       TString helper = TString(samplename);
+      
       if(helper.Contains("Signal")){
-	if(helper.Contains("T2tt")){
+	if(helper.Contains("T2tt") || helper.Contains("x") ){
 	  TString signalname = Form("%s_%d_%d",samplename.c_str(),(int)mass_stop(),(int)mass_lsp());
+	  samplename = signalname.Data();
+	} else {
+	  TString signalname = Form("%s_%d_%d_%d",samplename.c_str(),(int)mass_stop(), (int)mass_chargino(),(int)mass_lsp());
 	  samplename = signalname.Data();
 	}
       }
       
       // Analysis Code
-      float weight = cms3.scale1fb()*5.;
+      float weight = cms3.scale1fb()*2.;
       if(samplename == "Data") weight = 1.;
       if(is_data()) weight = 1.;
       if(event==0) cout << "weight " << weight << " nEvents " << cms3.nEvents() << " filename " << currentFile->GetTitle() << endl;
@@ -164,35 +178,37 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if(fabs(ak4pfjets_p4()[nj].Eta())>2.4) continue;
 	if(ak4pfjets_loose_pfid()[nj]==false) continue;
 	++NGJets;
-	//if(ls()==146841&&evt()==14684057&&samplename=="TTbar1l") {
-	//cout << "NGJets " << NGJets << "/" <<  ak4pfjets_CSV().size() << " PT " << cms3.ak4pfjets_p4()[nj].Pt() << " Eta " << ak4pfjets_p4()[nj].Eta() << endl;
-	//}
-	if(ak4pfjets_CSV()[nj]>0.814) {++NGBJets; }
-      }
-      //NGJets = ngoodjets();
-      //NGBJets = ngoodbtags();
-      //NSLeps = ngoodleps();
-      //NGLeps = nvetoleps();
-      //if(ls()==146841&&evt()==14684057&&samplename=="TTbar1l") {
-      //cout << cms3.ak4pfjets_p4()[0].Pt() << " " << cms3.ak4pfjets_p4()[1].Pt() << " " << cms3.ak4pfjets_p4()[2].Pt() << " " << cms3.ak4pfjets_p4()[3].Pt() << " " << cms3.ak4pfjets_p4()[4].Pt() << endl;
-      //cout << __LINE__ << " LS " << ls() << " evt " << evt() <<endl;
-      //cout << "nvtxs " << nvtxs() << " NGLeps " << NGLeps << "NSLeps " << NSLeps << " NGJets " << NGJets << " NGBJets " << NGBJets << " MinDPhi " << mindphi_met_j1_j2() << " MET " << pfmet() << " MT " << mt_met_lep() << endl;
-      //}
-      if(nvtxs()<0)        continue;
-      if(NGLeps!=1)        continue;
-      if(NSLeps!=1)        continue;
-      //if(!PassTrackVeto()) continue;
-      //if(!PassTauVeto())   continue;
-      if(NGJets<4)         continue;
-      if(NGBJets<1)        continue;
-      if(mindphi_met_j1_j2()<0.8) continue;
-      //if(hadronic_top_chi2()>10) continue;
-      if(pfmet()<250)       continue;
-      if(mt_met_lep()<150)  continue;
 
-      //if(MT2W()>200&&pfmet()>500) { crosscheck += weight; }
+	if(ak4pfjets_CSV()[nj]>MEDBTAG) {++NGBJets; }
+      }
+
+      if(nvtxs()<0)                continue;
+      if(nvetoleps()!=1)           continue;
+      //if(NSLeps!=1)              continue;
+      if(ngoodleps()!=1)           continue;
+      if(!PassTrackVeto_v3())      continue;
+      if(!PassTauVeto())           continue;
+      if(ngoodjets()<4)            continue;
+      if(ngoodbtags()<1)           continue;
+      //if(NGJets<4)               continue;
+      //if(NGBJets<1)              continue;
+      if(mindphi_met_j1_j2()<0.8)  continue;
+      //if(hadronic_top_chi2()>10) continue;
+      if(pfmet()<250)              continue;
+      if(mt_met_lep()<150)         continue;
+
     
       float mybin = -1;
+      if(MT2W()<200){
+	if(     pfmet()<325) mybin = 1;
+	else                 mybin = 2;
+      } else {
+	if(     pfmet()<350) mybin = 3;
+	else if(pfmet()<450) mybin = 4;
+	else                 mybin = 5;
+      }
+
+      /*
       if(MT2W()<200){
 	if(     pfmet()<300) mybin = 1;
 	else if(pfmet()<350) mybin = 3;
@@ -206,20 +222,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	else if(pfmet()<500) mybin = 8;
 	else                 mybin = 9;
       }
-      //if(mybin<=0||mybin>9) cout << "MT2W " << MT2W() << " MET " << pfmet() << endl;
-      //if(mybin==9) cout << samplename << " MT2W " << MT2W() << " MET " << pfmet() << endl;
-      //if(nEventsTotal%50==0) {
-      //  cout << samplename << " " << mybin << " MT2W " << MT2W() << " MET " << pfmet() << endl;
-      //  cout << "NGLeps " << NGLeps << " NSLeps " << NSLeps << " NGJets " << NGJets << " NGBJets " << NGBJets
-      //       << " MinDPhi " << mindphi_met_j1_j2() << " MT " << mt_met_lep() << " weight " << weight << endl;
-      //}
-
-      //cout << "SRyield_" << samplename <<  " " << mybin << " " << weight << endl;
+      */
       histos["SRyield_" + samplename]->Fill(mybin,weight);
-      //in principal try to fill also +/- 1 sigma and CR regions - add some +/- histgrams
-      //if(MT2W()>200) histos["MT2W200_MET_"+samplename]->Fill(pfmet(),weight);
-      //if(MT2W()<=200) histos["MT2Wle200_MET_"+samplename]->Fill(pfmet(),weight);
-      //if(samplename=="TTbar1l") cout << "LS:evt " << ls() << ":" << evt() << " MT2W " << MT2W() << " MET " << pfmet() << endl;
     }
   
     // Clean Up
@@ -242,11 +246,17 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     if(skimFilePrefix=="TTbar"&&b==2) samplename = "TTbarH";
     string mapname;
     if(helper.Contains("Signal")){
-      if(helper.Contains("T2tt")){
-	for(int t = 100; t<=1100; t+=25){
-	  for(int l = 0; l<=800; l+=25){
+      for(int t = toplow; t<=topup; t+=topstep){
+	for(int c = charglow; c<=chargup; c+=chargstep){
+	  if(helper.Contains("T2tt")&&c!=charglow) continue;
+	  if(!helper.Contains("T2tt")&&c>t) continue;
+	  for(int l = lsplow; l<=lspup; l+=lspstep){
 	    if(l>t) continue;
-	    TString signalname = Form("%s_%d_%d",skimFilePrefix.c_str(),t,l);
+	    if(!helper.Contains("T2tt")&&l>c) continue;
+	    TString signalname = Form("%s_%d_%d",skimFilePrefix.c_str(),t,l);//%s contains x0p5 etc
+	    if(!helper.Contains("T2tt") && !helper.Contains("x") ) signalname = Form("%s_%d_%d_%d",skimFilePrefix.c_str(),t,c,l);
+	    //if(helper.Contains("x")) signalname = Form("%s_%d_%d",skimFilePrefix.c_str(),t,l);
+	    //else if(!helper.Contains("T2tt")) signalname = Form("%s_%d_%d_%d",skimFilePrefix.c_str(),t,c,l);
 	    samplename = signalname.Data();
 	    //cout << samplename << endl;
 	    for(int i = 1; i<=histos["SRyield_"+samplename]->GetNbinsX();++i){
@@ -288,11 +298,17 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     f->cd();
     string mapname;
     if(helper.Contains("Signal")){
-      if(helper.Contains("T2tt")){
-	for(int t = 100; t<=1100; t+=25){
-	  for(int l = 0; l<=800; l+=25){
+      for(int t = toplow; t<=topup; t+=topstep){
+	for(int c = charglow; c<=chargup; c+=chargstep){
+	  if(helper.Contains("T2tt")&&c!=charglow) continue;
+	  if(!helper.Contains("T2tt")&&c>t) continue;
+	  for(int l = lsplow; l<=lspup; l+=lspstep){
 	    if(l>t) continue;
-	    TString signalname = Form("%s_%d_%d",skimFilePrefix.c_str(),t,l);
+	    if(!helper.Contains("T2tt")&&l>c) continue;
+	    TString signalname = Form("%s_%d_%d",skimFilePrefix.c_str(),t,l);//%s contains x0p5 etc
+	    if(!helper.Contains("T2tt") && !helper.Contains("x") ) signalname = Form("%s_%d_%d_%d",skimFilePrefix.c_str(),t,c,l);
+	    //if(helper.Contains("x")) signalname = Form("%s_%d_%d",skimFilePrefix.c_str(),t,l);
+	    //else if(!helper.Contains("T2tt")) signalname = Form("%s_%d_%d_%d",skimFilePrefix.c_str(),t,c,l);
 	    for(unsigned int i = 0; i<histonames.size();++i){
 	      mapname = histonames[i] + "_" + signalname.Data();
 	      if(storeh[i]) histos[mapname]->Write();
