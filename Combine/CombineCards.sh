@@ -1,15 +1,42 @@
 
+#check cmssw and if it contains HiggsCombine
+if [ -z $CMSSW_BASE ]; then
+    echo "CMSSW_BASE var not set, run cmsenv, exiting..."
+    exit 0;
+fi
+DIRECTORY=`echo $CMSSW_BASE/src/HiggsAnalysis`
+if [ ! -d "$DIRECTORY" ]; then
+    echo "Your CMSSW release does not have HiggsCombined installed. Please do."
+    echo "Please read https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit"
+    echo "You should have ${DIRECTORY}. Exiting..."
+    exit 0;
+fi
+
 #thedir='/home/users/haweber/StopAnalysis/CombineCode/datacards/fakedata/dataisbgsig/'
 thedir='datacards/'
-fakedata=true
+fakedata=false
 dataisbg=true
 
-signaltype='T2tt'
-stopmass=425
-lspmass=325
-chargmass=-1
-xval=-1
-numbins=9
+if [ $# -eq 0 ]
+then
+    echo You should provide at least the signal.
+    exit 0
+fi
+    
+
+#signal='T2tt_425_325'
+signal=$1
+
+if [ $# -gt 1 ]
+then
+    fakedata=$2
+fi
+
+if [ $# -gt 2 ]
+then
+    dataisbg=$3
+fi
+    
 
 if [ "$fakedata" = true ]
 then
@@ -28,27 +55,12 @@ fi
 
 
 
-Name=`echo ${signaltype}_${stopmass}`
-if [ ${chargmass} -gt 0 ]
-then
-    Name=`echo ${Name}_${chargmass}_${lspmass}`
-elif [ ${xval} -gt 0 ]
-then
-    Name=`echo ${Name}_${lspmass}_${xval}`
-else
-    Name=`echo ${Name}_${lspmass}`
-fi
+Name=`echo ${signal}`
 
 #echo ${Name}
 
 combinestring=combineCards.py
-#for i in {1..9}
-#for i in `seq 1 ${numbins}`;
-#do
-#    #echo $i
-#    combinestring=`echo ${combinestring} ch${i}=${thedir}${Name}_bin${i}.txt`
-#    #echo ${combinestring}
-#done
+validcommand=true
 
 BinArray=("met250_mt2w0" "met250_mt2w200" "met300_mt2w0" "met300_mt2w200" "met350_mt2w0" "met350_mt2w200" "met400_mt2w0" "met400_mt2w200" "met500_mt2w200")
 for i in "${!BinArray[@]}"
@@ -61,6 +73,7 @@ do
 	validcommand=false
 	#nonvalidfile=`echo ${thedir}${Name}_bin${i}.txt`
 	nonvalidfile=`echo ${thedir}${Name}_${BinArray[$i]}.txt`
+	#echo "file ${thedir}${Name}_${BinArray[$i]}.txt does not exist. dont combine"
 	break
     fi
     chnum=$(($i + 1))
@@ -69,8 +82,13 @@ do
     #echo ${combinestring}
 done
 
-eval ${combinestring} > ${thedir}combinedcards/combined_${Name}.txt
+if [ "$validcommand" = true ]
+then
+    eval ${combinestring} > ${thedir}combinedcards/combined_${Name}.txt
 
-#echo ${combinestring}
+    #echo ${combinestring}
 
-echo Combined cards for ${Name} into ${thedir}combinedcards/combined_${Name}.txt
+    echo "Combined cards for ${Name} into ${thedir}combinedcards/combined_${Name}.txt"
+#else
+#    echo "Some input file did not exist. Didnt combine"
+fi

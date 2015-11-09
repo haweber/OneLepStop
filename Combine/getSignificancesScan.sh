@@ -4,6 +4,11 @@ fakedata=true
 dataisbg=true
 
 signaltype='T2tt'
+declare -i ntoys=-1
+
+observed=false #if false get expectected
+priori=true #if false use posteriori
+
 declare -i stopmasslow=425
 declare -i stopmasshigh=850
 declare -i stopmassstep=25
@@ -19,43 +24,54 @@ if [ $# -ge 1 ]
 then
     signaltype=$1
 fi
-
 if [ $# -ge 2 ]
 then
-    fakedata=$2
+    ntoys=$2
 fi
 if [ $# -ge 3 ]
 then
-    dataisbg=$3
+    observed=$3
 fi
-if [ $# -eq 9 ]
+if [ $# -ge 4 ]
 then
-    stopmasslow=$4
-    stopmasshigh=$5
-    stopmassstep=$6
-    lspmasslow=$7
-    lspmasshigh=$8
-    lspmassstep=$9
-elif [ $# -eq 10 ]
+    priori=$4
+fi
+if [ $# -ge 5 ]
 then
-    stopmasslow=$4
-    stopmasshigh=$5
-    stopmassstep=$6
-    lspmasslow=$7
-    lspmasshigh=$8
-    lspmassstep=$9
-    xval=${10}
-elif [ $# -ge 12 ]
+    fakedata=$5
+fi
+if [ $# -ge 6 ]
 then
-    stopmasslow=$4
-    stopmasshigh=$5
-    stopmassstep=$6
-    chargmasslow=$7
-    chargmasshigh=$8
-    chargmassstep=$9
-    spmasslow=${10}
+    dataisbg=$6
+fi
+if [ $# -eq 12 ]
+then
+    stopmasslow=$7
+    stopmasshigh=$8
+    stopmassstep=$9
+    lspmasslow=${10}
     lspmasshigh=${11}
     lspmassstep=${12}
+elif [ $# -eq 13 ]
+then
+    stopmasslow=$7
+    stopmasshigh=$8
+    stopmassstep=$9
+    lspmasslow=${10}
+    lspmasshigh=${11}
+    lspmassstep=${12}
+    xval=${13}
+elif [ $# -ge 15 ]
+then
+    stopmasslow=$7
+    stopmasshigh=$8
+    stopmassstep=$9
+    chargmasslow=${10}
+    chargmasshigh=${11}
+    chargmassstep=${12}
+    spmasslow=${13}
+    lspmasshigh=${14}
+    lspmassstep=${15}
 fi
 
 
@@ -119,6 +135,6 @@ done
 
 for Name in "${NameArray[@]}"
 do
-    bash CombineCards.sh ${Name} ${fakedata} ${dataisbg}
+    bash getSignificances.sh ${Name} ${ntoys} ${observed} ${priori} ${fakedata} ${dataisbg}
 done
 

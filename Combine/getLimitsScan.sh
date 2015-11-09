@@ -4,6 +4,9 @@ fakedata=true
 dataisbg=true
 
 signaltype='T2tt'
+
+postfit=false #if false do prefit
+
 declare -i stopmasslow=425
 declare -i stopmasshigh=850
 declare -i stopmassstep=25
@@ -19,43 +22,46 @@ if [ $# -ge 1 ]
 then
     signaltype=$1
 fi
-
 if [ $# -ge 2 ]
 then
-    fakedata=$2
+    postfit=$2
 fi
 if [ $# -ge 3 ]
 then
-    dataisbg=$3
+    fakedata=$3
 fi
-if [ $# -eq 9 ]
+if [ $# -ge 4 ]
 then
-    stopmasslow=$4
-    stopmasshigh=$5
-    stopmassstep=$6
-    lspmasslow=$7
-    lspmasshigh=$8
-    lspmassstep=$9
-elif [ $# -eq 10 ]
+    dataisbg=$4
+fi
+if [ $# -eq 10 ]
 then
-    stopmasslow=$4
-    stopmasshigh=$5
-    stopmassstep=$6
-    lspmasslow=$7
-    lspmasshigh=$8
-    lspmassstep=$9
-    xval=${10}
-elif [ $# -ge 12 ]
+    stopmasslow=$5
+    stopmasshigh=$6
+    stopmassstep=$7
+    lspmasslow=$8
+    lspmasshigh=$9
+    lspmassstep=${10}
+elif [ $# -eq 11 ]
 then
-    stopmasslow=$4
-    stopmasshigh=$5
-    stopmassstep=$6
-    chargmasslow=$7
-    chargmasshigh=$8
-    chargmassstep=$9
-    spmasslow=${10}
-    lspmasshigh=${11}
-    lspmassstep=${12}
+    stopmasslow=$5
+    stopmasshigh=$6
+    stopmassstep=$7
+    lspmasslow=$8
+    lspmasshigh=$9
+    lspmassstep=${10}
+    xval=${11}
+elif [ $# -ge 13 ]
+then
+    stopmasslow=$5
+    stopmasshigh=$6
+    stopmassstep=$7
+    chargmasslow=$8
+    chargmasshigh=$9
+    chargmassstep=${10}
+    spmasslow=${11}
+    lspmasshigh=${12}
+    lspmassstep=${13}
 fi
 
 
@@ -119,6 +125,6 @@ done
 
 for Name in "${NameArray[@]}"
 do
-    bash CombineCards.sh ${Name} ${fakedata} ${dataisbg}
+    bash getLimits.sh ${Name} ${postfit} ${fakedata} ${dataisbg}
 done
 

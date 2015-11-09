@@ -1,22 +1,50 @@
 
-INPUTDIR="datacards/fakedata/dataisbg/combinedcards/"
-OUTPUTDIR="outputfiles/fakedata/dataisbg/"
-LOGDIR="logs"
+#check cmssw and if it contains HiggsCombine
+if [ -z $CMSSW_BASE ]; then
+    echo "CMSSW_BASE var not set, run cmsenv, exiting..."
+    exit 0;
+fi
+DIRECTORY=`echo $CMSSW_BASE/src/HiggsAnalysis`
+if [ ! -d "$DIRECTORY" ]; then
+    echo "Your CMSSW release does not have HiggsCombined installed. Please do."
+    echo "Please read https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit"
+    echo "You should have ${DIRECTORY}. Exiting..."
+    exit 0;
+fi
 
-declare -a samples=("T2tt")
+#this is only the base, rest will be added depending on fakedata, dataisbg
+INPUTDIR="datacards/"
+OUTPUTDIR="outputfiles/"
 
+
+
+
+#Signal="T2tt_425_325"
 postfit=false #if false do prefit
 
-#get list of files for that samples
-for i in "${samples[@]}"
-do
-    ls ${INPUTDIR}combined_${i}_*.txt > myfilelist
 
-done
+fakedata=true
+dataisbg=true
 
-nLines=`wc -l < myfilelist`
+if [ $# -eq 0 ]
+then
+    echo You should provide at least the signal.
+    exit 0
+fi
+Signal=$1
 
-#echo $nLines
+if [ $# -gt 1 ]
+then
+    postfit=$2
+fi
+if [ $# -gt 2 ]
+then
+    fakedata=$3
+fi
+if [ $# -gt 3 ]
+then
+    dataisbg=$4
+fi
 
 methodcmd="--noFitAsimov"
 methodname="PreFit"
@@ -26,30 +54,30 @@ then
     methodname="PostFit"
 fi
 
-#run all samples
-for (( i = 1; i <= $nLines; i++ ))
-do
-    
-
-    temp=`awk "NR==$i" myfilelist` #this is the datacard I have
-    #echo ${temp}
-    Par0=`echo $temp |cut -d'_' -f2` #sample
-    Par1=`echo $temp |cut -d'_' -f3` #top mass
-    Par2=`echo $temp |cut -d'_' -f4` #chargino or LSP mass
-    Par3=`echo $temp |cut -d'_' -f5` #LSP mass or x or empty
-    Par1=`echo $Par1 |cut -d'.' -f1`
-    Par2=`echo $Par2 |cut -d'.' -f1` #if here file ends with .txt
-    Par3=`echo $Par3 |cut -d'.' -f1`
-
-    if [ "$Par3" == "" ]
+thedir=''
+if [ "$fakedata" = true ]
+then
+    thedir=`echo ${thedir}fakedata/`
+    if [ "$dataisbg" = true ]
     then
-	combine  -M Asymptotic ${temp} ${methodcmd} -n ${methodname}${Par0}_${Par1}_${Par2} > /dev/null 2>&1
-	mv higgsCombine${methodname}${Par0}_${Par1}_${Par2}.Asymptotic.mH120.root ${OUTPUTDIR}Limits_Asymptotic_${methodname}_${Par0}_${Par1}_${Par2}.root
+	thedir=`echo ${thedir}dataisbg/`
     else
-	combine  -M Asymptotic ${temp} ${methodcmd} -n ${methodname}${Par0}_${Par1}_${Par2}_${Par3} > /dev/null 2>&1
-	mv higgsCombine${methodname}${Par0}_${Par1}_${Par2}_${Par3}.Asymptotic.mH120.root ${OUTPUTDIR}Limits_Asymptotic_${methodname}_${Par0}_${Par1}_${Par2}_${Par3}.root
+	thedir=`echo ${thedir}dataisbgsig/`
     fi
-    
-done
+else
+    thedir=`echo ${thedir}data/`
+fi
+INPUTDIR=`echo ${INPUTDIR}${thedir}combinedcards/`
+OUTPUTDIR=`echo ${OUTPUTDIR}${thedir}`
 
-rm myfilelist
+temp=`echo ${INPUTDIR}combined_${Signal}.txt`
+
+if [ ! -e "${temp}" ] && [ ! -f "${temp}" ] && [ ! -s "${temp}" ]
+then
+    echo "File ${temp} does not exist. Stop."
+    exit 0;
+else    
+    #computes automatically observed and expected limit together
+    combine  -M Asymptotic ${temp} ${methodcmd} -n ${methodname}${Signal} > /dev/null 2>&1
+    mv higgsCombine${methodname}${Signal}.Asymptotic.mH120.root ${OUTPUTDIR}Limits_Asymptotic_${methodname}_${Signal}.root
+fi
