@@ -1,14 +1,23 @@
 
 #directory of combined datacards
-mydir=xxx/
+mydir=$DATACARD_DIR
 NAME=T2tt
-MSTOP=100
+MSTOP=-9
 MLSP=-9
 MCharg=-9
 xval=-1
 postfit=false
 #xsecup 1 xsecdown -1
 xsecupdown=0
+#SR=2 - compressed SR
+SR=1
+
+if [ $SR -eq 2 ]
+then
+    mydir=${DATACARD_DIR}compressed/
+fi
+
+tar_file=/hadoop/cms/store/user/haweber/HiggsCombine_CMSSW_7_1_5.tar.gz
 
 #PUT THIS INTO A SPLITTING LOOP - probably enough to split per stop mass - i.e. do batch submission for each stop mass
 
@@ -48,9 +57,15 @@ then
 fi
 
 #create list of datacards I want to run
-NameArray=( )
+#run a job per stop mass - for now
 for (( t=${stopmasslow}; t<=${stopmasshigh}; t+=$stopmassstep ))
 do
+    TYPE_MASS=`echo ${NAME}_${t}`
+    if [ $SR -eq 2 ]
+    then
+	TYPE_MASS=`echo Compressed${TYPE_MASS}`
+    fi
+    NameArray=( )    
     for (( l=$lspmasslow; l<=$lspmasshigh; l+=$lspmassstep ))
     do
 	if [ $l -gt $t ]
@@ -59,7 +74,7 @@ do
 	fi	   
 	for (( c=$chargmasslow; c<=$chargmasshigh; c+=$chargmassstep ))
 	do
-	    Name=`echo ${NAME}_${t}`
+	    Name=$TYPE_MASS
 	    if [ ${c} -gt 0 ]
 	    then
 		if [ $c -gt $t ]
@@ -77,32 +92,50 @@ do
 	    else
 		Name=`echo ${Name}_${l}`
 	    fi
-	    #add here xsec up down
-	    if [ ${xsecupdown} -eq -1 ]
-	    then
-		Name=`echo ${Name}_xsecdown`
-	    elif [ ${xsecupdown} -eq 1 ]
-	    then
-		Name=`echo ${Name}_xsecup`
-	    fi
 	    NameArray=("${NameArray[@]}" "${Name}")
 	done
     done
-done
 
-#copy datacard here
-for Name in "${NameArray[@]}"
-do
-    if [ ! -e "${Name}" ] && [ ! -f "${Name}" ] && [ ! -s "${Name}" ]
+    #add here xsec up down
+    if [ ${xsecupdown} -eq -1 ]
     then
-	#echo "File ${temp} does not exist. Stop."
-	exit 0;
-    else    
-	#computes automatically observed and expected limit together
-	cp ${mydir}/datacard_${Name}.txt .
+	mydir=`echo ${mydir}xsecdown/`
+    elif [ ${xsecupdown} -eq 1 ]
+    then
+	mydir=`echo ${mydir}xsecup/`
     fi
-done
-tar czfv $DATACARDS_TAR datacard_*.txt
-rm datacard_*.txt
 
-#now do condor submission
+    #copy datacard here
+    for Name in "${NameArray[@]}"
+    do
+	if [ ! -e "${mydir}/datacard_${Name}.txt" ] && [ ! -f "${mydir}/datacard_${Name}.txt" ] && [ ! -s "${mydir}/datacard_${Name}.txt" ]
+	then
+	    #echo "File ${temp} does not exist. Stop."
+	    continue
+	else    
+	    #computes automatically observed and expected limit together
+	    cp ${mydir}/datacard_${Name}.txt .
+	fi
+    done
+    DATACARDS_TAR=datacards.tar.gz
+    tar czfv $DATACARDS_TAR datacard_*.txt
+    rm datacard_*.txt
+
+    #now do condor submission
+
+    cp condorFileTemplate condorFile
+    sed -i "s,ARG1,$postfit,g" condorFile
+    sed -i "s,ARG2,$COPYDIR,g" condorFile
+    sed -i "s,ARG3,$CONDOR_DIR_NAME,g" condorFile
+    sed -i "s,ARG4,$DATACARDS_TAR,g" condorFile
+    sed -i "s,ARG5,$MAKER_NAME,g" condorFile
+    sed -i "s,ARG6,$TYPE_MASS,g" condorFile
+    sed -i "s,ARG7,$SCRATCH_DIR,g" condorFile
+    sed -i "s,ARG8,$USER_EMAIL,g" condorFile
+    sed -i "s,USER_PROXY,$pathToProxy,g" condorFile
+    sed -i "s,TARFILE1,$tar_file,g" condorFile
+    sed -i "s,TARFILE2,$DATACARDS_TAR,g" condorFile
+    condor_submit condorFile
+
+done
+
