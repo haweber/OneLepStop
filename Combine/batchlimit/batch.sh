@@ -1,5 +1,11 @@
 
 #directory of combined datacards
+if [ z $DATACARD_DIR ]; then
+    echo "DATACARD_DIR not set, don't know which maker to use :(, exiting..."
+    echo "Please set it in setup.sh and do source setup.sh!"
+    return 1;
+fi
+
 mydir=$DATACARD_DIR
 NAME=T2tt
 MSTOP=-9
@@ -30,7 +36,7 @@ declare -i lspmasshigh=450
 declare -i lspmassstep=25
 declare -i chargmasslow=-1
 declare -i chargmasshigh=-1
-declare -i chargmassstep=-1
+declare -i chargmassstep=25
 xval=-1
 
 if [ $MSTOP -gt -1 ]
@@ -49,7 +55,7 @@ then
     chargmasslow=$MCharg
     chargmasshigh=$MCharg
     chargmassstep=25
-elif [ $Mcharg -gt -5 ]
+elif [ $MCharg -gt -5 ]
 then
     chargmasslow=0
     chargmasshigh=1000
@@ -65,13 +71,13 @@ do
     then
 	TYPE_MASS=`echo Compressed${TYPE_MASS}`
     fi
-    NameArray=( )    
+    NameArray=( )
     for (( l=$lspmasslow; l<=$lspmasshigh; l+=$lspmassstep ))
     do
 	if [ $l -gt $t ]
 	then
 	    continue
-	fi	   
+	fi
 	for (( c=$chargmasslow; c<=$chargmasshigh; c+=$chargmassstep ))
 	do
 	    Name=$TYPE_MASS
@@ -91,6 +97,7 @@ do
 		Name=`echo ${Name}_${l}_${xval}`
 	    else
 		Name=`echo ${Name}_${l}`
+		#echo $Name
 	    fi
 	    NameArray=("${NameArray[@]}" "${Name}")
 	done
@@ -106,8 +113,10 @@ do
     fi
 
     #copy datacard here
+    NCARDS=0
     for Name in "${NameArray[@]}"
     do
+	#echo "${mydir}/datacard_${Name}.txt"
 	if [ ! -e "${mydir}/datacard_${Name}.txt" ] && [ ! -f "${mydir}/datacard_${Name}.txt" ] && [ ! -s "${mydir}/datacard_${Name}.txt" ]
 	then
 	    #echo "File ${temp} does not exist. Stop."
@@ -115,13 +124,30 @@ do
 	else    
 	    #computes automatically observed and expected limit together
 	    cp ${mydir}/datacard_${Name}.txt .
+	    let "NCARDS=$NCARDS+1"
 	fi
     done
+    if [ $NCARDS -eq 0 ]
+    then
+	continue
+    fi
+    #echo "I have following datacards"
+    #ls
+    
     DATACARDS_TAR=datacards.tar.gz
     tar czfv $DATACARDS_TAR datacard_*.txt
     rm datacard_*.txt
 
     #now do condor submission
+    voms-proxy-info --all &> $SCRATCH_DIR/voms_status.txt
+    if grep "Couldn't find a valid proxy." $SCRATCH_DIR/voms_status.txt &>/dev/null
+    then 
+	echo "Error: couldn't find a valid proxy!  Aborting.  Create a proxy with voms-proxy-init."
+	rm $SCRATCH_DIR/voms_status.txt
+	return 1
+    fi
+    lineWithPath=`sed -n /path/= $SCRATCH_DIR/voms_status.txt`
+    pathToProxy=`awk -v var="$lineWithPath" 'NR==var {print $3}' $SCRATCH_DIR/voms_status.txt`
 
     cp condorFileTemplate condorFile
     sed -i "s,ARG1,$postfit,g" condorFile
@@ -135,7 +161,14 @@ do
     sed -i "s,USER_PROXY,$pathToProxy,g" condorFile
     sed -i "s,TARFILE1,$tar_file,g" condorFile
     sed -i "s,TARFILE2,$DATACARDS_TAR,g" condorFile
+    #echo "My condor file is"
+    #cat condorFile
     condor_submit condorFile
 
 done
+
+#cleanup
+rm datacards.tar.gz
+rm condorFile
+rm null
 

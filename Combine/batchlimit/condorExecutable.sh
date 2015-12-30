@@ -56,7 +56,7 @@ THISDIR=`pwd`
 echo $THISDIR
 echo "LS to check that all files were transferred: "
 ls
-tar xzfv $CONDOR_DIR_NAME.tar.gz
+tar xzf $CONDOR_DIR_NAME.tar.gz
 echo "LS to check that tarball was unpacked: "
 ls
 #cd $CONDOR_DIR_NAME
@@ -107,7 +107,7 @@ for f in *; do
     #echo "mytest $mytest"
     if [ $mytest == "0" ]
     then
-        #echo "passed $f"
+        echo "passed $f"
         NameArray=("${NameArray[@]}" "${f}")
     fi
 done
@@ -120,7 +120,7 @@ do
     stripone=`echo "datacard_"`
     #echo $stripone
     Signal=`echo ${filenamenoext#${stripone}}`
-    #echo $Signal
+    echo "get limit for $Signal"
     #computes automatically observed and expected limit together
     combine  -M Asymptotic ${Name} ${methodcmd} -n ${methodname}${Signal} > /dev/null 2>&1
     mv higgsCombine${methodname}${Signal}.Asymptotic.mH120.root Limits_Asymptotic_${methodname}_${Signal}.root
@@ -138,7 +138,7 @@ echo ""
 
 #  This preserves grid functionality
 echo "copying.  LS is: "
-ls -l $*.root
+ls -l *.root
 rootfilearray=( )
 for f in *; do
     #echo $f
@@ -150,10 +150,11 @@ for f in *; do
         rootfilearray=("${rootfilearray[@]}" "${f}")
     fi
 done
-#echo "${NameArray[@]}"
+#echo "${rootfilearray[@]}"
 
 for Name in "${rootfilearray[@]}"
 do
+    echo "Transfer ${Name}"
     lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/${Name} srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/${Name}
 done
 #lcg-cp -b -D srmv2 --vo cms --connect-timeout 2400 --verbose file://`pwd`/${NAME}_${NUMBER}.root srm://bsrm-3.t2.ucsd.edu:8443/srm/v2/server?SFN=${COPYDIR}/${NAME}_${NUMBER}.root

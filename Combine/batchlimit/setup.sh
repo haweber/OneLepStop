@@ -33,17 +33,19 @@ if [ -z $DATACARD_DIR ]; then
     return 1;
 fi
 if [ ! -d $DATACARD_DIR ]; then
-    echo "$DATACARD_DIR does not exist, :( exiting..."
-    echo "Please set it in setup.sh and do source setup.sh!"
-    return 1;
+    echo "$DATACARD_DIR does not exist, :( making it..."
+    mkdir -p $DATACARD_DIR
+    #echo "Please set it in setup.sh and do source setup.sh!"
+    #return 1;
+fi
+if [ ! -d $COPYDIR ]; then
+    echo "$COPYDIR does not exist, :( making it..."
+    mkdir -p $COPYDIR
+    #echo "Please set it in setup.sh and do source setup.sh!"
+    #return 1;
 fi
 if [ -z $COPYDIR ]; then
     echo "COPYDIR not set, don't know which maker to use :(, exiting..."
-    echo "Please set it in setup.sh and do source setup.sh!"
-    return 1;
-fi
-if [ ! -d $COPYDIR ]; then
-    echo "$COPYDIR does not exist, :( exiting..."
     echo "Please set it in setup.sh and do source setup.sh!"
     return 1;
 fi
@@ -52,13 +54,14 @@ if [ -z $MAKER_NAME ]; then
     echo "Please set it in setup.sh and do source setup.sh!"
     return 1;
 fi
+if [ ! -d $SCRATCH_DIR ]; then
+    echo "$SCRATCH_DIR does not exist, :( making it..."
+    mkdir -p $SCRATCH_DIR
+    #echo "Please set it in setup.sh and do source setup.sh!"
+    #return 1;
+fi
 if [ -z $SCRATCH_DIR ]; then
     echo "SCRATCH_DIR not set, don't know which SCRATCH area to use :(, exiting..."
-    echo "Please set it in setup.sh and do source setup.sh!"
-    return 1;
-fi
-if [ ! -d $SCRATCH_DIR ]; then
-    echo "$SCRATCH_DIR does not exist, :( exiting..."
     echo "Please set it in setup.sh and do source setup.sh!"
     return 1;
 fi
