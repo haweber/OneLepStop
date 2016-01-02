@@ -6,7 +6,7 @@ MAKER_NAME=CMSSW_7_1_5/src/HiggsAnalysis/CombinedLimit/
 
 COPYDIR=/hadoop/cms/store/user/haweber/condor/limits/
 
-SCRATCH_DIR=/data/tmp/haweber/limits/logs/
+SCRATCH_DIR=/data/tmp/haweber/limits/
 
 CONDOR_DIR_NAME=HiggsCombine_CMSSW_7_1_5
 
@@ -57,6 +57,7 @@ fi
 if [ ! -d $SCRATCH_DIR ]; then
     echo "$SCRATCH_DIR does not exist, :( making it..."
     mkdir -p $SCRATCH_DIR
+    mkdir -p $SCRATCH_DIR/logs/
     #echo "Please set it in setup.sh and do source setup.sh!"
     #return 1;
 fi
