@@ -1,6 +1,6 @@
 
 #directory of combined datacards
-if [ z $DATACARD_DIR ]; then
+if [ -z $DATACARD_DIR ]; then
     echo "DATACARD_DIR not set, don't know which maker to use :(, exiting..."
     echo "Please set it in setup.sh and do source setup.sh!"
     return 1;

@@ -6,7 +6,7 @@ MAKER_NAME=CMSSW_7_1_5/src/HiggsAnalysis/CombinedLimit/
 
 COPYDIR=/hadoop/cms/store/user/haweber/condor/limits/
 
-SCRATCH_DIR=/data/tmp/haweber/limits/
+SCRATCH_DIR=/data/tmp/haweber/limits/logs/
 
 CONDOR_DIR_NAME=HiggsCombine_CMSSW_7_1_5
 

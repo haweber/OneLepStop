@@ -76,8 +76,10 @@ eval `scramv1 runtime -sh`
 cd $OLDDIR
 echo "copy datacards into HiggsCombine directory"
 cp $DATACARDS_TAR $MAKER_NAME/.
-echo "untar datacards"
 cd $MAKER_NAME/
+echo "rescram to update links"
+scramv1 b
+echo "untar datacards"
 tar xzfv $DATACARDS_TAR
 echo "LS to check contents of unpacked combine: "
 ls
@@ -102,6 +104,10 @@ fi
 #get all datacards
 NameArray=( )
 for f in *; do
+    if [ $f == "datacard.tar.gz" ]
+    then
+	continue
+    fi
     #echo $f
     mytest=`echo $f | grep -q datacard ; echo $?`
     #echo "mytest $mytest"
@@ -122,8 +128,11 @@ do
     Signal=`echo ${filenamenoext#${stripone}}`
     echo "get limit for $Signal"
     #computes automatically observed and expected limit together
-    combine  -M Asymptotic ${Name} ${methodcmd} -n ${methodname}${Signal} > /dev/null 2>&1
+    combine  -M Asymptotic ${Name} ${methodcmd} -n ${methodname}${Signal}
+    #> /dev/null 2>&1
+    ls
     mv higgsCombine${methodname}${Signal}.Asymptotic.mH120.root Limits_Asymptotic_${methodname}_${Signal}.root
+    ls
 done
 
 
@@ -138,15 +147,16 @@ echo ""
 
 #  This preserves grid functionality
 echo "copying.  LS is: "
-ls -l *.root
+#ls -l *.root
+ls
 rootfilearray=( )
 for f in *; do
     #echo $f
-    mytest=`echo $f | grep -q .root ; echo $?`
+    mytest=`echo $f | grep -q root ; echo $?`
     #echo "mytest $mytest"
     if [ $mytest == "0" ]
     then
-        #echo "passed $f"
+        echo "passed $f"
         rootfilearray=("${rootfilearray[@]}" "${f}")
     fi
 done
