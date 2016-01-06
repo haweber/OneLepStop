@@ -466,5 +466,11 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   cout << endl;
   delete bmark;
   delete fPU;//delete PU file
+  delete f_el_SF;
+  delete f_mu_SF_id;
+  delete f_mu_SF_iso;
+  delete f_mu_SF_veto_id;
+  delete f_mu_SF_veto_iso;
+  delete f_vetoLep_eff;
   return 0;
 }
