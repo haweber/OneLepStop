@@ -33,6 +33,59 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
 
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
+  //load PUweights
+  TFile *fPU = new TFile("puWeights.root","READ");
+  TH1D *puWeight     = (TH1D*)fPU->Get("puWeight");
+  TH1D *puWeightUp   = (TH1D*)fPU->Get("puWeightUp");
+  TH1D *puWeightDown = (TH1D*)fPU->Get("puWeightDown");
+
+  TFile *f_el_SF       = new TFile("lepsf/kinematicBinSFele.root", "read");
+  TFile *f_mu_SF_id    = new TFile("lepsf/TnP_MuonID_NUM_MediumID_DENOM_generalTracks_VAR_map_pt_eta.root", "read");
+  TFile *f_mu_SF_iso   = new TFile("lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
+  TFile *f_mu_SF_veto_id  = new TFile("lepsf/TnP_MuonID_NUM_LooseID_DENOM_generalTracks_VAR_map_pt_eta.root", "read");
+  TFile *f_mu_SF_veto_iso = new TFile("lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
+  //TFile *f_mu_SF_veto_iso = new TFile("lepsf/TnP_MuonID_NUM_MiniIsoLoose_DENOM_LooseID_VAR_map_pt_eta.root");
+  //TFile *f_vetoLep_eff = new TFile("lepsf/lepeff__ttbar_powheg_pythia8_25ns.root", "read");
+  TFile *f_vetoLep_eff = new TFile("lepsf/lepeff__ttbar_powheg_pythia8_25ns__SRcuts.root", "read");  
+  TH2D *h_el_SF_id_temp      = (TH2D*)f_el_SF->Get("CutBasedMedium");
+  TH2D *h_el_SF_iso_temp     = (TH2D*)f_el_SF->Get("MiniIso0p1_vs_AbsEta");
+  TH2D *h_el_SF_veto_id_temp  = (TH2D*)f_el_SF->Get("CutBasedVeto");
+  TH2D *h_el_SF_veto_iso_temp = (TH2D*)f_el_SF->Get("MiniIso0p4_vs_AbsEta");
+  TH2D *h_mu_SF_id_temp      = (TH2D*)f_mu_SF_id->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_tag_IsoMu20_pass");
+  TH2D *h_mu_SF_iso_temp     = (TH2D*)f_mu_SF_iso->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_PF_pass_&_tag_IsoMu20_pass");
+  TH2D *h_mu_SF_veto_id_temp  = (TH2D*)f_mu_SF_veto_id->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_tag_IsoMu20_pass");
+  TH2D *h_mu_SF_veto_iso_temp = (TH2D*)f_mu_SF_veto_iso->Get("pt_abseta_PLOT_pair_probeMultiplicity_bin0_&_tag_combRelIsoPF04dBeta_bin0_&_tag_pt_bin0_&_PF_pass_&_tag_IsoMu20_pass");
+  //TH2D *h_el_vetoLepEff_temp = (TH2D*)f_vetoLep_eff->Get("h2_lepEff_vetoSel_Eff_el");
+  //TH2D *h_mu_vetoLepEff_temp = (TH2D*)f_vetoLep_eff->Get("h2_lepEff_vetoSel_Eff_mu");
+  TH2D *h_el_vetoLepEff_temp = (TH2D*)f_vetoLep_eff->Get("h2_lepEff_vetoSel_rebin_Eff_el");
+  TH2D *h_mu_vetoLepEff_temp = (TH2D*)f_vetoLep_eff->Get("h2_lepEff_vetoSel_rebin_Eff_mu");
+  TH2D *h_el_SF_id  = (TH2D*)h_el_SF_id_temp->Clone("h_el_SF_id");
+  TH2D *h_el_SF_iso = (TH2D*)h_el_SF_iso_temp->Clone("h_el_SF_iso");
+  TH2D *h_mu_SF_id  = (TH2D*)h_mu_SF_id_temp->Clone("h_mu_SF_id");
+  TH2D *h_mu_SF_iso = (TH2D*)h_mu_SF_iso_temp->Clone("h_mu_SF_iso");
+  TH2D *h_el_SF_veto_id  = (TH2D*)h_el_SF_veto_id_temp->Clone("h_el_SF_veto_id");
+  TH2D *h_el_SF_veto_iso = (TH2D*)h_el_SF_veto_iso_temp->Clone("h_el_SF_veto_iso");
+  TH2D *h_mu_SF_veto_id  = (TH2D*)h_mu_SF_veto_id_temp->Clone("h_mu_SF_veto_id");
+  TH2D *h_mu_SF_veto_iso = (TH2D*)h_mu_SF_veto_iso_temp->Clone("h_mu_SF_veto_iso");
+  //This is are the important ones
+  TH2D *h_el_vetoLepEff = (TH2D*)h_el_vetoLepEff_temp->Clone("h_el_vetoLepEff");
+  TH2D *h_mu_vetoLepEff = (TH2D*)h_mu_vetoLepEff_temp->Clone("h_mu_vetoLepEff");
+  TH2D *h_el_SF = (TH2D*)h_el_SF_id->Clone("h_el_SF");
+  h_el_SF->Multiply(h_el_SF_iso);
+  TH2D *h_el_SF_veto = (TH2D*)h_el_SF_veto_id->Clone("h_el_SF_veto");
+  h_el_SF_veto->Multiply(h_el_SF_veto_iso);
+  TH2D *h_mu_SF = (TH2D*)h_mu_SF_id->Clone("h_mu_SF");
+  h_mu_SF->Multiply(h_mu_SF_iso);
+  TH2D *h_mu_SF_veto = (TH2D*)h_mu_SF_veto_id->Clone("h_mu_SF_veto");
+  h_mu_SF_veto->Multiply(h_mu_SF_veto_iso);
+  f_el_SF->Close();
+  f_mu_SF_id->Close();
+  f_mu_SF_iso->Close();
+  f_mu_SF_veto_id->Close();
+  f_mu_SF_veto_iso->Close();
+  f_vetoLep_eff->Close();
+
+  
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
@@ -49,22 +102,24 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
   //lumi, trigger, stats done
   histonames.push_back("SRyield");
-  histonames.push_back("SR_Bup_HF");
+  histonames.push_back("SR_Bup_HF");//done
   histonames.push_back("SR_Bdown_HF");
-  histonames.push_back("SR_Bup_LF");
+  histonames.push_back("SR_Bup_LF");//done
   histonames.push_back("SR_Bdown_LF");
   histonames.push_back("SR_JESup");
   histonames.push_back("SR_JESdown");
   histonames.push_back("SR_muRFup");
   histonames.push_back("SR_muRFdown");
-  histonames.push_back("SR_PDFup");
-  histonames.push_back("SR_PDFdown");
-  histonames.push_back("SR_ISRup");
+  //histonames.push_back("SR_PDFup");
+  //histonames.push_back("SR_PDFdown");
+  histonames.push_back("SR_ISRup");//done preliminary
   histonames.push_back("SR_ISRdown");
-  histonames.push_back("SR_PUup");
+  histonames.push_back("SR_PUup");//done preliminary
   histonames.push_back("SR_PUdown");
-  histonames.push_back("SR_LepEffup");
+  histonames.push_back("SR_LepEffup");//done - I guess we need no renormalization - no fastsim in, no vetoSF
   histonames.push_back("SR_LepEffdown");
+  histonames.push_back("SR_Xsecup");//done
+  histonames.push_back("SR_Xsecdown");
   histonames.push_back("CR1l_sigcontamination");//scaled to signalreg yield
   histonames.push_back("CR2l_sigcontamination");//scaled to signalreg yield
 
@@ -147,9 +202,37 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float mCharg = mass_chargino();
       //float xVal = mass_lsp();
       int Nevts = histNEvts->GetBinContent(histNEvts->FindBin(mStop,mLSP));
+      double nevts = double(Nevts);
       //float weight = cms3.scale1fb()*2.11;
-      float weight = xsec()*2110./Nevts;//xsec given in pb
-      
+      double PUweight     = puWeight    ->GetBinContent(puWeight    ->FindBin(pu_ntrue() ) );
+      double PUweightUp   = puWeightUp  ->GetBinContent(puWeightUp  ->FindBin(pu_ntrue() ) );
+      double PUweightDown = puWeightDown->GetBinContent(puWeightDown->FindBin(pu_ntrue() ) );
+      PUweightUp = 1; PUweightDown = PUweight; PUweight = 1; //now PU syst is applying vs not applying
+      double ISRnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,19));
+      double ISRnormup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,20));
+      double ISRnormdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,21));
+      double ISRweight = weight_ISR();
+      double BSFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,14));
+      double BSFnormHup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,15));
+      double BSFnormLup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,16));
+      double BSFnormHdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,17));
+      double BSFnormLdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,18));
+      double BSFweight = weight_btagsf();
+      double muRFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,1));
+      double muRFup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,5));
+      double muRFdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,9));
+      if(ISRnorm>0) ISRweight*=nevts/ISRnorm;
+      if(ISRnorm<=0||ISRnormup<=0||ISRnormdown<=0){ ISRnormdown=1.; ISRnormup=1.; ISRnorm=1.;}
+      if(ISRweight!=weight_ISR()) cout << "ISRw " << ISRweight << " wISR " << weight_ISR() << " nevts " << nevts << " ISRn " << ISRnorm << endl;
+      if(BSFnorm>0) BSFweight *=nevts/BSFnorm;
+      if(BSFnorm<0||BSFnormHup<0||BSFnormLup<0||BSFnormHdown<0||BSFnormLdown<0){
+	BSFnorm=1; BSFnormHup=1; BSFnormLup=1; BSFnormHdown=1; BSFnormLdown=1;
+      }
+      if(muRFnorm<0||muRFup<0||muRFdown<0){ muRFdown=1; muRFup=1; muRFnorm=1; }
+      //lepSF is done below
+      double weight = xsec()*2260./Nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
+      //did put ISRweight which should be ==1
+      if(ISRweight!=1) cout << "ISRw " << ISRweight << endl;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
 
       int NSLeps = 0;
@@ -163,6 +246,27 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if(lep2_pt()>20&&fabs(lep2_eta())<1.4442) {++NSLeps; }
       }
       if(NSLeps<1) continue;//temp
+      float lepSF_pt_cutoff = 100.0;
+      float lepSF_pt_min    = 10.0;
+      double lepSF    = 1.0;
+      double lepSF_Up = 1.0;
+      double lepSF_Dn = 1.0;	  
+      if(lep1_is_el()){
+	int binX = h_el_SF->GetXaxis()->FindBin( std::min(lepSF_pt_cutoff, (float)lep1_p4().Pt()) );
+	int binY = h_el_SF->GetYaxis()->FindBin( fabs(lep1_p4().Eta()) );
+	lepSF    = h_el_SF->GetBinContent( binX, binY );
+	lepSF_Up = lepSF + h_el_SF->GetBinError( binX, binY );
+	lepSF_Dn = lepSF - h_el_SF->GetBinError( binX, binY );
+      }
+      if(lep1_is_mu()){
+	int binX = h_mu_SF->GetXaxis()->FindBin( std::min(lepSF_pt_cutoff, (float)lep1_p4().Pt()) );
+	int binY = h_mu_SF->GetYaxis()->FindBin( fabs(lep1_p4().Eta()) );
+	lepSF    = h_mu_SF->GetBinContent( binX, binY );
+	lepSF_Up = lepSF + h_mu_SF->GetBinError( binX, binY );
+	lepSF_Dn = lepSF - h_mu_SF->GetBinError( binX, binY );
+      }
+      weight *= lepSF;
+
       
       if(nvtxs()<0)               continue;
       if(ngoodleps()<1)           continue;//accomodate 2l-CR
@@ -241,34 +345,27 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float CR2l_2_5 = 0.44*0.07;
       float CR2l_2_6 = 0.44*0.11;
 
-      if(SR==(-1)&&CR1l==(-1)&&CR2l==(-1)) continue;
+      if(SR==(-1)&&CR1l==(-1)&&CR2l==(-1)&&compressedSR==(-1)) continue;
       //implement some sanity checks
       if(CR1l!=(-1)&&CR2l!=(-1)) cout << "WTF CR1l " << CR1l << " CR2l " << CR2l << endl;
       if(SR!=(-1)&&CR1l!=(-1)) cout << "WTF SR " << SR << " CR1l " << CR1l << endl;
       if(SR!=(-1)&&CR2l!=(-1)) cout << "WTF SR " << SR << " CR2l " << CR2l << endl;
 
       //ISR reweighting, get stop pair using last copy:
-      int ngenstopstop = 0; int ngenstopantistop = 0;
-      ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > stopsystemlv;//this does not work with ROOT5!!! Why
-      stopsystemlv.SetPxPyPzE(0.,0.,0.,0.);
-      for(unsigned int i = 0; i<gensusy_id().size(); ++i){
-	if(gensusy_id()[i]==1000006 && gensusy_isLastCopy()[i]) {
-	  ++ngenstopstop;
-	  stopsystemlv += gensusy_p4()[i];
-	}
-	if(gensusy_id()[i]==(-1000006) && gensusy_isLastCopy()[i]) {
-	  ++ngenstopantistop;
-	  stopsystemlv += gensusy_p4()[i];
-	}	
-      }
-      //if(ngenstopstop!=1||ngenstopantistop!=1) cout << "I expected to have 1 stop + 1 antistop, but I have " << ngenstopstop << " stops + " << ngenstopantistop << " antistops" << endl; - don't work for T1tttt
-
-      float systempt = stopsystemlv.Pt();
-      //if(systempt<=0) cout << "WTF systemPt " << systempt << endl; - don't work for T1tttt
-      float ISRup = 1.;
-      float ISRdown = 1.;
-      if(systempt>600) { ISRup = 1.3; ISRdown = 0.7; }
-      else if(systempt>400) { ISRup = 1.15; ISRdown = 0.85; }
+      double ISRup = weight_ISRup()/weight_ISR()*ISRnorm/ISRnormup;
+      double ISRdown = weight_ISRdown()/weight_ISR()*ISRnorm/ISRnormdown;
+      double XSup = (xsec()+xsec_uncert())/xsec();
+      double XSdown = (xsec()-xsec_uncert())/xsec();
+      double PUup = PUweightUp/PUweight;
+      double PUdown = PUweightDown/PUweight;
+      double lEffup = lepSF_Up/lepSF;
+      double lEffdown = lepSF_Dn/lepSF;
+      double BSFHup = weight_btagsf_heavy_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
+      double BSFLup = weight_btagsf_light_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
+      double BSFHdown = weight_btagsf_heavy_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
+      double BSFLdown = weight_btagsf_light_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
+      double muRFup = genweights().at(4)/genweights().at(0)*muRFnorm/muRFup;
+      double muRFdown = genweights().at(8)/genweights().at(0)*muRFnorm/muRFup;
 
       if(CR1l>0){
 	//signal contamination in 0b control region, do correlations later during datacard making
@@ -296,6 +393,36 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	histos["SRyield"]->Fill(mStop,mLSP,SR,weight);
 	histos["SR_ISRup"]->Fill(mStop,mLSP,SR,weight*ISRup);
 	histos["SR_ISRdown"]->Fill(mStop,mLSP,SR,weight*ISRdown);
+	histos["SR_Xsecup"]->Fill(mStop,mLSP,SR,weight*XSup);
+	histos["SR_Xsecdown"]->Fill(mStop,mLSP,SR,weight*XSdown);
+	histos["SR_PUup"]->Fill(mStop,mLSP,SR,weight*PUup);
+	histos["SR_PUdown"]->Fill(mStop,mLSP,SR,weight*PUdown);
+	histos["SR_Bup_HF"]->Fill(mStop,mLSP,SR,weight*BSFHup);
+	histos["SR_Bup_LF"]->Fill(mStop,mLSP,SR,weight*BSFLup);
+	histos["SR_Bdown_HF"]->Fill(mStop,mLSP,SR,weight*BSFHdown);
+	histos["SR_Bdown_LF"]->Fill(mStop,mLSP,SR,weight*BSFLdown);
+	histos["SR_LepEffup"]->Fill(mStop,mLSP,SR,weight*lEffup);
+	histos["SR_LepEffdown"]->Fill(mStop,mLSP,SR,weight*lEffdown);
+	histos["SR_muRFup"]->Fill(mStop,mLSP,SR,weight*muRFup);
+	histos["SR_muRFdown"]->Fill(mStop,mLSP,SR,weight*muRFdown);
+      }
+      if(compressedSR>0){
+	//compressedSR is defined to not overlap with SR - can use same histogram!
+	histos["SRyield"]->Fill(mStop,mLSP,compressedSR,weight);
+	histos["SR_ISRup"]->Fill(mStop,mLSP,compressedSR,weight*ISRup);
+	histos["SR_ISRdown"]->Fill(mStop,mLSP,compressedSR,weight*ISRdown);
+	histos["SR_Xsecup"]->Fill(mStop,mLSP,compressedSR,weight*XSup);
+	histos["SR_Xsecdown"]->Fill(mStop,mLSP,compressedSR,weight*XSdown);
+	histos["SR_PUup"]->Fill(mStop,mLSP,compressedSR,weight*PUup);
+	histos["SR_PUdown"]->Fill(mStop,mLSP,compressedSR,weight*PUdown);
+	histos["SR_Bup_HF"]->Fill(mStop,mLSP,compressedSR,weight*BSFHup);
+	histos["SR_Bup_LF"]->Fill(mStop,mLSP,compressedSR,weight*BSFLup);
+	histos["SR_Bdown_HF"]->Fill(mStop,mLSP,compressedSR,weight*BSFHdown);
+	histos["SR_Bdown_LF"]->Fill(mStop,mLSP,compressedSR,weight*BSFLdown);
+	histos["SR_LepEffup"]->Fill(mStop,mLSP,compressedSR,weight*lEffup);
+	histos["SR_LepEffdown"]->Fill(mStop,mLSP,compressedSR,weight*lEffdown);
+	histos["SR_muRFup"]->Fill(mStop,mLSP,compressedSR,weight*muRFup);
+	histos["SR_muRFdown"]->Fill(mStop,mLSP,compressedSR,weight*muRFdown);
       }
 
     }//event loop
@@ -338,5 +465,6 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   cout << "Real Time:	" << Form( "%.01f", bmark->GetRealTime("benchmark") ) << endl;
   cout << endl;
   delete bmark;
+  delete fPU;//delete PU file
   return 0;
 }
