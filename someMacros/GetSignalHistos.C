@@ -84,6 +84,22 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   f_mu_SF_veto_id->Close();
   f_mu_SF_veto_iso->Close();
   f_vetoLep_eff->Close();
+  TFile *f_el_FS_ID       = new TFile("lepsf/sf_el_mediumCB.root", "read");
+  TFile *f_el_FS_Iso      = new TFile("lepsf/sf_el_mini01.root", "read");
+  TFile *f_mu_FS_ID       = new TFile("lepsf/sf_mu_mediumID.root", "read");
+  TFile *f_mu_FS_Iso      = new TFile("lepsf/sf_mu_mini02.root", "read");
+  TH2D *h_el_FS_ID_temp  = (TH2D*)f_el_FS_ID ->Get("histo2D");
+  //TH2D *h_el_FS_ID       = (TH2D*)h_el_FS_ID_temp ->Clone("h_el_FS_ID");
+  TH2D *h_el_FS          = (TH2D*)h_el_FS_ID_temp ->Clone("h_el_FS");
+  TH2D *h_el_FS_Iso_temp = (TH2D*)f_mu_FS_Iso->Get("histo2D");
+  //TH2D *h_el_FS_Iso      = (TH2D*)h_el_FS_Iso_temp->Clone("h_el_FS_Iso");
+  h_el_FS->Multiply(h_wl_FS_Iso_temp);
+  TH2D *h_mu_FS_ID_temp  = (TH2D*)f_el_FS_ID ->Get("histo2D");
+  //TH2D *h_mu_FS_ID       = (TH2D*)h_mu_FS_ID_temp ->Clone("h_mu_FS_ID");
+  TH2D *h_mu_FS          = (TH2D*)h_mu_FS_ID_temp ->Clone("h_mu_FS");
+  TH2D *h_mu_FS_Iso_temp = (TH2D*)f_mu_FS_Iso->Get("histo2D");
+  //TH2D *h_mu_FS_Iso      = (TH2D*)h_mu_FS_Iso_temp->Clone("h_mu_FS_ID");
+  h_mu_FS->Multiply(h_mu_FS_Iso_temp);
 
   
   // Benchmark
@@ -118,6 +134,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   histonames.push_back("SR_PUdown");
   histonames.push_back("SR_LepEffup");//done - I guess we need no renormalization - no fastsim in, no vetoSF
   histonames.push_back("SR_LepEffdown");
+  histonames.push_back("SR_LepEffFSup");//done - I guess we need no renormalization - no fastsim in, no vetoSF
+  histonames.push_back("SR_LepEffFSdown");
   histonames.push_back("SR_Xsecup");//done
   histonames.push_back("SR_Xsecdown");
   histonames.push_back("CR1l_sigcontamination");//scaled to signalreg yield
@@ -230,7 +248,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       }
       if(muRFnorm<0||muRFup<0||muRFdown<0){ muRFdown=1; muRFup=1; muRFnorm=1; }
       //lepSF is done below
-      double weight = xsec()*2260./Nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
+      double weight = xsec()*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
       //did put ISRweight which should be ==1
       if(ISRweight!=1) cout << "ISRw " << ISRweight << endl;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
@@ -250,13 +268,21 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float lepSF_pt_min    = 10.0;
       double lepSF    = 1.0;
       double lepSF_Up = 1.0;
-      double lepSF_Dn = 1.0;	  
+      double lepSF_Dn = 1.0;
+      float lepSF_FS_pt_cutoff = 200.0;
+      double lepSF_FS    = 1.0;
+      double lepSF_FS_Up = 1.0;
+      double lepSF_FS_Dn = 1.0;	
       if(lep1_is_el()){
 	int binX = h_el_SF->GetXaxis()->FindBin( std::min(lepSF_pt_cutoff, (float)lep1_p4().Pt()) );
 	int binY = h_el_SF->GetYaxis()->FindBin( fabs(lep1_p4().Eta()) );
 	lepSF    = h_el_SF->GetBinContent( binX, binY );
 	lepSF_Up = lepSF + h_el_SF->GetBinError( binX, binY );
 	lepSF_Dn = lepSF - h_el_SF->GetBinError( binX, binY );
+	int bin = h_el_FS->FindBin(  std::min(lepSF_FS_pt_cutoff, (float)lep1_p4().Pt()), fabs(lep1_p4().Eta()) );
+	lep_SF_FS = h_el_FS->GetBinContent(bin);
+	lep_SF_FS_Up = lep_SF_FS + h_el_FS->GetBinError(bin);
+	lep_SF_FS_Dn = lep_SF_FS + h_el_FS->GetBinError(bin);
       }
       if(lep1_is_mu()){
 	int binX = h_mu_SF->GetXaxis()->FindBin( std::min(lepSF_pt_cutoff, (float)lep1_p4().Pt()) );
@@ -264,8 +290,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	lepSF    = h_mu_SF->GetBinContent( binX, binY );
 	lepSF_Up = lepSF + h_mu_SF->GetBinError( binX, binY );
 	lepSF_Dn = lepSF - h_mu_SF->GetBinError( binX, binY );
+	int bin = h_mu_FS->FindBin(  std::min(lepSF_FS_pt_cutoff, (float)lep1_p4().Pt()), fabs(lep1_p4().Eta()) );
+	lep_SF_FS = h_mu_FS->GetBinContent(bin);
+	lep_SF_FS_Up = lep_SF_FS + h_mu_FS->GetBinError(bin);
+	lep_SF_FS_Dn = lep_SF_FS + h_mu_FS->GetBinError(bin);
       }
-      weight *= lepSF;
+      weight *= (lepSF*lep_SF_FS);
 
       
       if(nvtxs()<0)               continue;
@@ -360,6 +390,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       double PUdown = PUweightDown/PUweight;
       double lEffup = lepSF_Up/lepSF;
       double lEffdown = lepSF_Dn/lepSF;
+      double lEffFSup = lepFS_Up/lepFS;
+      double lEffFSdown = lepFS_Dn/lepFS;
       double BSFHup = weight_btagsf_heavy_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
       double BSFLup = weight_btagsf_light_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
       double BSFHdown = weight_btagsf_heavy_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
@@ -403,6 +435,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	histos["SR_Bdown_LF"]->Fill(mStop,mLSP,SR,weight*BSFLdown);
 	histos["SR_LepEffup"]->Fill(mStop,mLSP,SR,weight*lEffup);
 	histos["SR_LepEffdown"]->Fill(mStop,mLSP,SR,weight*lEffdown);
+	histos["SR_LepEffFSup"]->Fill(mStop,mLSP,SR,weight*lEffFSup);
+	histos["SR_LepEffFSdown"]->Fill(mStop,mLSP,SR,weight*lEffFSdown);
 	histos["SR_muRFup"]->Fill(mStop,mLSP,SR,weight*muRFup);
 	histos["SR_muRFdown"]->Fill(mStop,mLSP,SR,weight*muRFdown);
       }
@@ -421,6 +455,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	histos["SR_Bdown_LF"]->Fill(mStop,mLSP,compressedSR,weight*BSFLdown);
 	histos["SR_LepEffup"]->Fill(mStop,mLSP,compressedSR,weight*lEffup);
 	histos["SR_LepEffdown"]->Fill(mStop,mLSP,compressedSR,weight*lEffdown);
+	histos["SR_LepEffFSup"]->Fill(mStop,mLSP,compressedSR,weight*lEffFSup);
+	histos["SR_LepEffFSdown"]->Fill(mStop,mLSP,compressedSR,weight*lEffFSdown);
 	histos["SR_muRFup"]->Fill(mStop,mLSP,compressedSR,weight*muRFup);
 	histos["SR_muRFdown"]->Fill(mStop,mLSP,compressedSR,weight*muRFdown);
       }
