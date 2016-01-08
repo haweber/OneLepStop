@@ -281,11 +281,11 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   *fLogStream << "rate        " << sig << "  " << bg2l << "  " << bg1l << "  " << bg1ltop << "  " << znunu << endl;
   *fLogStream << "------------" << endl;
   //next ALL control region statistical uncertainties
-  if(!nosigunc && sig    >0) *fLogStream << "SigStat" << b << "     lnN "             << sigerr     << "  -  -  -  -" << endl;
-  if(!nosigunc && bg2l   >0) *fLogStream << "Bg2lStat" << b << "    lnN -  "          << bg2lerr    << "  -  -  -"    << endl;
-  if(!nosigunc && bg1l   >0) *fLogStream << "Bg1lStat" << b << "    lnN -  -  "       << bg1lerr    << "  -  -"       << endl;
-  if(!nosigunc && bg1ltop>0) *fLogStream << "Bg1lTopStat" << b << " lnN -  -  -  "    << bg1ltoperr << "  -"          << endl;
-  if(!nosigunc && znunu  >0) *fLogStream << "BgZnunuStat" << b << " lnN -  -  -  -  " << bgznunuerr                   << endl;
+  if(!nosigunc && sig    >0) *fLogStream << "SigStat"     << b << "     lnN "             << sigerr     << "  -  -  -  -" << endl;
+  if(!nosigunc && bg2l   >0) *fLogStream << "Bg2lStat"    << b << "     lnN -  "          << bg2lerr    << "  -  -  -"    << endl;
+  if(!nosigunc && bg1l   >0) *fLogStream << "Bg1lStat"    << b << "     lnN -  -  "       << bg1lerr    << "  -  -"       << endl;
+  if(!nosigunc && bg1ltop>0) *fLogStream << "Bg1lTopStat" << b << "     lnN -  -  -  "    << bg1ltoperr << "  -"          << endl;
+  if(!nosigunc && znunu  >0) *fLogStream << "BgZnunuStat" << b << "     lnN -  -  -  -  " << bgznunuerr                   << endl;
   //signal systematic uncertainties (or general - therefore add no "Sig" prefix)
   if(sigtrig  !=1)    *fLogStream << " TrigSyst        lnN " << sigtrig   << "  -  -  -  -" << endl;//add znunu ttbar1l
   if(siglum   !=1)    *fLogStream << " LumSyst         lnN " << siglum    << "  -  -  -  -" << endl;//add znunu ttbar1l
@@ -296,6 +296,8 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     if(sigmurf  !=1)  *fLogStream << " MuRFSyst        lnN " << sigmurf   << " -  -  -  -" << endl;//add all
     //if(sigpu    !=1)  *fLogStream << " PUSyst            lnN " << sigpu     << " -  -  -  -" << endl;//add all
     if(siglepeff!=1)  *fLogStream << " LEffSyst        lnN " << siglepeff << " -  -  -  -" << endl;//add all
+    if(sigleffFS!=1)  *fLogStream << " LEffFSSyst      lnN " << sigleffFS << " -  -  -  -" << endl;//add all
+                      *fLogStream << " LVetoSyst" << b <<"       lnN " << 1.03 << " -  -  -  -" << endl;//add all
   }
   if(!nobkgunc){
     //bg2l
