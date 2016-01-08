@@ -78,11 +78,17 @@ echo "copy datacards into HiggsCombine directory"
 cp $DATACARDS_TAR $MAKER_NAME/.
 cd $MAKER_NAME/
 echo "rescram to update links"
-scramv1 b
+scramv1 b ProjectRename
+source /cvmfs/cms.cern.ch/cmsset_default.sh
+eval `scramv1 runtime -sh`
 echo "untar datacards"
 tar xzfv $DATACARDS_TAR
 echo "LS to check contents of unpacked combine: "
 ls
+echo "remove the tar files "
+rm $CONDOR_DIR_NAME.tar.gz
+rm $DATACARDS_TAR
+
 
 # Run babyMaker
 RIGHT_NOW=`date +"%Y%m%d %H%M%S"`
@@ -104,7 +110,7 @@ fi
 #get all datacards
 NameArray=( )
 for f in *; do
-    if [ $f == "datacard.tar.gz" ]
+    if [ ${f: -7} == ".tar.gz" ]
     then
 	continue
     fi

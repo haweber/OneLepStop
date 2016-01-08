@@ -134,7 +134,7 @@ do
     #echo "I have following datacards"
     #ls
     
-    DATACARDS_TAR=datacards.tar.gz
+    DATACARDS_TAR=`echo datacards_${t}.tar.gz`
     tar czfv $DATACARDS_TAR datacard_*.txt
     rm datacard_*.txt
 
@@ -148,6 +148,15 @@ do
     fi
     lineWithPath=`sed -n /path/= $SCRATCH_DIR/voms_status.txt`
     pathToProxy=`awk -v var="$lineWithPath" 'NR==var {print $3}' $SCRATCH_DIR/voms_status.txt`
+
+    if [ ! -f $tar_file ]
+    then
+	echo "Error, ${tar_file} does not exist"
+    fi
+    if [ ! -f $DATACARDS_TAR ]
+    then
+	echo "Error, ${DATACARDS_TAR} does not exist"
+    fi
 
     cp condorFileTemplate condorFile
     sed -i "s,ARG1,$postfit,g" condorFile
@@ -167,8 +176,11 @@ do
 
 done
 
-#cleanup
-rm datacards.tar.gz
-rm condorFile
-rm null
+
+
+#cleanup - need to check how to do by hand
+#rm $SCRATCH_DIR/voms_status.txt &>/dev/null
+#rm datacards*.tar.gz
+#rm condorFile
+#rm null
 
