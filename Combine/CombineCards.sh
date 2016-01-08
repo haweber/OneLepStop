@@ -60,8 +60,9 @@ Name=`echo ${signal}`
 #echo ${Name}
 
 combinestring=combineCards.py
-validcommand=true
+validcommand=false
 
+counter=9
 maxbins=5
 #BinArray=("met250_mt2w0" "met250_mt2w200" "met300_mt2w0" "met300_mt2w200" "met350_mt2w0" "met350_mt2w200" "met400_mt2w0" "met400_mt2w200" "met500_mt2w200")
 #for i in "${!BinArray[@]}"
@@ -76,8 +77,11 @@ do
 	nonvalidfile=`echo ${thedir}${Name}_b${i}.txt`
 	#nonvalidfile=`echo ${thedir}${Name}_${BinArray[$i]}.txt`
 	#echo "file ${thedir}${Name}_${BinArray[$i]}.txt does not exist. dont combine"
-	break
+	#break
+	continue
     fi
+    counter=$((counter+1))
+    validcommand=true
     chnum=$(($i + 1))
     combinestring=`echo ${combinestring} ch${i}=${thedir}${Name}_b${i}.txt`
     #combinestring=`echo ${combinestring} ch${chnum}=${thedir}${Name}_${BinArray[$i]}.txt`
