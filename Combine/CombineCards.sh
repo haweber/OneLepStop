@@ -13,7 +13,7 @@ if [ ! -d "$DIRECTORY" ]; then
 fi
 
 #thedir='/home/users/haweber/StopAnalysis/CombineCode/datacards/fakedata/dataisbgsig/'
-thedir='datacards/'
+thedir='datacards2p3fbinv/'
 fakedata=false
 dataisbg=true
 
@@ -41,12 +41,12 @@ fi
 if [ "$fakedata" = true ]
 then
     thedir=`echo ${thedir}fakedata/`
-    if [ "$dataisbg" = true ]
-    then
-	thedir=`echo ${thedir}dataisbg/`
-    else
-	thedir=`echo ${thedir}dataisbgsig/`
-    fi
+    #if [ "$dataisbg" = true ]
+    #then
+	#thedir=`echo ${thedir}dataisbg/`
+    #else
+	#thedir=`echo ${thedir}dataisbgsig/`
+    #fi
 else
     thedir=`echo ${thedir}data/`
 fi
@@ -55,7 +55,7 @@ fi
 
 
 
-Name=`echo ${signal}`
+Name=`echo datacard_${signal}`
 
 #echo ${Name}
 

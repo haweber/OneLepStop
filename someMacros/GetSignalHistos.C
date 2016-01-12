@@ -73,17 +73,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   TH2D *h_el_SF = (TH2D*)h_el_SF_id->Clone("h_el_SF");
   h_el_SF->Multiply(h_el_SF_iso);
   TH2D *h_el_SF_veto = (TH2D*)h_el_SF_veto_id->Clone("h_el_SF_veto");
-  h_el_SF_veto->Multiply(h_el_SF_veto_iso);
   TH2D *h_mu_SF = (TH2D*)h_mu_SF_id->Clone("h_mu_SF");
   h_mu_SF->Multiply(h_mu_SF_iso);
   TH2D *h_mu_SF_veto = (TH2D*)h_mu_SF_veto_id->Clone("h_mu_SF_veto");
   h_mu_SF_veto->Multiply(h_mu_SF_veto_iso);
-  f_el_SF->Close();
-  f_mu_SF_id->Close();
-  f_mu_SF_iso->Close();
-  f_mu_SF_veto_id->Close();
-  f_mu_SF_veto_iso->Close();
-  f_vetoLep_eff->Close();
   TFile *f_el_FS_ID       = new TFile("lepsf/sf_el_mediumCB.root", "read");
   TFile *f_el_FS_Iso      = new TFile("lepsf/sf_el_mini01.root", "read");
   TFile *f_mu_FS_ID       = new TFile("lepsf/sf_mu_mediumID.root", "read");
@@ -91,10 +84,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   TH2D *h_el_FS_ID_temp  = (TH2D*)f_el_FS_ID ->Get("histo2D");
   //TH2D *h_el_FS_ID       = (TH2D*)h_el_FS_ID_temp ->Clone("h_el_FS_ID");
   TH2D *h_el_FS          = (TH2D*)h_el_FS_ID_temp ->Clone("h_el_FS");
-  TH2D *h_el_FS_Iso_temp = (TH2D*)f_mu_FS_Iso->Get("histo2D");
+  TH2D *h_el_FS_Iso_temp = (TH2D*)f_el_FS_Iso->Get("histo2D");
   //TH2D *h_el_FS_Iso      = (TH2D*)h_el_FS_Iso_temp->Clone("h_el_FS_Iso");
-  h_el_FS->Multiply(h_wl_FS_Iso_temp);
-  TH2D *h_mu_FS_ID_temp  = (TH2D*)f_el_FS_ID ->Get("histo2D");
+  h_el_FS->Multiply(h_el_FS_Iso_temp);
+  TH2D *h_mu_FS_ID_temp  = (TH2D*)f_mu_FS_ID ->Get("histo2D");
   //TH2D *h_mu_FS_ID       = (TH2D*)h_mu_FS_ID_temp ->Clone("h_mu_FS_ID");
   TH2D *h_mu_FS          = (TH2D*)h_mu_FS_ID_temp ->Clone("h_mu_FS");
   TH2D *h_mu_FS_Iso_temp = (TH2D*)f_mu_FS_Iso->Get("histo2D");
@@ -226,7 +219,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       double PUweightUp   = puWeightUp  ->GetBinContent(puWeightUp  ->FindBin(pu_ntrue() ) );
       double PUweightDown = puWeightDown->GetBinContent(puWeightDown->FindBin(pu_ntrue() ) );
       PUweightUp = 1; PUweightDown = PUweight; PUweight = 1; //now PU syst is applying vs not applying
-      double ISRnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,19));
+     double ISRnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,19));
       double ISRnormup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,20));
       double ISRnormdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,21));
       double ISRweight = weight_ISR();
@@ -237,16 +230,16 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       double BSFnormLdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,18));
       double BSFweight = weight_btagsf();
       double muRFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,1));
-      double muRFup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,5));
-      double muRFdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,9));
+      double muRFnormup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,5));
+      double muRFnormdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,9));
       if(ISRnorm>0) ISRweight*=nevts/ISRnorm;
       if(ISRnorm<=0||ISRnormup<=0||ISRnormdown<=0){ ISRnormdown=1.; ISRnormup=1.; ISRnorm=1.;}
       if(ISRweight!=weight_ISR()) cout << "ISRw " << ISRweight << " wISR " << weight_ISR() << " nevts " << nevts << " ISRn " << ISRnorm << endl;
       if(BSFnorm>0) BSFweight *=nevts/BSFnorm;
-      if(BSFnorm<0||BSFnormHup<0||BSFnormLup<0||BSFnormHdown<0||BSFnormLdown<0){
+      if(BSFnorm<=0||BSFnormHup<=0||BSFnormLup<=0||BSFnormHdown<=0||BSFnormLdown<=0){
 	BSFnorm=1; BSFnormHup=1; BSFnormLup=1; BSFnormHdown=1; BSFnormLdown=1;
       }
-      if(muRFnorm<0||muRFup<0||muRFdown<0){ muRFdown=1; muRFup=1; muRFnorm=1; }
+      if(muRFnorm<=0||muRFnormup<=0||muRFnormdown<=0){ muRFnormdown=1; muRFnormup=1; muRFnorm=1; }
       //lepSF is done below
       double weight = xsec()*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
       //did put ISRweight which should be ==1
@@ -280,9 +273,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	lepSF_Up = lepSF + h_el_SF->GetBinError( binX, binY );
 	lepSF_Dn = lepSF - h_el_SF->GetBinError( binX, binY );
 	int bin = h_el_FS->FindBin(  std::min(lepSF_FS_pt_cutoff, (float)lep1_p4().Pt()), fabs(lep1_p4().Eta()) );
-	lep_SF_FS = h_el_FS->GetBinContent(bin);
-	lep_SF_FS_Up = lep_SF_FS + h_el_FS->GetBinError(bin);
-	lep_SF_FS_Dn = lep_SF_FS + h_el_FS->GetBinError(bin);
+	lepSF_FS = h_el_FS->GetBinContent(bin);
+	lepSF_FS_Up = lepSF_FS + h_el_FS->GetBinError(bin);
+	lepSF_FS_Dn = lepSF_FS + h_el_FS->GetBinError(bin);
       }
       if(lep1_is_mu()){
 	int binX = h_mu_SF->GetXaxis()->FindBin( std::min(lepSF_pt_cutoff, (float)lep1_p4().Pt()) );
@@ -291,11 +284,11 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	lepSF_Up = lepSF + h_mu_SF->GetBinError( binX, binY );
 	lepSF_Dn = lepSF - h_mu_SF->GetBinError( binX, binY );
 	int bin = h_mu_FS->FindBin(  std::min(lepSF_FS_pt_cutoff, (float)lep1_p4().Pt()), fabs(lep1_p4().Eta()) );
-	lep_SF_FS = h_mu_FS->GetBinContent(bin);
-	lep_SF_FS_Up = lep_SF_FS + h_mu_FS->GetBinError(bin);
-	lep_SF_FS_Dn = lep_SF_FS + h_mu_FS->GetBinError(bin);
+	lepSF_FS = h_mu_FS->GetBinContent(bin);
+	lepSF_FS_Up = lepSF_FS + h_mu_FS->GetBinError(bin);
+	lepSF_FS_Dn = lepSF_FS + h_mu_FS->GetBinError(bin);
       }
-      weight *= (lepSF*lep_SF_FS);
+      weight *= (lepSF*lepSF_FS);
 
       
       if(nvtxs()<0)               continue;
@@ -390,14 +383,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       double PUdown = PUweightDown/PUweight;
       double lEffup = lepSF_Up/lepSF;
       double lEffdown = lepSF_Dn/lepSF;
-      double lEffFSup = lepFS_Up/lepFS;
-      double lEffFSdown = lepFS_Dn/lepFS;
+      double lEffFSup = lepSF_FS_Up/lepSF_FS;
+      double lEffFSdown = lepSF_FS_Dn/lepSF_FS;
       double BSFHup = weight_btagsf_heavy_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
       double BSFLup = weight_btagsf_light_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
       double BSFHdown = weight_btagsf_heavy_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
       double BSFLdown = weight_btagsf_light_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
-      double muRFup = genweights().at(4)/genweights().at(0)*muRFnorm/muRFup;
-      double muRFdown = genweights().at(8)/genweights().at(0)*muRFnorm/muRFup;
+      double muRFup = genweights().at(4)/genweights().at(0)*muRFnorm/muRFnormup;
+      double muRFdown = genweights().at(8)/genweights().at(0)*muRFnorm/muRFnormdown;
 
       if(CR1l>0){
 	//signal contamination in 0b control region, do correlations later during datacard making
@@ -492,6 +485,16 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   f->Close();
   cout << "Saved histos in " << f->GetName() << endl;
 
+  f_el_SF->Close();
+  f_mu_SF_id->Close();
+  f_mu_SF_iso->Close();
+  f_mu_SF_veto_id->Close();
+  f_mu_SF_veto_iso->Close();
+  f_vetoLep_eff->Close();
+  f_el_FS_ID->Close();
+  f_el_FS_Iso->Close();
+  f_mu_FS_ID->Close();
+  f_mu_FS_Iso->Close();
   // return
   bmark->Stop("benchmark");
   cout << endl;
@@ -508,5 +511,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   delete f_mu_SF_veto_id;
   delete f_mu_SF_veto_iso;
   delete f_vetoLep_eff;
+  delete f_el_FS_ID;
+  delete f_el_FS_Iso;
+  delete f_mu_FS_ID;
+  delete f_mu_FS_Iso;
   return 0;
 }

@@ -4,11 +4,11 @@ fakedata=true
 dataisbg=true
 
 signaltype='T2tt'
-declare -i stopmasslow=425
-declare -i stopmasshigh=850
+declare -i stopmasslow=100
+declare -i stopmasshigh=975
 declare -i stopmassstep=25
-declare -i lspmasslow=100
-declare -i lspmasshigh=325
+declare -i lspmasslow=0
+declare -i lspmasshigh=500
 declare -i lspmassstep=25
 declare -i chargmasslow=-1
 declare -i chargmasshigh=-1

@@ -1,3 +1,4 @@
+#include "TList.h"
 #include "TMath.h"
 #include "TString.h"
 #include "TObject.h"
@@ -33,8 +34,9 @@
 
 using namespace std;
 
-string inputdir = "inputfiles/";
-string outputdir = "datacards/";
+//string inputdir = "inputfiles/";
+string inputdir = "../SignalAnalysisCode/rootfiles/signalyields/";
+string outputdir = "datacards2p3fbinv/";
 bool nosigunc = false;
 bool nobkgunc = false;
 
@@ -48,13 +50,14 @@ inline TString MakeOutputDir(TString dir){
   return dir;
 }
 
-void makeDataCardsFullyHardCodedOneBin(int bin=0,TString signaltype="T2tt", int stop=100; int lsp=0, int charg=-1, float xval=-1, bool fakedata, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false);
-void makeDataCardsFullyHardCodedAllBins(TString signaltype="T2tt", int stop=100; int lsp=0, int charg=-1, float xval=-1, bool fakedata, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false);
-void makeDataCardsFullyHardCodedOneScan(TString signaltype="T2tt", bool fakedata, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false);
+void makeDataCardsFullyHardCodedOneBin(int bin=0, TString signaltype="T2tt", int stop=100, int lsp=0, int charg=-1, float xval=-1, bool fakedata=false, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false);
+void makeDataCardsFullyHardCodedAllBins(TString signaltype="T2tt", int stop=100, int lsp=0, int charg=-1, float xval=-1, bool fakedata=false, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false);
+void makeDataCardsFullyHardCodedOneScan(TString signaltype="T2tt", bool fakedata=false, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false);
 void makeDataCardsFullyHardCodedAllScans(bool fakedata, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false);
 
 double getSignalUncertainty(double origyield, TString upshape, TString downshape, TFile *file, int bx, int by, int bz, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins);
 double getBGUncertainty(double origyield, TString upshape, TString downshape, TFile *file, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins);
+//double getBGUncertainty(double origyield, TString upshape, TString downshape, TString filename, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins);
 
 void makeDataCardsFullyHardCodedAllScans(bool fakedata, bool nosyst, int xsecupdown, int compressed, bool dropsigcont){
   makeDataCardsFullyHardCodedOneScan("T2tt",fakedata, nosyst, xsecupdown, compressed, dropsigcont);
@@ -66,8 +69,8 @@ void makeDataCardsFullyHardCodedAllScans(bool fakedata, bool nosyst, int xsecupd
 
 void makeDataCardsFullyHardCodedOneScan(TString signaltype, bool fakedata, bool nosyst, int xsecupdown, int compressed, bool dropsigcont){
   float chargLow = -1;
-  for(int t = 0; t<=1000; t+=25){
-    for(int l = 0; l<=500; l+=25){
+  for(int t = 100; t<=1000; t+=25){
+    for(int l = 0; l<=450; l+=25){
       if(l>t) continue;
       int stop = t;
       int lsp = l;
@@ -82,7 +85,7 @@ void makeDataCardsFullyHardCodedAllBins(TString signaltype, int stop, int lsp, i
   int startbin = -1;
   if(compressed == 1) { maxbin = 2; startbin = 11; }
   else { maxbin = 5; startbin = 1; }
-  for(unsigned int bin = startbin; bin < (startbin+maxbin); ++bin){
+  for(int bin = startbin; bin <= (startbin+maxbin); ++bin){
     makeDataCardsFullyHardCodedOneBin(bin,signaltype, stop, lsp, charg, xval, fakedata, nosyst, xsecupdown, compressed, dropsigcont);
   }
 }
@@ -101,10 +104,10 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     minbin = 11;
     maxbin = 12;
   }
-  if(stop<lsp) continue;
+  if(stop<lsp) return;
   int nbgs = 0;
   int nnuis = 0;
-  TString filename = inputdir + "Signal_" + signaltype + ".root";
+  TString filename = inputdir + "Histos_Signal_" + signaltype + ".root";
   TFile *fsig = new TFile(filename,"READ");
   if(fsig->IsZombie()) {
     fsig->Close();
@@ -112,7 +115,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     cout << "No Signal file - exit" << endl;
     return;
   }
-  filename = inputdir + "Background_2l.root";
+  filename = inputdir + "histos__diLepton_Bkg_Estimate_25ns.root";
   //filename = inputdir + "Background_2l.root";
   TFile *f2l = new TFile(filename,"READ");
   if(f2l->IsZombie()) {
@@ -121,6 +124,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     cout << "No 2l file - exit" << endl;
     return;
   }
+  // XXX
   filename = inputdir + "Background_1l.root";
   TFile *f1l = new TFile(filename,"READ");
   if(f1l->IsZombie()) {
@@ -145,9 +149,11 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     cout << "No Znunu file - exit" << endl;
     return;
   }
+  // XXX
+  TFile *fdata;
   if(!fakedata) {
     filename= inputdir + "Data.root";
-    TFile *fdata = new TFile(filename,"READ");
+    fdata = new TFile(filename,"READ");
     if(fdata->IsZombie()) {
       fdata->Close();
       delete fdata;
@@ -157,21 +163,26 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   }
   else fdata = (TFile*)f2l->Clone("Data.root");
 
-  double sig, sigerr;
-  double origsig, origsigerr;//keep original without signal contamination
-  double data, dataerr;
-  double bg2l, bg2lerr, bg1l, bg1lerr, bg1ltop, bg1ltoperr, bgznunu, bgznunuerr;
+  double sig(0.), sigerr(0.);
+  double origsig(0.), origsigerr(0.);//keep original without signal contamination
+  double data(0.), dataerr(0.);
+  double bg2l(0.), bg2lerr(0.), bg1l(0.), bg1lerr(0.), bg1ltop(0.), bg1ltoperr(0.), bgznunu(0.), bgznunuerr(0.);
   TH1D *h;
   TH3D *h3;
   int b,b3;
-  b = bin;
+  b = bin;//need to use bin = 1 - 6 for main analysis - this is not binlowedge - i.e. cannot use find bin
   //if(compressed==1) b = bin+5;//check if needed - probably no
   TString histname;
   histname = "SRyield"; h3 = (TH3D*)fsig->Get(histname);
   int bx,by,bz;
-  bx = h3->GetXaxis()->FindBin(b);
-  by = h3->GetYaxis()->FindBin(stop);
-  bz = h3->GetZaxis()->FindBin(lsp);
+  bx = h3->GetXaxis()->FindBin(stop);
+  by = h3->GetYaxis()->FindBin(lsp);
+  bz = h3->GetZaxis()->FindBin(b);
+  //cout << "bin:stop:lsp " << bin << ":" << stop << ":" << lsp << " bz,bx,by " << bz << "," << bx << "," << by
+  //     << " xrange " << h3->GetXaxis()->GetBinLowEdge(bx) << "-" << h3->GetXaxis()->GetBinLowEdge(bx)+h3->GetXaxis()->GetBinWidth(bx)
+  //     << " yrange " << h3->GetYaxis()->GetBinLowEdge(by) << "-" << h3->GetYaxis()->GetBinLowEdge(by)+h3->GetYaxis()->GetBinWidth(by)
+  //     << " zrange " << h3->GetZaxis()->GetBinLowEdge(bz) << "-" << h3->GetZaxis()->GetBinLowEdge(bz)+h3->GetZaxis()->GetBinWidth(bz)
+  //     << endl;
   if(bx>h3->GetXaxis()->GetNbins()){
     cout << "xaxis out of range - exit" << endl;
     return;
@@ -184,14 +195,17 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     cout << "zaxis out of range - exit" << endl;
     return;
   }
-  b3 = h3->FindBin(b,stop,lsp);
+  b3 = h3->FindBin(stop,lsp,b);
   if(b3!=h3->GetBin(bx,by,bz)) cout << "Check this " << "b:stop:lsp " << b << ":" << stop << ":" << lsp << " are bins " << bx << ":"<<by<<":"<<bz <<" are global bin " << h3->GetBin(bx,by,bz) << " and also should be findbin b3 " << b3 << endl;
 
   //get all yields and statistical uncertainties - also signal contamination
   sig = h3->GetBinContent(b3);
+  bool bogussignal = false;
   if(sig<=0) {
-    cout << "There is no signal (" << signaltype <<"_"<<stop<<"_"<<lsp << ") in this bin (" << bin << ") - no datacard is made!!!!!!!!"
-      return;
+    cout << "There is no signal (" << signaltype <<"_"<<stop<<"_"<<lsp << ") in this bin (" << bin << ") - no datacard is made!!!!!!!!" << endl;
+    bogussignal = true;
+    sig = 1;
+    //  return;
   }
   sigerr = 1.+h3->GetBinError(b3)/sig; ++nnuis;
   origsig = sig; origsigerr = sigerr;
@@ -204,17 +218,25 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   }
   if(!dropsigcont){
     histname = "CR1l_sigcontamination"; h3 = (TH3D*)fsig->Get(histname);
-    temp = h3->GetBinContent(b3); sig = TMath::Max(0., sig-temp);
+    double temp = h3->GetBinContent(b3); sig = TMath::Max(0., sig-temp);
     histname = "CR2l_sigcontamination"; h3 = (TH3D*)fsig->Get(histname);
     temp = h3->GetBinContent(b3); sig = TMath::Max(0., sig-temp);
   }
-  histname = "Data"; h = (TH1D*)fdata->Get(histname);
-  data = h->GetBinContent(b); //dataerr = 1.+h->GetBinError(b)/data;//do I need the data err;
+  histname = "Data";
+  if(fakedata) histname = "CR2lyield";
+  h = (TH1D*)fdata->Get(histname);
+  //if(h->GetBin(bz)!=b) cout << "Check this " << "b " << b << " bz " << bz << endl;
+
+  //data = h->GetBinContent(b); //dataerr = 1.+h->GetBinError(b)/data;//do I need the data err;
   histname = "CR2lyield"; h = (TH1D*)f2l->Get(histname);
+  //cout << "bin " << bin << " b " << b << " bz " << bz << endl;
+  //cout << "h->GetBinLowEdge(bin) " << h->GetBinLowEdge(bin) << endl;
   bg2l = h->GetBinContent(b); ++nbgs;
+  //cout << "sig vs bg " << sig << " vs " << bg2l << endl;
   if(bg2l>0) { bg2lerr = 1.+((h->GetBinError(b))/bg2l); ++nnuis;}
   //histname = "CR2lstat"; h = (TH1D*)f2l->Get(histname);
   //if(bg2l>0) {bg2lerr = 1.+((h->GetBinContent(b))/bg2l); ++nnuis;}
+  // XXX
   histname = "CR1lest"; h = (TH1D*)f1l->Get(histname);
   bg1l = h->GetBinContent(b); ++nbgs;
   histname = "CR1lstat"; h = (TH1D*)f1l->Get(histname);
@@ -225,7 +247,11 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   histname = "CRznunuest"; h = (TH1D*)fznunu->Get(histname);
   bgznunu = h->GetBinContent(b);
   if(bgznunu>0) { bgznunuerr = 1.+h->GetBinError(b)/bgznunu; ++nbgs; ++nnuis; }
-  if(sig<=0 || (bg2l+bg1l+bg1ltop+bgznunu)<=0) return;//empty datacard - probably empty point
+  // XXX
+  if(sig<=0 || (bg2l+bg1l+bg1ltop+bgznunu)<=0) {
+    bogussignal = true;
+    return;//empty datacard - probably empty point
+  }
   //get signal uncertainties
   double sigbsfhf, sigbsflf, sigjes, sigmurf, sigisr, sigpu, siglepeff, sigleffFS;
   double sigtrig, siglum;
@@ -245,15 +271,15 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   //get bg2l uncertainties
   double bg2lbsfhf, bg2lbsflf, bg2llepeff, bg2ltoppt, bg2lnjets, bg2lpdf, bg2lalphas, bg2lmurf, bg2ljes;
   if(!nobkgunc){
-    bg2lbsfhf  = getBGUncertainty(bg2l, "CR2l_Bup_HF",    "CR2l_Bdown_HF",    f2l, b, true, minbin, maxbin, corrbins) if(bg2lbsfhf !=1.) ++nnuis;
-    bg2lbsflf  = getBGUncertainty(bg2l, "CR2l_Bup_LF",    "CR2l_Bdown_LF",    f2l, b, true, minbin, maxbin, corrbins) if(bg2lbsflf !=1.) ++nnuis;
-    bg2llepeff = getBGUncertainty(bg2l, "CR2l_LepEffup",  "CR2l_LepEffdown",  f2l, b, true, minbin, maxbin, corrbins) if(bg2llepeff!=1.) ++nnuis;
-    bg2ltoppt  = getBGUncertainty(bg2l, "CR2l_TopPtup",   "CR2l_TopPtdown",   f2l, b, true, minbin, maxbin, corrbins) if(bg2ltoppt !=1.) ++nnuis;
-    bg2lnjets  = getBGUncertainty(bg2l, "CR2l_njetsSFup", "CR2l_njetsSFdown", f2l, b, true, minbin, maxbin, corrbins) if(bg2lnjets !=1.) ++nnuis;
-    bg2lpdf    = getBGUncertainty(bg2l, "CR2l_PDFup",     "CR2l_PDFdown",     f2l, b, true, minbin, maxbin, corrbins) if(bg2lpdf   !=1.) ++nnuis;
-    bg2lalphas = getBGUncertainty(bg2l, "CR2l_Alphasup",  "CR2l_Alphasdown",  f2l, b, true, minbin, maxbin, corrbins) if(bg2lalphas!=1.) ++nnuis;
-    bg2lmurf   = getBGUncertainty(bg2l, "CR2l_muRFup",    "CR2l_muRFdown",    f2l, b, true, minbin, maxbin, corrbins) if(bg2lmurf  !=1.) ++nnuis;
-    bg2ljes    = getBGUncertainty(bg2l, "CR2l_JESup",     "CR2l_JESdown",     f2l, b, true, minbin, maxbin, corrbins) if(bg2ljes   !=1.) ++nnuis;
+    bg2lbsfhf  = getBGUncertainty(bg2l, "CR2l_Bup_HF",    "CR2l_Bdown_HF",    f2l, bin, true, minbin, maxbin, corrbins); if(bg2lbsfhf !=1.) ++nnuis;
+    bg2lbsflf  = getBGUncertainty(bg2l, "CR2l_Bup_LF",    "CR2l_Bdown_LF",    f2l, bin, true, minbin, maxbin, corrbins); if(bg2lbsflf !=1.) ++nnuis;
+    bg2llepeff = getBGUncertainty(bg2l, "CR2l_LepEffup",  "CR2l_LepEffdown",  f2l, bin, true, minbin, maxbin, corrbins); if(bg2llepeff!=1.) ++nnuis;
+    bg2ltoppt  = getBGUncertainty(bg2l, "CR2l_TopPtup",   "CR2l_TopPtdown",   f2l, bin, true, minbin, maxbin, corrbins); if(bg2ltoppt !=1.) ++nnuis;
+    bg2lnjets  = getBGUncertainty(bg2l, "CR2l_nJetsSFup", "CR2l_nJetsSFdown", f2l, bin, true, minbin, maxbin, corrbins); if(bg2lnjets !=1.) ++nnuis;
+    bg2lpdf    = getBGUncertainty(bg2l, "CR2l_PDFup",     "CR2l_PDFdown",     f2l, bin, true, minbin, maxbin, corrbins); if(bg2lpdf   !=1.) ++nnuis;
+    bg2lalphas = getBGUncertainty(bg2l, "CR2l_Alphasup",  "CR2l_Alphasdown",  f2l, bin, true, minbin, maxbin, corrbins); if(bg2lalphas!=1.) ++nnuis;
+    bg2lmurf   = getBGUncertainty(bg2l, "CR2l_muRFup",    "CR2l_muRFdown",    f2l, bin, true, minbin, maxbin, corrbins); if(bg2lmurf  !=1.) ++nnuis;
+    bg2ljes    = getBGUncertainty(bg2l, "CR2l_JESup",     "CR2l_JESdown",     f2l, bin, true, minbin, maxbin, corrbins); if(bg2ljes   !=1.) ++nnuis;
   }
   //get bg1l uncertainties
   //get bg1ltop uncertainties
@@ -264,6 +290,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   std::ostringstream* fLogStream     = 0;
   fLogStream = new std::ostringstream();
   string binstring = "b" + std::to_string(bin);
+  TString signalname = signaltype + "_" + std::to_string(stop) + "_" + std::to_string(lsp);
 
   
   *fLogStream << "# My significance experiment" << endl
@@ -272,26 +299,26 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
 	      << "kmax "  << nnuis << "  number of nuisance parameters" << endl;
   *fLogStream << "------------" << endl << "# observations " << endl;
   *fLogStream << "bin         " << b << endl;
-  *fLogStream << "observation " << data << endl;
+  *fLogStream << "observation " << int(data) << endl;//use int if one uses fake data
   *fLogStream << "------------" << endl;
   *fLogStream << "#now we list all expected number of events" << endl;
   *fLogStream << "bin          " << b << "       " << b << "       " << b << "       " << b << "       " << b << "       " << endl;
   *fLogStream << "process     sig       2l       1l       1ltop       znunu" << endl;
   *fLogStream << "process      0     1    2    3       4" << endl;
-  *fLogStream << "rate        " << sig << "  " << bg2l << "  " << bg1l << "  " << bg1ltop << "  " << znunu << endl;
+  *fLogStream << "rate        " << sig << "  " << bg2l << "  " << bg1l << "  " << bg1ltop << "  " << bgznunu << endl;
   *fLogStream << "------------" << endl;
   //next ALL control region statistical uncertainties
   if(!nosigunc && sig    >0) *fLogStream << "SigStat"     << b << "     lnN "             << sigerr     << "  -  -  -  -" << endl;
   if(!nosigunc && bg2l   >0) *fLogStream << "Bg2lStat"    << b << "     lnN -  "          << bg2lerr    << "  -  -  -"    << endl;
   if(!nosigunc && bg1l   >0) *fLogStream << "Bg1lStat"    << b << "     lnN -  -  "       << bg1lerr    << "  -  -"       << endl;
   if(!nosigunc && bg1ltop>0) *fLogStream << "Bg1lTopStat" << b << "     lnN -  -  -  "    << bg1ltoperr << "  -"          << endl;
-  if(!nosigunc && znunu  >0) *fLogStream << "BgZnunuStat" << b << "     lnN -  -  -  -  " << bgznunuerr                   << endl;
+  if(!nosigunc && bgznunu>0) *fLogStream << "BgZnunuStat" << b << "     lnN -  -  -  -  " << bgznunuerr                   << endl;
   //signal systematic uncertainties (or general - therefore add no "Sig" prefix)
   if(sigtrig  !=1)    *fLogStream << " TrigSyst        lnN " << sigtrig   << "  -  -  -  -" << endl;//add znunu ttbar1l
   if(siglum   !=1)    *fLogStream << " LumSyst         lnN " << siglum    << "  -  -  -  -" << endl;//add znunu ttbar1l
   if(!nosigunc){
-    if(sigbfslf !=1)  *fLogStream << " BLFSyst         lnN " << sigbfslf  << " -  -  -  -" << endl;//add all
-    if(sigbfshf !=1)  *fLogStream << " BHFSyst         lnN " << sigbfshf  << " -  -  -  -" << endl;//add all
+    if(sigbsflf !=1)  *fLogStream << " BLFSyst         lnN " << sigbsflf  << " -  -  -  -" << endl;//add all
+    if(sigbsfhf !=1)  *fLogStream << " BHFSyst         lnN " << sigbsfhf  << " -  -  -  -" << endl;//add all
     if(sigjes   !=1)  *fLogStream << " JESSyst         lnN " << sigjes    << " -  -  -  -" << endl;//add all
     if(sigmurf  !=1)  *fLogStream << " MuRFSyst        lnN " << sigmurf   << " -  -  -  -" << endl;//add all
     //if(sigpu    !=1)  *fLogStream << " PUSyst            lnN " << sigpu     << " -  -  -  -" << endl;//add all
@@ -313,18 +340,46 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   }
   *fLogStream << endl;
 
-  if(fakedata)   outputdir = outputdir + "fakedata/";
-  if(compressed==1) outputdir = outputdir + "compressed/";
-  //outputdir = outputdir + "nocorrelations/";
-  if(nosigunc&&nobkgunc) outputdir = "nounc/";
-  else if(nosigunc) outputdir = "nosigunc/";
-  else if(nobkgunc) outputdir = "nobkgunc/";
-  MakeOutputDir(outputdir);
-  TString logname = outputdir + "datacard_" + signalname + "_" + binstring + ".txt";
-  ofstream f_log (logname.Data(), ios::trunc);
-  f_log << fLogStream->str();
-  cout << "wrote results into  " << logname <<  " (old file replaced)" << endl;
+  TString myoutputdir = outputdir;
+  if(fakedata)   myoutputdir = myoutputdir + "fakedata/";
+  if(compressed==1) myoutputdir = myoutputdir + "compressed/";
+  //myoutputdir = myoutputdir + "nocorrelations/";
+  if(nosigunc&&nobkgunc) myoutputdir = "nounc/";
+  else if(nosigunc) myoutputdir = "nosigunc/";
+  else if(nobkgunc) myoutputdir = "nobkgunc/";
+  MakeOutputDir(myoutputdir);
+  TString logname = myoutputdir + "datacard_" + signalname + "_" + binstring + ".txt";
+  if(!bogussignal) {
+    ofstream f_log (logname.Data(), ios::trunc);
+    f_log << fLogStream->str();
+    cout << "wrote results into  " << logname <<  " (old file replaced)" << endl;
+  }
   delete fLogStream;
+  
+  h->Delete();
+  h3->Delete();
+  fsig->Close();
+  f2l->Close();
+  // XXX
+  f1l->Close();
+  f1ltop->Close();
+  fznunu->Close();
+  // XXX
+  fdata->Close();
+  // XXX
+  delete fznunu;
+  delete f1ltop;
+  delete f1l;
+  // XXX
+  delete f2l;
+  delete fsig;
+  delete fdata;
+  //TList *files = (TList*)gDirectory->GetListOfKeys();
+  //TListIter next(files);
+  //TObject *obj;
+  //while ((obj = next()))
+  //  cout << obj->GetName() << endl;
+  
 
 }
 
@@ -333,12 +388,13 @@ double getSignalUncertainty(double origyield, TString upshape, TString downshape
     cout << "This uncertainty should not exists, as there is no yield at all - returning 1." << endl;
     return 1.;
   }
+  //cout << "I want shape " << upshape << "/" << downshape << " for original yield " << origyield << " from file " << file->GetName() << endl;
   double upshapeerr=0; double downshapeerr=0;
   TH3D *h3u = (TH3D*)file->Get(upshape);
   TH3D *h3l = (TH3D*)file->Get(downshape);
   if(correlated){
     if(corrbins.size()==0){
-      for(unsigned int i = minbin; i<=maxbin; ++i){
+      for(int i = minbin; i<=maxbin; ++i){
 	upshapeerr   += pow(TMath::Abs(origyield-h3u->GetBinContent(bx,by,i))/origyield,2);
 	downshapeerr += pow(TMath::Abs(origyield-h3l->GetBinContent(bx,by,i))/origyield,2);
       }
@@ -351,24 +407,31 @@ double getSignalUncertainty(double origyield, TString upshape, TString downshape
       }
     }
   } else {
-    upshapeerr   = TMath::Abs(origyield-h3u->GetBinContent(bin))/origsig;
+    upshapeerr   = TMath::Abs(origyield-h3u->GetBinContent(bin))/origyield;
     downshapeerr = TMath::Abs(origyield-h3l->GetBinContent(bin))/origyield;
   }
-  if(upshapeerr>downshapeerr) return 1.+(origyield-h3u->GetBinContent(bin))/origyield;
-  else                        return 1.+(origyield-h3l->GetBinContent(bin))/origyield;
+  double upcontent   = h3u->GetBinContent(bin);
+  double downcontent = h3l->GetBinContent(bin);
+  //h3u->Delete();
+  //h3l->Delete();
+  if(upshapeerr>downshapeerr) return 1.+(origyield-  upcontent)/origyield;
+  else                        return 1.+(origyield-downcontent)/origyield;
 }
 
 double getBGUncertainty(double origyield, TString upshape, TString downshape, TFile *file, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins){
+//double getBGUncertainty(double origyield, TString upshape, TString downshape, TString filename, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins){
   if(origyield <= 0){
     cout << "This uncertainty should not exists, as there is no yield at all - returning 1." << endl;
     return 1.;
   }
   double upshapeerr=0; double downshapeerr=0;
+  //TFile *file = new TFile(filename,"read");
+  //cout << "I want shape " << upshape << "/" << downshape << " for original yield " << origyield << " from file " << file->GetName() << endl;
   TH1D *hu = (TH1D*)file->Get(upshape);
   TH1D *hl = (TH1D*)file->Get(downshape);
   if(correlated){
     if(corrbins.size()==0){
-      for(unsigned int i = minbin; i<=maxbin; ++i){
+      for(int i = minbin; i<=maxbin; ++i){
 	upshapeerr   += pow(TMath::Abs(origyield-hu->GetBinContent(i))/origyield,2);
 	downshapeerr += pow(TMath::Abs(origyield-hl->GetBinContent(i))/origyield,2);
       }
@@ -381,11 +444,17 @@ double getBGUncertainty(double origyield, TString upshape, TString downshape, TF
       }
     }
   } else {
-    upshapeerr   = TMath::Abs(origyield-hu->GetBinContent(bin))/origsig;
+    upshapeerr   = TMath::Abs(origyield-hu->GetBinContent(bin))/origyield;
     downshapeerr = TMath::Abs(origyield-hl->GetBinContent(bin))/origyield;
   }
-  if(upshapeerr>downshapeerr) return 1.+(origyield-hu->GetBinContent(bin))/origyield;
-  else                        return 1.+(origyield-hl->GetBinContent(bin))/origyield;
+  double upcontent   = hu->GetBinContent(bin);
+  double downcontent = hl->GetBinContent(bin);
+  //file->Close();
+  //delete file;
+  hu->Delete();
+  hl->Delete();
+  if(upshapeerr>downshapeerr) return 1.+(origyield-  upcontent)/origyield;
+  else                        return 1.+(origyield-downcontent)/origyield;
 }
 
 
