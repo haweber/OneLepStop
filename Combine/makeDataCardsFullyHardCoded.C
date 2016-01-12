@@ -344,9 +344,9 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   if(fakedata)   myoutputdir = myoutputdir + "fakedata/";
   if(compressed==1) myoutputdir = myoutputdir + "compressed/";
   //myoutputdir = myoutputdir + "nocorrelations/";
-  if(nosigunc&&nobkgunc) myoutputdir = "nounc/";
-  else if(nosigunc) myoutputdir = "nosigunc/";
-  else if(nobkgunc) myoutputdir = "nobkgunc/";
+  if(nosigunc&&nobkgunc) myoutputdir = myoutputdir+ "nounc/";
+  else if(nosigunc) myoutputdir = myoutputdir+ "nosigunc/";
+  else if(nobkgunc) myoutputdir = myoutputdir + "nobkgunc/";
   MakeOutputDir(myoutputdir);
   TString logname = myoutputdir + "datacard_" + signalname + "_" + binstring + ".txt";
   if(!bogussignal) {
