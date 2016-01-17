@@ -237,6 +237,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     double temp = h3->GetBinContent(b3); sig = TMath::Max(0., sig-temp); cont1 = temp;
     histname = "CR2l_sigcontamination"; h3 = (TH3D*)fsig->Get(histname);
     temp = h3->GetBinContent(b3); sig = TMath::Max(0., sig-temp); cont2 = temp;
+    if(!bogussignal) cout << "orig " << origsig << " CR1l_cont " << cont1 << " CR2l_cont " << cont2 << endl;
   }
   histname = "Data";
   if(fakedata) histname = "CR2lyield";
@@ -295,12 +296,12 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   if(!nosigunc){
     sigbsfhf  = getSignalUncertainty(origsig, "SR_Bup_HF",     "SR_Bdown_HF",   fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigbsfhf !=1.) ++nnuis;
     sigbsflf  = getSignalUncertainty(origsig, "SR_Bup_LF",     "SR_Bdown_LF",   fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigbsflf !=1.) ++nnuis;
-    sigjes    = getSignalUncertainty(origsig, "SR_JESup",      "SR_JESup",      fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigjes   !=1.) ++nnuis;
-    sigmurf   = getSignalUncertainty(origsig, "SR_muRFup",     "SR_muRFup",     fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigmurf  !=1.) ++nnuis;
+    sigjes    = getSignalUncertainty(origsig, "SR_JESup",      "SR_JESdown",      fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigjes   !=1.) ++nnuis;
+    sigmurf   = getSignalUncertainty(origsig, "SR_muRFup",     "SR_muRFdown",     fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigmurf  !=1.) ++nnuis;
     sigisr    = getSignalUncertainty(origsig, "SR_ISRup",      "SR_ISRdown",    fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigisr   !=1.) ++nnuis;
     //sigpu     = getSignalUncertainty(origsig, "SR_PUup",       "SR_PUdown",     fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigpu    !=1.) ++nnuis;
-    siglepeff = getSignalUncertainty(origsig, "SR_LepEffup",   "SR_LepEffup",   fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(siglepeff!=1.) ++nnuis;
-    sigleffFS = getSignalUncertainty(origsig, "SR_LepEffFSup", "SR_LepEffFSup", fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigleffFS!=1.) ++nnuis;
+    siglepeff = getSignalUncertainty(origsig, "SR_LepEffup",   "SR_LepEffdown",   fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(siglepeff!=1.) ++nnuis;
+    sigleffFS = getSignalUncertainty(origsig, "SR_LepEffFSup", "SR_LepEffFSdown", fsig, bx,by,bz,b3,  true, minbin, maxbin, corrbins); if(sigleffFS!=1.) ++nnuis;
   }
   sigtrig   = 1.01;  ++nnuis;
   siglum    = 1.046; ++nnuis;
@@ -403,12 +404,12 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     if(bg1lbsf  !=1) *fLogStream << " BSFSyst1l" << b <<"       lnN  -  - "<< bg1lbsf  << "  -  -" << endl;
     //bg1ltop
     //bgznunu
-    if(bgzpu   !=1) *fLogStream << " PUSystZ" << b <<"         lnN  -  -  -  - "<< bgzpu   << endl;
-    if(bgzleff !=1) *fLogStream << " LEffSystZ" << b <<"       lnN  -  -  -  - "<< bgzleff << endl;
-    if(bgzjes  !=1) *fLogStream << " JESSystZ" << b <<"        lnN  -  -  -  - "<< bgzjes  << endl;
-    if(bgzbsf  !=1) *fLogStream << " BSFSystZ" << b <<"        lnN  -  -  -  - "<< bgzbsf  << endl;
-    if(bgztpt  !=1) *fLogStream << " QSqSystZ" << b <<"        lnN  -  -  -  - "<< bgztpt  << endl;
-    if(bgzpdf  !=1) *fLogStream << " PDFSystZ" << b <<"        lnN  -  -  -  - "<< bgzpdf  << endl;
+    if(bgzpu   !=1) *fLogStream << " PUSystZ         lnN  -  -  -  - "<< bgzpu   << endl;
+    if(bgzleff !=1) *fLogStream << " LEffSystZ       lnN  -  -  -  - "<< bgzleff << endl;
+    if(bgzjes  !=1) *fLogStream << " JESSystZ        lnN  -  -  -  - "<< bgzjes  << endl;
+    if(bgzbsf  !=1) *fLogStream << " BSFSystZ        lnN  -  -  -  - "<< bgzbsf  << endl;
+    if(bgztpt  !=1) *fLogStream << " QSqSystZ        lnN  -  -  -  - "<< bgztpt  << endl;
+    if(bgzpdf  !=1) *fLogStream << " PDFSystZ        lnN  -  -  -  - "<< bgzpdf  << endl;
   }
   *fLogStream << endl;
 
@@ -525,10 +526,15 @@ double getSignalUncertainty(double origyield, TString upshape, TString downshape
   }
   double upcontent   = h3u->GetBinContent(bin);
   double downcontent = h3l->GetBinContent(bin);
+  if("SR_JESup"==upshape&&origyield!=1) cout << "orig " << origyield << " up " << upcontent << " down " << downcontent << endl;
   //h3u->Delete();
   //h3l->Delete();
-  if(upshapeerr>downshapeerr) return 1.+(origyield-  upcontent)/origyield;
-  else                        return 1.+(origyield-downcontent)/origyield;
+    double tmp;
+  if(upshapeerr>downshapeerr) tmp = 1.+(origyield-  upcontent)/origyield;
+  else                        tmp = 1.+(origyield-downcontent)/origyield;
+  if(tmp<0) tmp = 0.0001;
+  else if (tmp>2) tmp = 2;
+  return tmp;
 }
 
 double getBGUncertainty(double origyield, TString upshape, TString downshape, TFile *file, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins){
@@ -566,8 +572,12 @@ double getBGUncertainty(double origyield, TString upshape, TString downshape, TF
   //delete file;
   hu->Delete();
   hl->Delete();
-  if(upshapeerr>downshapeerr) return 1.+(origyield-  upcontent)/origyield;
-  else                        return 1.+(origyield-downcontent)/origyield;
+  double tmp;
+  if(upshapeerr>downshapeerr) tmp = 1.+(origyield-  upcontent)/origyield;
+  else                        tmp = 1.+(origyield-downcontent)/origyield;
+  if(tmp<0) tmp = 0.0001;
+  else if (tmp>2) tmp = 2;
+  return tmp;
 }
 
 double getBGError(double origyield, TString errshape, TFile *file, int bin){
@@ -580,6 +590,8 @@ double getBGError(double origyield, TString errshape, TFile *file, int bin){
   err   = TMath::Abs(origyield+h->GetBinContent(bin))/origyield;
 
   h->Delete();
+  if(err<0) err = 0.0001;
+  else if (err>2) err = 2;
   return err;
 }
 
