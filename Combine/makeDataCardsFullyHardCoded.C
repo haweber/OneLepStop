@@ -432,7 +432,16 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
 
   if(updateplottinghisto){
     bool updatesignal = false;
-    TString uname = inputdir + "ResultPlotTable.root";
+    TString uname = inputdir;
+    if(compressed==1) uname = uname + "compressed/";
+    //myoutputdir = uname + "uname/";
+    if(nosigunc&&nobkgunc) uname = uname+ "nounc/";
+    else if(nosigunc) uname = uname+ "nosigunc/";
+    else if(nobkgunc) uname = uname + "nobkgunc/";
+    if(dropsigcont) uname = uname + "dropsigcont/";
+    if(fakedata)   uname = uname + "fakedata/";
+    MakeOutputDir(uname);
+    uname = uname + "ResultPlotTable.root";
     TFile *updatefile = new TFile(uname,"update");
     updatefile->cd();
     TH1D *rpt_Data  = (TH1D*)updatefile->Get("rpt_Data");

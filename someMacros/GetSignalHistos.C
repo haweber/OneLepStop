@@ -39,6 +39,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   TH1D *puWeightUp   = (TH1D*)fPU->Get("puWeightUp");
   TH1D *puWeightDown = (TH1D*)fPU->Get("puWeightDown");
 
+  TFile *fxsec = new TFile("xsec_stop_13TeV.root","READ");
+  TH1D *hxsec     = (TH1D*)fxsec->Get("stop");
+
   TFile *f_el_SF       = new TFile("lepsf/kinematicBinSFele.root", "read");
   TFile *f_mu_SF_id    = new TFile("lepsf/TnP_MuonID_NUM_MediumID_DENOM_generalTracks_VAR_map_pt_eta.root", "read");
   TFile *f_mu_SF_iso   = new TFile("lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
@@ -133,8 +136,18 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   histonames.push_back("SR_Xsecdown");
   histonames.push_back("CR1l_sigcontamination");//scaled to signalreg yield
   histonames.push_back("CR2l_sigcontamination");//scaled to signalreg yield
-
-
+  /*
+  histonames.push_back("eventsum");
+  histonames.push_back("rawweightsum");
+  histonames.push_back("totweightsum");
+  histonames.push_back("ISRsum");
+  histonames.push_back("BSFsum");
+  histonames.push_back("PUweightsum");
+  histonames.push_back("xsecsum");
+  histonames.push_back("nevtsum");
+  histonames.push_back("lepsum");
+  histonames.push_back("lepSFsum");
+  */
   for(unsigned int i = 0; i<histonames.size(); ++i){
     string mapname = histonames[i];
     if(histos.count(mapname) == 0 ) histos[mapname] = new TH3D(mapname.c_str(), "", 37,99,1024, 19,-1,474, 13, -0.5,12.5);
@@ -241,7 +254,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       }
       if(muRFnorm<=0||muRFnormup<=0||muRFnormdown<=0){ muRFnormdown=1; muRFnormup=1; muRFnorm=1; }
       //lepSF is done below
-      double weight = xsec()*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
+      double xsection = hxsec->GetBinContent(hxsec->FindBin(mStop));
+      double xsectionerr = hxsec->GetBinError(hxsec->FindBin(mStop));
+      //double rawweight = xsec()*2260./nevts;
+      //double weight = xsec()*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
+      double rawweight = xsection*2260./nevts;
+      double weight = xsection*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
       //did put ISRweight which should be ==1
       if(ISRweight!=1) cout << "ISRw " << ISRweight << endl;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
@@ -383,8 +401,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //ISR reweighting, get stop pair using last copy:
       double ISRup = weight_ISRup()/weight_ISR()*ISRnorm/ISRnormup;
       double ISRdown = weight_ISRdown()/weight_ISR()*ISRnorm/ISRnormdown;
-      double XSup = (xsec()+xsec_uncert())/xsec();
-      double XSdown = (xsec()-xsec_uncert())/xsec();
+      //double XSup = (xsec()+xsec_uncert())/xsec();
+      //double XSdown = (xsec()-xsec_uncert())/xsec();
+      double XSup = (xsection+xsectionerr)/xsection;
+      double XSdown = (xsection-xsectionerr)/xsection;
       double PUup = PUweightUp/PUweight;
       double PUdown = PUweightDown/PUweight;
       double lEffup = lepSF_Up/lepSF;
@@ -399,6 +419,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       double muRFdown = genweights().at(8)/genweights().at(0)*muRFnorm/muRFnormdown;
 
       if(CR1l>0){
+	if(ngoodleps()!=1) cout << __LINE__ << " " << ngoodleps() << endl;
+	if(NSLeps!=1) cout << __LINE__ << " " << NSLeps << endl;
+	if(nvetoleps()!=1) cout << __LINE__ << " " << nvetoleps() << endl;
+	if(ngoodbtags()>=1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	//signal contamination in 0b control region, do correlations later during datacard making
 	if(CR1l==1){
 	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,6,weight*CR1l_1_6);
@@ -408,6 +432,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,5,weight*CR1l_2_5);
 	}
       } else if(CR2l>0){
+	if(nvetoleps()<=1||(nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto()))) cout << __LINE__ << " " << nvetoleps() << " " << PassTrackVeto_v3() << " " << PassTauVeto() << endl;
+	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	//signal contamination in 2l control region, do correlations later during datacard making
 	if(CR2l==1){
 	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,1,weight*CR2l_1_1);
@@ -420,6 +446,25 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
 	}
       } else if(SR>0){
+	if(ngoodleps()!=1) cout << __LINE__ << " " << ngoodleps() << endl;
+	if(NSLeps!=1) cout << __LINE__ << " " << NSLeps << endl;
+	if(nvetoleps()!=1) cout << __LINE__ << " " << nvetoleps() << endl;
+	if(!PassTrackVeto_v3())  cout << __LINE__ << endl;
+	if(!PassTauVeto())  cout << __LINE__ << endl;
+	if(SR<=6&&ngoodjets()<3) cout << __LINE__ << " " << ngoodjets() << endl;
+	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
+	/*
+	histos["eventsum"]->Fill(mStop,mLSP,SR,1.);
+	histos["rawweightsum"]->Fill(mStop,mLSP,SR,rawweight);
+	histos["totweightsum"]->Fill(mStop,mLSP,SR,weight);
+	histos["ISRsum"]->Fill(mStop,mLSP,SR,ISRweight);
+	histos["BSFsum"]->Fill(mStop,mLSP,SR,BSFweight);
+	histos["PUweightsum"]->Fill(mStop,mLSP,SR,PUweight);
+	histos["xsecsum"]->Fill(mStop,mLSP,SR,xsection);
+	histos["nevtsum"]->Fill(mStop,mLSP,SR,nevts);
+	histos["lepsum"]->Fill(mStop,mLSP,SR,lepSF);
+	histos["lepSFsum"]->Fill(mStop,mLSP,SR,lepSF_FS);
+	*/
 	//finally - do signal regions!
 	histos["SRyield"]->Fill(mStop,mLSP,SR,weight);
 	histos["SR_ISRup"]->Fill(mStop,mLSP,SR,weight*ISRup);
@@ -440,6 +485,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	histos["SR_muRFdown"]->Fill(mStop,mLSP,SR,weight*muRFdown);
       }
       if(compressedSR>0){
+	if(compressedSR<=6) cout << __LINE__ << " " << compressedSR << endl;
 	//compressedSR is defined to not overlap with SR - can use same histogram!
 	histos["SRyield"]->Fill(mStop,mLSP,compressedSR,weight);
 	histos["SR_ISRup"]->Fill(mStop,mLSP,compressedSR,weight*ISRup);

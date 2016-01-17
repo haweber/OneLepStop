@@ -13,7 +13,8 @@ if [ ! -d "$DIRECTORY" ]; then
 fi
 
 #thedir='/home/users/haweber/StopAnalysis/CombineCode/datacards/fakedata/dataisbgsig/'
-thedir='datacards2p3fbinv/dropsigcont/'
+#thedir='datacards2p3fbinv/dropsigcont/'
+thedir='datacards2p3fbinv/'
 fakedata=false
 dataisbg=true
 
@@ -63,7 +64,7 @@ combinestring=combineCards.py
 validcommand=false
 
 counter=9
-maxbins=5
+maxbins=6
 #BinArray=("met250_mt2w0" "met250_mt2w200" "met300_mt2w0" "met300_mt2w200" "met350_mt2w0" "met350_mt2w200" "met400_mt2w0" "met400_mt2w200" "met500_mt2w200")
 #for i in "${!BinArray[@]}"
 for i in `seq 1 ${maxbins}`;

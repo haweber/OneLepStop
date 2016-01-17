@@ -52,6 +52,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   TH1D *puWeightUp   = (TH1D*)fPU->Get("puWeightUp");
   TH1D *puWeightDown = (TH1D*)fPU->Get("puWeightDown");
 
+  TFile *fxsec = new TFile("xsec_stop_13TeV.root","READ");
+  TH1D *hxsec     = (TH1D*)fxsec->Get("stop");
+  
   TFile *f_el_SF       = new TFile("lepsf/kinematicBinSFele.root", "read");
   TFile *f_mu_SF_id    = new TFile("lepsf/TnP_MuonID_NUM_MediumID_DENOM_generalTracks_VAR_map_pt_eta.root", "read");
   TFile *f_mu_SF_iso   = new TFile("lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
@@ -241,7 +244,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(BSFnorm>0) BSFweight *=nevts/BSFnorm;
       if(BSFnorm<=0){ BSFnorm=1; }
       //lepSF is done below
-      double weight = xsec()*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
+      double xsection = hxsec->GetBinContent(hxsec->FindBin(mStop));
+      double xsectionerr = hxsec->GetBinError(hxsec->FindBin(mStop));
+      //double weight = xsec()*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
+      double weight = xsection*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
       //did put ISRweight which should be ==1
       if(ISRweight!=1) cout << "ISRw " << ISRweight << endl;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
@@ -337,11 +343,19 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       }
 
       if(SR>0){
+	if(ngoodleps()!=1) cout << __LINE__ << " " << ngoodleps() << endl;
+	if(NSLeps!=1) cout << __LINE__ << " " << NSLeps << endl;
+	if(nvetoleps()!=1) cout << __LINE__ << " " << nvetoleps() << endl;
+	if(!PassTrackVeto_v3())  cout << __LINE__ << endl;
+	if(!PassTauVeto())  cout << __LINE__ << endl;
+	if(SR<=6&&ngoodjets()<3) cout << __LINE__ << " " << ngoodjets() << endl;
+	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	//finally - do signal regions!
 	if(jes==1) histos["SR_JESup"]->Fill(mStop,mLSP,SR,weight);
 	else if(jes==(-1)) histos["SR_JESdown"]->Fill(mStop,mLSP,SR,weight);
       }
       if(compressedSR>0){
+	if(compressedSR<=6) cout << __LINE__ << " " << compressedSR << endl;
 	//compressedSR is defined to not overlap with SR - can use same histogram!
 	if(jes==1) histos["SR_JESup"]->Fill(mStop,mLSP,compressedSR,weight);
 	else if(jes==(-1)) histos["SR_JESdown"]->Fill(mStop,mLSP,compressedSR,weight);

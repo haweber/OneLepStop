@@ -39,6 +39,14 @@ using namespace std;
 TString inputdir = "/hadoop/cms/store/user/haweber/condor/limits/";
 TString outputdir = "rootfiles/";
 
+void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont);
+TH2F* InterpolateThisHistogram(TH2F *hold);
+TGraph2D* GetInterpolatingGraph(TH2F *hold);
+TH2F* PassThisHistogram(TH2F *hold);
+TH2F* XsecThisHistogram(TH2F *hold, TH1D *hxsec);
+TGraph* GetContour(TGraph2D *g, TString name);
+inline TString MakeOutputDir(TString dir);
+
 inline TString MakeOutputDir(TString dir){
   if(!dir.EndsWith("/")) dir += "/";
   // Create directory if needed
@@ -48,13 +56,6 @@ inline TString MakeOutputDir(TString dir){
   system(cmd);
   return dir;
 }
-
-void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont);
-TH2F* InterpolateThisHistogram(TH2F *hold);
-TGraph2D* GetInterpolatingGraph(TH2F *hold);
-TH2F* PassThisHistogram(TH2F *hold);
-TH2F* XsecThisHistogram(TH2F *hold, TH1D *hxsec);
-TGraph* GetContour(TGraph2D *g, TString name);
 
 
 void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont){
@@ -77,19 +78,23 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   int nbinsy = (mLSPHigh - mLSPLow)/mLSPStep;
   
   TString myoutputdir = outputdir;
-  if(fakedata)   myoutputdir = myoutputdir + "fakedata/";
   if(compressed==1) myoutputdir = myoutputdir + "compressed/";
   if(nosigunc&&nobkgunc) myoutputdir = myoutputdir + "nounc/";
   else if(nosigunc) myoutputdir = myoutputdir + "nosigunc/";
   else if(nobkgunc) myoutputdir = myoutputdir + "nobkgunc/";
+  if(dropsigcont) myoutputdir = myoutputdir + "dropsigcont/";
+  if(fakedata)   myoutputdir = myoutputdir + "fakedata/";
+  cout << "make directory " << myoutputdir << endl;
   MakeOutputDir(myoutputdir);
   TString myinputdir = inputdir;
-  if(fakedata)   myinputdir = myinputdir + "fakedata/";
   if(compressed==1) myinputdir = myinputdir + "compressed/";
   if(nosigunc&&nobkgunc) myinputdir = myinputdir + "nounc/";
   else if(nosigunc) myinputdir = myinputdir + "nosigunc/";
   else if(nobkgunc) myinputdir = myinputdir + "nobkgunc/";
-  
+  if(dropsigcont) myinputdir = myinputdir + "dropsigcont/";
+  if(fakedata)   myinputdir = myinputdir + "fakedata/";
+  cout << "inputs from " << myinputdir << endl;
+
   TString outfilename = myoutputdir + "Limits2DHistograms.root";
   TFile *file = new TFile(outfilename, "recreate");
   file->cd();
@@ -182,9 +187,10 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
       TTree *tlimit = (TTree*)flimit->Get("limit");
       double value = -1.0;
       tlimit->SetBranchAddress("limit", &value);
-            
+      
       for(int i=0; i< 6; i++){
 	tlimit->GetEntry(i);
+	//cout << "stop " << stop << " lsp " << lsp << " i " << i << " value " << value << endl;
 	if(i==0)      expm2s = value;
 	else if(i==1) expm1s = value;
 	else if(i==2) exp    = value;
@@ -264,6 +270,7 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
 
   cout << "Get contours" << endl;
   TGraph *gExp_c   = (TGraph*)GetContour(g2Exp, "gExp");
+  //cout << "gExp_c " << gExp_c->GetName() << " " << gExp_c->GetN() << endl;
   TGraph *gExp2m_c = (TGraph*)GetContour(g2Exp2m, "gExp2m");
   TGraph *gExp1m_c = (TGraph*)GetContour(g2Exp1m, "gExp1m");
   TGraph *gExp1p_c = (TGraph*)GetContour(g2Exp1p, "gExp1p");
@@ -322,7 +329,15 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   hExp2mPass ->Write();
   hExp1pPass ->Write();
   hExp2pPass ->Write();
-  
+
+  g2Exp   ->Write();
+  g2Obs   ->Write();
+  g2Obs1m ->Write();
+  g2Obs1p ->Write();
+  g2Exp1m ->Write();
+  g2Exp2m ->Write();
+  g2Exp1p ->Write();
+  g2Exp2p ->Write();
   gExp_c   ->Write();
   gObs_c   ->Write();
   gObs1m_c ->Write();
@@ -361,6 +376,7 @@ TGraph2D* GetInterpolatingGraph(TH2F *hold){
   TGraph2D *g = new TGraph2D(hold);
   g->SetNpx(int(g->GetXmax()-g->GetXmin())/binsize);
   g->SetNpy(int(g->GetYmax()-g->GetYmin())/binsize);
+  //cout << "name " << g->GetN() << " " << hold->Integral() << endl;
   return g;
 }
 
@@ -396,11 +412,16 @@ TH2F* XsecThisHistogram(TH2F *hold, TH1D *hxsec){
 
 TGraph* GetContour(TGraph2D *g, TString name){
   TGraph *gnew;
-  TList *list = (TList*)g->GetContourList(1.0);
-  if(list == nullptr) return gnew;
- int max_points = -1;
-  for(int i = 0; i<list->GetSize(); ++i){
-    TGraph *gtemp = (TGraph*)list->At(i);
+  //cout << g->GetName() << " " << g->GetN() << endl;
+  TH2D *temp = (TH2D*)g->GetHistogram();//need this for list to work?
+  //g->Draw("alp");//need this for list to work?
+  TList *glist = (TList*)g->GetContourList(1.0);
+  if(glist == nullptr) return gnew;
+  int max_points = -1;
+  int nn = glist->GetSize();
+  //cout << "number of entries in list " << nn << endl;
+  for(int i = 0; i<glist->GetSize(); ++i){
+    TGraph *gtemp = (TGraph*)glist->At(i);
     int Npoints = gtemp->GetN();
     if(Npoints>max_points){
       gnew = (TGraph*)gtemp->Clone(name);
