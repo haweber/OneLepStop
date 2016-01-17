@@ -13,7 +13,7 @@ if [ ! -d "$DIRECTORY" ]; then
 fi
 
 #thedir='/home/users/haweber/StopAnalysis/CombineCode/datacards/fakedata/dataisbgsig/'
-thedir='datacards2p3fbinv/'
+thedir='datacards2p3fbinv/dropsigcont/'
 fakedata=false
 dataisbg=true
 
@@ -90,11 +90,11 @@ done
 
 if [ "$validcommand" = true ]
 then
-    eval ${combinestring} > ${thedir}combinedcards/combined_${Name}.txt
+    eval ${combinestring} > ${thedir}combinedcards/${Name}.txt
 
     #echo ${combinestring}
 
-    echo "Combined cards for ${Name} into ${thedir}combinedcards/combined_${Name}.txt"
+    echo "Combined cards for ${Name} into ${thedir}combinedcards/${Name}.txt"
 #else
 #    echo "Some input file did not exist. Didnt combine"
 fi

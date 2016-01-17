@@ -247,6 +247,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
 
       int NSLeps = 0;
+      int NAddVetoLeps = 0;
       if(lep1_is_mu()){
 	if(lep1_pt()>20&&fabs(lep1_eta())<2.4) {++NSLeps;}
       } else if (lep1_is_el()){
@@ -255,6 +256,11 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if(lep2_pt()>20&&fabs(lep2_eta())<2.4) {++NSLeps;}
       } else if (lep2_is_el()){
 	if(lep2_pt()>20&&fabs(lep2_eta())<1.4442) {++NSLeps; }
+      }
+      if(lep2_is_mu()){
+	if(lep2_pt()>10&&fabs(lep2_eta())<2.4) {++NAddVetoLeps;}
+      } else if (lep2_is_el()){
+	if(lep2_pt()>10&&fabs(lep2_eta())<2.4) {++NAddVetoLeps; }
       }
       if(NSLeps<1) continue;//temp
       float lepSF_pt_cutoff = 100.0;
@@ -344,27 +350,27 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       }
       //CR1l  1 --> SR  6
       //CR1l  2 --> SR  3-5
-      float CR1l_1_6 = 0.05;
-      float CR1l_2_3 = 0.04;
-      float CR1l_2_4 = 0.06;
-      float CR1l_2_5 = 0.06;
+      float CR1l_1_6 = 0.37*0.18;
+      float CR1l_2_3 = 0.55*0.15;
+      float CR1l_2_4 = 0.25*0.29;
+      float CR1l_2_5 = 0.20*0.40;
 
       //CR2l = -1;
       int lepind = -1;
-      if(ngoodleps()>2&&NSLeps==2) lepind = 5;
+      if(ngoodleps()>=2&&NSLeps==2) lepind = 5;
       else if(ngoodleps()==2&&NSLeps==2) lepind = 4;//exactly two leptons,CR4
-      else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()>2) lepind = 3;//one lepton, but more than 1 add. loose,1l,>2l
-      else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()==2) lepind = 2;//one lepton + 1 add. loose,CR5
-      else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto())) lepind = 1;//exactly one lepton, but do not pass track/tau veto - i.e. one additional track or tau, CR6
+      else if(ngoodleps()==1&&NSLeps==1&&NAddVetoLeps>=1) lepind = 3;//one lepton, but more than 1 add. loose,1l,>2l
+      //else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()==2) lepind = 2;//one lepton + 1 add. loose,CR5
+      else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()==0&&(!PassTrackVeto_v3()||!PassTauVeto())) lepind = 1;//exactly one lepton, but do not pass track/tau veto - i.e. one additional track or tau, CR6
       int CR2l = -1;
-      if((lepind==4||lepind==2||lepind==1)&&ngoodjets()>=3&&ngoodbtags()>=1){
+      if((lepind==4||lepind==3||lepind==1)&&ngoodjets()>=3&&ngoodbtags()>=1){
 	if(MT2W()<=200) CR2l = 1;
 	else CR2l = 2;
       }
-      float CR2l_1_1 = 0.63*0.48;
-      float CR2l_1_2 = 0.63*0.19;
-      float CR2l_2_3 = 0.44*0.38;
-      float CR2l_2_4 = 0.44*0.12;
+      float CR2l_1_1 = 0.61*0.48;
+      float CR2l_1_2 = 0.61*0.19;
+      float CR2l_2_3 = 0.44*0.39;
+      float CR2l_2_4 = 0.44*0.11;
       float CR2l_2_5 = 0.44*0.07;
       float CR2l_2_6 = 0.44*0.11;
 
