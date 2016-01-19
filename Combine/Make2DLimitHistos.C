@@ -278,6 +278,11 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   TGraph *gObs_c   = (TGraph*)GetContour(g2Obs, "gObs");
   TGraph *gObs1m_c = (TGraph*)GetContour(g2Obs1m, "gObs1m");
   TGraph *gObs1p_c = (TGraph*)GetContour(g2Obs1p, "gObs1p");
+
+  TGraph *gEmpty = new TGraph();//empty graph for suppressing obs in limit plots
+  gEmpty->SetName("gEmpty");
+  gEmpty->SetPoint(0,-100,-100);
+  gEmpty->SetPoint(1,-200,-200);
   
   
   file->cd();
@@ -346,7 +351,7 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   gExp2m_c ->Write();
   gExp1p_c ->Write();
   gExp2p_c ->Write();
-  
+  gEmpty->Write();
   file->Close();
   cout << "Saved all histos in  " << file->GetName() << endl;
 
