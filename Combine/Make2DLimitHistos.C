@@ -280,7 +280,7 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   TGraph *gExp2m_c = (TGraph*)GetContour(g2Exp2m, "gExp2m");
   TGraph *gExp1m_c = (TGraph*)GetContour(g2Exp1m, "gExp1m");
   TGraph *gExp1p_c = (TGraph*)GetContour(g2Exp1p, "gExp1p");
-  TGraph *gExp2p_c = (TGraph*)GetContour(g2Exp2m, "gExp2p");
+  TGraph *gExp2p_c = (TGraph*)GetContour(g2Exp2p, "gExp2p");
   TGraph *gObs_c   = (TGraph*)GetContour(g2Obs, "gObs");
   TGraph *gObs1m_c = (TGraph*)GetContour(g2Obs1m, "gObs1m");
   TGraph *gObs1p_c = (TGraph*)GetContour(g2Obs1p, "gObs1p");
