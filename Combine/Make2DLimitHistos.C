@@ -267,7 +267,13 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   hObsXsecOrg   = (TH2F*)XsecThisHistogram(hObsOrg, hxsec);
   hObs1mXsecOrg = (TH2F*)XsecThisHistogram(hObs1mOrg, hxsec);
   hObs1pXsecOrg = (TH2F*)XsecThisHistogram(hObs1pOrg, hxsec);
-
+  //this is stupid, but I don't want empty 0 axis
+  for(unsigned int i = 1; i<=hExpXsec->GetNbinsX(); ++i){
+    if(hExpXsec->GetBinContent(i,1)==0 && hExpXsec->GetBinContent(i,2)>0) hExpXsec->SetBinContent(i,1,hExpXsec->GetBinContent(i,2));
+  }
+  for(unsigned int i = 1; i<=hExpXsec->GetNbinsY(); ++i){
+    if(hExpXsec->GetBinContent(1,i)==0 && hExpXsec->GetBinContent(2,i)>0) hExpXsec->SetBinContent(1,i,hExpXsec->GetBinContent(2,i));
+  }
   cout << "Get contours" << endl;
   TGraph *gExp_c   = (TGraph*)GetContour(g2Exp, "gExp");
   //cout << "gExp_c " << gExp_c->GetName() << " " << gExp_c->GetN() << endl;
