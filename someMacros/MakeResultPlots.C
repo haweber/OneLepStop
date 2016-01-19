@@ -223,7 +223,7 @@ void MakeResultPlots(TString inputfile){
   tt1l->SetMarkerStyle(1);
   tt1l->SetLineStyle(0);
   Sum->Add(tt1l,"");
-  leg->AddEntry(tt1l, "t#bar{t}#rightarrow1l", "f");
+  leg->AddEntry(tt1l, "t#bar{t}#rightarrow1#font[12]{l}", "f");
   // leg->AddEntry(tt1l, "t{t}\\to1\\ell", "f");
 
   //orig: kOrange-2
@@ -234,7 +234,7 @@ void MakeResultPlots(TString inputfile){
   W1l->SetMarkerStyle(1);
   W1l->SetLineStyle(0);
   Sum->Add(W1l,"");
-  leg->AddEntry(W1l, "1l (not from t)", "f");
+  leg->AddEntry(W1l, "1#font[12]{l} (not from t)", "f");
   // leg->AddEntry(W1l, "\\text{1}\\ell\\text{ (not from t)}", "f");
 
   //orig: kMagenta-5
