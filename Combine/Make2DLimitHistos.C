@@ -228,7 +228,7 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   TGraph2D *g2Exp2m = (TGraph2D*)GetInterpolatingGraph(hExp2mOrg);
   TGraph2D *g2Exp1m = (TGraph2D*)GetInterpolatingGraph(hExp1mOrg);
   TGraph2D *g2Exp1p = (TGraph2D*)GetInterpolatingGraph(hExp1pOrg);
-  TGraph2D *g2Exp2p = (TGraph2D*)GetInterpolatingGraph(hExp2mOrg);
+  TGraph2D *g2Exp2p = (TGraph2D*)GetInterpolatingGraph(hExp2pOrg);
   TGraph2D *g2Obs   = (TGraph2D*)GetInterpolatingGraph(hObsOrg);
   TGraph2D *g2Obs1m = (TGraph2D*)GetInterpolatingGraph(hObs1mOrg);
   TGraph2D *g2Obs1p = (TGraph2D*)GetInterpolatingGraph(hObs1pOrg);
