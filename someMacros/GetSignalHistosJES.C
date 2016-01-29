@@ -153,7 +153,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
   for(unsigned int i = 0; i<histonames.size(); ++i){
     string mapname = histonames[i];
-    if(histos.count(mapname) == 0 ) histos[mapname] = new TH3D(mapname.c_str(), "", 37,99,1024, 19,-1,474, 13, -0.5,12.5);
+    if(histos.count(mapname) == 0 ) histos[mapname] = new TH3D(mapname.c_str(), "", 37,99,1024, 19,-1,474, 9, 0.5,9.5);
     //mStop 100-1000, mLSP 0-450, SR 1-12, 9200 bins, SR 0 is non-SR - in case it it needed!!
       histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);
     }
@@ -312,7 +312,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
       int SR = -1;
       int compressedSR = -1;
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()>=1){//basis for SR 1l, >=1b
+      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()>=1) { //basis for SR 1l, >=1b
 	if(ngoodjets()>=4){
 	  if(MT2W()<=200){
 	    if(pfmet()>325) SR = 2;
@@ -322,24 +322,18 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	    else if(pfmet()>350) SR = 4;
 	    else SR = 3;
 	  }
-	} else if(ngoodjets()==3 && MT2W()>200 && pfmet()>350) {
-	  SR = 6;
-	} else if(MT2W()>200&&topnessMod()>(-3)) { //2 or 3 jets
-	  if(ngoodbtags()==1){
-	    if(pfmet()>400) SR = 8;
-	    else SR = 7;
-	  } else {//ge2 jets
-	    if(pfmet()>400) SR = 10;
-	    else SR = 9;
-	  }
+	} else if(ngoodjets()==3 && MT2W()>200) {
+	  if(pfmet()>350) SR = 7;
+	  else SR = 6;
+	} else if(topnessMod()>6.4) { //2 or 3 jets
+	  if(pfmet()>350) SR = 9;
+	  else SR = 8;
 	}
-	/*
 	//compressed region (jets are sorted by pt
-	if(ngoodjets()>=5&&ak4pfjets_passMEDbtag()[0]==false&&ak4pfjets_pt()[0]>200.){
-	  if(MT2W()<=200) compressedSR = 11;
-	  else compressedSR = 12;
-	}
-	*/
+	//if(ngoodjets()>=5&&ak4pfjets_passMEDbtag()[0]==false&&ak4pfjets_pt()[0]>200.){
+	//  if(MT2W()<=200) compressedSR = 11;
+	//  else compressedSR = 12;
+	//}
       }
 
       if(SR>0){
