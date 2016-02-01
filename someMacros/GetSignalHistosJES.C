@@ -325,7 +325,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	} else if(ngoodjets()==3 && MT2W()>200) {
 	  if(pfmet()>350) SR = 7;
 	  else SR = 6;
-	} else if(topnessMod()>6.4) { //2 or 3 jets
+	} else if(ngoodjets()==2 && topnessMod()>6.4) { //2 or 3 jets
 	  if(pfmet()>350) SR = 9;
 	  else SR = 8;
 	}
