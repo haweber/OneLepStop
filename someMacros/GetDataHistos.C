@@ -48,7 +48,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
 
 
-  map<string, TH1F*> histos;
+  map<string, TH1D*> histos;
   vector<string> histonames; histonames.clear();
   vector<int> hbins;  hbins.clear();
   vector<float> hlow; hlow.clear();
@@ -59,7 +59,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
   for(unsigned int i = 0; i<histonames.size(); ++i){
     string mapname = histonames[i];
-    if(histos.count(mapname) == 0 ) histos[mapname] = new TH1F(mapname.c_str(), "", hbins[i], hlow[i], hup[i]);
+    if(histos.count(mapname) == 0 ) histos[mapname] = new TH1D(mapname.c_str(), "", hbins[i], hlow[i], hup[i]);
     histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);
   }
 
@@ -214,7 +214,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   string filename = "rootfiles/DATAyield2p3fbinv.root";
   TFile *f = new TFile(filename.c_str(),"RECREATE");
   f->cd();
-  for(map<string,TH1F*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
+  for(map<string,TH1D*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
   f->Close();
   cout << "Saved histos in " << f->GetName() << endl;
 
