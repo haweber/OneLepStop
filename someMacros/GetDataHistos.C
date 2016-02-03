@@ -79,7 +79,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/MET_ecalscn1043093.txt");
   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/SingleElectron_ecalscn1043093.txt");
   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/SingleMuon_ecalscn1043093.txt");
-
+  metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/csc2015_Dec01.txt");
+  metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/ecalscn1043093_Dec01.txt");
+  metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/badResolutionTrack_Jan13.txt");
+  metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/muonBadTrack_Jan13.txt");
   
   // Loop over events to Analyze
   unsigned int nEventsTotal = 0;
@@ -181,19 +184,19 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       int SR = -1;
       if(ngoodjets()>=4){
 	if(MT2W()<=200){
-	  if(pfmet()>325) SR = 2;
-	  else SR = 1;
+	  if(pfmet()>325) SR = 6;
+	  else SR = 5;
 	} else { //high MT2W
-	  if(pfmet()>450) SR = 5;
-	  else if(pfmet()>350) SR = 4;
-	  else SR = 3;
+	  if(pfmet()>450) SR = 9;
+	  else if(pfmet()>350) SR = 8;
+	  else SR = 7;
 	}
       } else if(ngoodjets()==3 && MT2W()>200) {
-	if(pfmet()>350) SR = 7;
-	else SR = 6;
+	if(pfmet()>350) SR = 4;
+	else SR = 3;
       } else if(ngoodjets()==2&&topnessMod()>6.4) { //2 or 3 jets
-	if(pfmet()>350) SR = 9;
-	else SR = 8;
+	if(pfmet()>350) SR = 2;
+	else SR = 1;
       }
 
       if(SR>=0){

@@ -315,19 +315,19 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()>=1) { //basis for SR 1l, >=1b
 	if(ngoodjets()>=4){
 	  if(MT2W()<=200){
-	    if(pfmet()>325) SR = 2;
-	    else SR = 1;
+	    if(pfmet()>325) SR = 6;
+	    else SR = 5;
 	  } else { //high MT2W
-	    if(pfmet()>450) SR = 5;
-	    else if(pfmet()>350) SR = 4;
-	    else SR = 3;
+	    if(pfmet()>450) SR = 9;
+	    else if(pfmet()>350) SR = 8;
+	    else SR = 7;
 	  }
 	} else if(ngoodjets()==3 && MT2W()>200) {
-	  if(pfmet()>350) SR = 7;
-	  else SR = 6;
+	  if(pfmet()>350) SR = 4;
+	  else SR = 3;
 	} else if(ngoodjets()==2 && topnessMod()>6.4) { //2 or 3 jets
-	  if(pfmet()>350) SR = 9;
-	  else SR = 8;
+	  if(pfmet()>350) SR = 2;
+	  else SR = 1;
 	}
 	//compressed region (jets are sorted by pt
 	//if(ngoodjets()>=5&&ak4pfjets_passMEDbtag()[0]==false&&ak4pfjets_pt()[0]>200.){
@@ -342,7 +342,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if(nvetoleps()!=1) cout << __LINE__ << " " << nvetoleps() << endl;
 	if(!PassTrackVeto_v3())  cout << __LINE__ << endl;
 	if(!PassTauVeto())  cout << __LINE__ << endl;
-	if(SR<=6&&ngoodjets()<3) cout << __LINE__ << " " << ngoodjets() << endl;
+	//if(SR<=6&&ngoodjets()<3) cout << __LINE__ << " " << ngoodjets() << endl;
 	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	//finally - do signal regions!
 	if(jes==1) histos["SR_JESup"]->Fill(mStop,mLSP,SR,weight);

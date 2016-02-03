@@ -339,19 +339,19 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()>=1) { //basis for SR 1l, >=1b
 	if(ngoodjets()>=4){
 	  if(MT2W()<=200){
-	    if(pfmet()>325) SR = 2;
-	    else SR = 1;
+	    if(pfmet()>325) SR = 6;
+	    else SR = 5;
 	  } else { //high MT2W
-	    if(pfmet()>450) SR = 5;
-	    else if(pfmet()>350) SR = 4;
-	    else SR = 3;
+	    if(pfmet()>450) SR = 9;
+	    else if(pfmet()>350) SR = 8;
+	    else SR = 7;
 	  }
 	} else if(ngoodjets()==3 && MT2W()>200) {
-	  if(pfmet()>350) SR = 7;
-	  else SR = 6;
+	  if(pfmet()>350) SR = 4;
+	  else SR = 3;
 	} else if(ngoodjets()==2 && topnessMod()>6.4) {
-	  if(pfmet()>350) SR = 9;
-	  else SR = 8;
+	  if(pfmet()>350) SR = 2;
+	  else SR = 1;
 	}
 	//compressed region (jets are sorted by pt
 	//if(ngoodjets()>=5&&ak4pfjets_passMEDbtag()[0]==false&&ak4pfjets_pt()[0]>200.){
@@ -372,6 +372,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //CR1l  1 --> SR  6
       //CR1l  2 --> SR  3-5
       float CR1l_1_6 = 0.35*0.18;
+      float CR1l_1_7 = 0.35*0.18;
       float CR1l_2_3 = 0.58*0.16;
       float CR1l_2_4 = 0.23*0.31;
       float CR1l_2_5 = 0.19*0.44;
@@ -394,6 +395,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float CR2l_2_4 = 0.44*0.11;
       float CR2l_2_5 = 0.44*0.07;
       float CR2l_2_6 = 0.44*0.11;
+      float CR2l_2_7 = 0.44*0.11;
 
       if(SR==(-1)&&CR1l==(-1)&&CR2l==(-1)&&compressedSR==(-1)) continue;
       //implement some sanity checks
@@ -428,24 +430,26 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if(ngoodbtags()>=1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	//signal contamination in 0b control region, do correlations later during datacard making
 	if(CR1l==1){
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,6,weight*CR1l_1_6);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR1l_1_6);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR1l_1_7);
 	} else if(CR1l==2){
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR1l_2_3);
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR1l_2_4);
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,5,weight*CR1l_2_5);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,7,weight*CR1l_2_3);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,8,weight*CR1l_2_4);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,9,weight*CR1l_2_5);
 	}
       } else if(CR2l>0){
 	if(nvetoleps()<=1||(nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto()))) cout << __LINE__ << " " << nvetoleps() << " " << PassTrackVeto_v3() << " " << PassTauVeto() << endl;
 	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	//signal contamination in 2l control region, do correlations later during datacard making
 	if(CR2l==1){
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,1,weight*CR2l_1_1);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,2,weight*CR2l_1_2);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,5,weight*CR2l_1_1);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,6,weight*CR2l_1_2);
 	} else if(CR2l==2){
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR2l_2_3);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR2l_2_4);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,5,weight*CR2l_2_5);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,6,weight*CR2l_2_6);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,7,weight*CR2l_2_3);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,8,weight*CR2l_2_4);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,9,weight*CR2l_2_5);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR2l_2_6);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR2l_2_7);
 
 	}
       } else if(SR>0){
@@ -454,7 +458,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if(nvetoleps()!=1) cout << __LINE__ << " " << nvetoleps() << endl;
 	if(!PassTrackVeto_v3())  cout << __LINE__ << endl;
 	if(!PassTauVeto())  cout << __LINE__ << endl;
-	if(SR<=6&&ngoodjets()<3) cout << __LINE__ << " " << ngoodjets() << endl;
+	//if(SR<=6&&ngoodjets()<3) cout << __LINE__ << " " << ngoodjets() << endl;
 	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	
 	histos2["eventsum"]->Fill(mStop,mLSP,SR,1.);

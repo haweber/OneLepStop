@@ -59,7 +59,11 @@ void makeDataCardsFullyHardCodedAllScans(bool fakedata, bool nosyst=false, int x
 double getSignalUncertainty(double origyield, TString upshape, TString downshape, TFile *file, int bx, int by, int bz, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins);
 double getBGUncertainty(double origyield, TString upshape, TString downshape, TFile *file, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins);
 double getBGError(double origyield, TString errshape, TFile *file, int bin);
+double getBGErrorRel(double origyield, TString errshape, TFile *file, int bin);
 //double getBGUncertainty(double origyield, TString upshape, TString downshape, TString filename, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins);
+
+int GetLLBin(int b);
+int GetTTZBin(int b);
 
 void makeDataCardsFullyHardCodedAllScans(bool fakedata, bool nosyst, int xsecupdown, int compressed, bool dropsigcont){
   makeDataCardsFullyHardCodedOneScan("T2tt",fakedata, nosyst, xsecupdown, compressed, dropsigcont);
@@ -86,8 +90,8 @@ void makeDataCardsFullyHardCodedAllBins(TString signaltype, int stop, int lsp, i
   int maxbin = -1;
   int startbin = -1;
   if(compressed == 1) { maxbin = 2; startbin = 11; }
-  else { maxbin = 5; startbin = 1; }
-  for(int bin = startbin; bin <= (startbin+maxbin); ++bin){
+  else { maxbin = 9; startbin = 1; }
+  for(int bin = startbin; bin < (startbin+maxbin); ++bin){
     makeDataCardsFullyHardCodedOneBin(bin,signaltype, stop, lsp, charg, xval, fakedata, nosyst, xsecupdown, compressed, dropsigcont);
   }
 }
@@ -97,11 +101,11 @@ void makeDataCardsFullyHardCodedAllBins(TString signaltype, int stop, int lsp, i
 void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int lsp, int charg, float xval, bool fakedata, bool nosyst, int xsecupdown, int compressed, bool dropsigcont){
 
   if(compressed==0&&bin<1) return;
-  if(compressed==0&&bin>6) return;
+  if(compressed==0&&bin>9) return;
   if(compressed==1&&bin<11) return;
   if(compressed==1&&bin>12) return;
   int minbin = 1;//run only baseline analysis
-  int maxbin = 6;//run only baseline analysis
+  int maxbin = 9;//run only baseline analysis
   if(compressed==1){
     minbin = 11;
     maxbin = 12;
@@ -152,7 +156,8 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     cout << "No 1ltop file - exit" << endl;
     return;
   }
-  filename = inputdir + "Background_ttz.root";
+  //filename = inputdir + "Background_ttz.root";
+  filename = inputdir + "hFile_TTZ_Syst_finalRelUnc_hists_0201_allfixJES_modtopness_nolabel.root";
   ifstream infilettz(filename.Data());
   if(!(infilettz.good() ) ) return;
   TFile *fznunu = new TFile(filename,"READ");
@@ -212,7 +217,9 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   }
   b3 = h3->FindBin(stop,lsp,b);
   if(b3!=h3->GetBin(bx,by,bz)) cout << "Check this " << "b:stop:lsp " << b << ":" << stop << ":" << lsp << " are bins " << bx << ":"<<by<<":"<<bz <<" are global bin " << h3->GetBin(bx,by,bz) << " and also should be findbin b3 " << b3 << endl;
-
+  int bLL = GetLLBin(b);
+  int bTTZ = GetTTZBin(b);
+  
   //get all yields and statistical uncertainties - also signal contamination
   sig = h3->GetBinContent(b3);
   bool bogussignal = false;
@@ -237,20 +244,21 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     double temp = h3->GetBinContent(b3); sig = TMath::Max(0., sig-temp); cont1 = temp;
     histname = "CR2l_sigcontamination"; h3 = (TH3D*)fsig->Get(histname);
     temp = h3->GetBinContent(b3); sig = TMath::Max(0., sig-temp); cont2 = temp;
-    if(!bogussignal) cout << "orig " << origsig << " CR1l_cont " << cont1 << " CR2l_cont " << cont2 << endl;
+    //if(!bogussignal) cout << "orig " << origsig << " CR1l_cont " << cont1 << " CR2l_cont " << cont2 << endl;
   }
   histname = "Data";
   if(fakedata) histname = "CR2lyield";
   h = (TH1D*)fdata->Get(histname);
   //if(h->GetBin(bz)!=b) cout << "Check this " << "b " << b << " bz " << bz << endl;
 
-  //data = h->GetBinContent(b); //dataerr = 1.+h->GetBinError(b)/data;//do I need the data err;
+  if(!fakedata) data = h->GetBinContent(b);
+  //else data = h->GetBinContent(bLL); //dataerr = 1.+h->GetBinError(b)/data;//do I need the data err;
   histname = "CR2lyield"; h = (TH1D*)f2l->Get(histname);
   //cout << "bin " << bin << " b " << b << " bz " << bz << endl;
   //cout << "h->GetBinLowEdge(bin) " << h->GetBinLowEdge(bin) << endl;
-  bg2l = h->GetBinContent(b); ++nbgs;
+  bg2l = h->GetBinContent(bLL); ++nbgs;
   //cout << "sig vs bg " << sig << " vs " << bg2l << endl;
-  if(bg2l>0) { bg2lerr = 1.+((h->GetBinError(b))/bg2l); ++nnuis;}
+  if(bg2l>0) { bg2lerr = 1.+((h->GetBinError(bLL))/bg2l); ++nnuis;}
   //histname = "CR2lstat"; h = (TH1D*)f2l->Get(histname);
   //if(bg2l>0) {bg2lerr = 1.+((h->GetBinContent(b))/bg2l); ++nnuis;}
   // XXX
@@ -262,9 +270,10 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   histname = "CR1ltt_est"; h = (TH1D*)f1ltop->Get(histname);
   bg1ltop = h->GetBinContent(b); ++nbgs;
   if(bg1ltop>0) { bg1ltoperr = 1.+h->GetBinError(b)/bg1ltop; ++nnuis;}
-  histname = "CRttz_est"; h = (TH1D*)fznunu->Get(histname);
-  bgznunu = h->GetBinContent(b); ++nbgs;
-  if(bgznunu>0) { bgznunuerr = 1.+h->GetBinError(b)/bgznunu; ++nnuis; }
+  //histname = "CRttz_est"; h = (TH1D*)fznunu->Get(histname);
+  histname = "h_signal_bins_TTZ"; h = (TH1D*)fznunu->Get(histname);
+  bgznunu = h->GetBinContent(bTTZ); ++nbgs;
+  if(bgznunu>0) { bgznunuerr = 1.+h->GetBinError(bTTZ)/bgznunu; ++nnuis; }
   // XXX
   if(nbgs!=4) cout << "Check your background" << endl;
   if(sig<=0 || (bg2l+bg1l+bg1ltop+bgznunu)<=0) {
@@ -310,43 +319,50 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   //get bg2l uncertainties
   double bg2lbsfhf(1.), bg2lbsflf(1.), bg2llepeff(1.), bg2ltoppt(1.), bg2lnjets(1.), bg2lpdf(1.), bg2lalphas(1.), bg2lmurf(1.), bg2ljes(1.), bg2lmet(1.);
   if(!nobkgunc){
-    bg2lbsfhf  = getBGUncertainty(bg2l, "CR2l_Bup_HF",    "CR2l_Bdown_HF",    f2l, bin, true, minbin, maxbin, corrbins); if(bg2lbsfhf !=1.) ++nnuis;
-    bg2lbsflf  = getBGUncertainty(bg2l, "CR2l_Bup_LF",    "CR2l_Bdown_LF",    f2l, bin, true, minbin, maxbin, corrbins); if(bg2lbsflf !=1.) ++nnuis;
-    bg2llepeff = getBGUncertainty(bg2l, "CR2l_LepEffup",  "CR2l_LepEffdown",  f2l, bin, true, minbin, maxbin, corrbins); if(bg2llepeff!=1.) ++nnuis;
-    bg2ltoppt  = getBGUncertainty(bg2l, "CR2l_TopPtup",   "CR2l_TopPtdown",   f2l, bin, true, minbin, maxbin, corrbins); if(bg2ltoppt !=1.) ++nnuis;
-    bg2lnjets  = getBGUncertainty(bg2l, "CR2l_nJetsSFup", "CR2l_nJetsSFdown", f2l, bin, true, minbin, maxbin, corrbins); if(bg2lnjets !=1.) ++nnuis;
-    bg2lpdf    = getBGUncertainty(bg2l, "CR2l_PDFup",     "CR2l_PDFdown",     f2l, bin, true, minbin, maxbin, corrbins); if(bg2lpdf   !=1.) ++nnuis;
-    bg2lalphas = getBGUncertainty(bg2l, "CR2l_Alphasup",  "CR2l_Alphasdown",  f2l, bin, true, minbin, maxbin, corrbins); if(bg2lalphas!=1.) ++nnuis;
-    bg2lmurf   = getBGUncertainty(bg2l, "CR2l_muRFup",    "CR2l_muRFdown",    f2l, bin, true, minbin, maxbin, corrbins); if(bg2lmurf  !=1.) ++nnuis;
-    bg2ljes    = getBGUncertainty(bg2l, "CR2l_JESup",     "CR2l_JESdown",     f2l, bin, true, minbin, maxbin, corrbins); if(bg2ljes   !=1.) ++nnuis;
-    bg2lmet    = getBGUncertainty(bg2l, "CR2l_metResup",  "CR2l_metResdown",  f2l, bin, true, minbin, maxbin, corrbins); if(bg2lmet   !=1.) ++nnuis;
+    bg2lbsfhf  = getBGUncertainty(bg2l, "CR2l_Bup_HF",    "CR2l_Bdown_HF",    f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lbsfhf !=1.) ++nnuis;
+    bg2lbsflf  = getBGUncertainty(bg2l, "CR2l_Bup_LF",    "CR2l_Bdown_LF",    f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lbsflf !=1.) ++nnuis;
+    bg2llepeff = getBGUncertainty(bg2l, "CR2l_LepEffup",  "CR2l_LepEffdown",  f2l, bLL, true, minbin, maxbin, corrbins); if(bg2llepeff!=1.) ++nnuis;
+    bg2ltoppt  = getBGUncertainty(bg2l, "CR2l_TopPtup",   "CR2l_TopPtdown",   f2l, bLL, true, minbin, maxbin, corrbins); if(bg2ltoppt !=1.) ++nnuis;
+    bg2lnjets  = getBGUncertainty(bg2l, "CR2l_nJetsSFup", "CR2l_nJetsSFdown", f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lnjets !=1.) ++nnuis;
+    bg2lpdf    = getBGUncertainty(bg2l, "CR2l_PDFup",     "CR2l_PDFdown",     f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lpdf   !=1.) ++nnuis;
+    bg2lalphas = getBGUncertainty(bg2l, "CR2l_Alphasup",  "CR2l_Alphasdown",  f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lalphas!=1.) ++nnuis;
+    bg2lmurf   = getBGUncertainty(bg2l, "CR2l_muRFup",    "CR2l_muRFdown",    f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lmurf  !=1.) ++nnuis;
+    bg2ljes    = getBGUncertainty(bg2l, "CR2l_JESup",     "CR2l_JESdown",     f2l, bLL, true, minbin, maxbin, corrbins); if(bg2ljes   !=1.) ++nnuis;
+    bg2lmet    = getBGUncertainty(bg2l, "CR2l_metResup",  "CR2l_metResdown",  f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lmet   !=1.) ++nnuis;
   }
   //cout << "Nuis after bg2l " << nnuis << endl;
   //get bg1l uncertainties
   double bg1lmc(1.), bg1lcont(1.), bg1lmet(1.), bg1lbsf(1.);
   if(!nobkgunc){
-    bg1lmc   = getBGError(bg1l, "CR0b_MCstats", f1l, bin); if(bg1lmc   !=1.) ++nnuis;
-    bg1lcont = getBGError(bg1l, "CR0b_Cont",    f1l, bin); if(bg1lcont !=1.) ++nnuis;
-    bg1lmet  = getBGError(bg1l, "CR0b_TFMET",   f1l, bin); if(bg1lmet  !=1.) ++nnuis;
-    bg1lbsf  = getBGError(bg1l, "CR0b_TFBSF",   f1l, bin); if(bg1lbsf  !=1.) ++nnuis;
+    bg1lmc   = getBGError(bg1l, "CR0b_MCstats", f1l, b); if(bg1lmc   !=1.) ++nnuis;
+    bg1lcont = getBGError(bg1l, "CR0b_Cont",    f1l, b); if(bg1lcont !=1.) ++nnuis;
+    bg1lmet  = getBGError(bg1l, "CR0b_TFMET",   f1l, b); if(bg1lmet  !=1.) ++nnuis;
+    bg1lbsf  = getBGError(bg1l, "CR0b_TFBSF",   f1l, b); if(bg1lbsf  !=1.) ++nnuis;
   }
   //cout << "Nuis after bg1l " << nnuis << endl;
   //get bg1ltop uncertainties
   //get bgZnunu uncertainties
-  double bgzpu(1.), bgzleff(1.), bgzjes(1.), bgzbsf(1.), bgztpt(1.), bgzpdf(1.);
+  double bgzpu(1.), bgzleff(1.), bgzjes(1.), bgzbsf(1.), bgztpt(1.), bgzpdf(1.), bgzqsq(1.);
   if(!nobkgunc){
-    bgzpu   = getBGError(bgznunu, "CRttz_PU",   fznunu, bin); if(bgzpu   !=1.) ++nnuis;
-    bgzleff = getBGError(bgznunu, "CRttz_LEff", fznunu, bin); if(bgzleff !=1.) ++nnuis;
-    bgzjes  = getBGError(bgznunu, "CRttz_JES",  fznunu, bin); if(bgzjes  !=1.) ++nnuis;
-    bgzbsf  = getBGError(bgznunu, "CRttz_BSF",  fznunu, bin); if(bgzbsf  !=1.) ++nnuis;
-    bgztpt  = getBGError(bgznunu, "CRttz_QSq",  fznunu, bin); if(bgztpt  !=1.) ++nnuis;
-    bgzpdf  = getBGError(bgznunu, "CRttz_PDF",  fznunu, bin); if(bgzpdf  !=1.) ++nnuis;
+    //bgzpu   = getBGError(bgznunu, "CRttz_PU",   fznunu, bTTZ); if(bgzpu   !=1.) ++nnuis;
+    //bgzleff = getBGError(bgznunu, "CRttz_LEff", fznunu, bTTZ); if(bgzleff !=1.) ++nnuis;
+    //bgzjes  = getBGError(bgznunu, "CRttz_JES",  fznunu, bTTZ); if(bgzjes  !=1.) ++nnuis;
+    //bgzbsf  = getBGError(bgznunu, "CRttz_BSF",  fznunu, bTTZ); if(bgzbsf  !=1.) ++nnuis;
+    //bgztpt  = getBGError(bgznunu, "CRttz_QSq",  fznunu, bTTZ); if(bgztpt  !=1.) ++nnuis;
+    //bgzpdf  = getBGError(bgznunu, "CRttz_PDF",  fznunu, bTTZ); if(bgzpdf  !=1.) ++nnuis;
+    bgzpu   = getBGErrorRel(bgznunu, "h_relUnc_PU",          fznunu, bTTZ); if(bgzpu   !=1.) ++nnuis;
+    bgzleff = getBGErrorRel(bgznunu, "h_relUnc_lepSF",       fznunu, bTTZ); if(bgzleff !=1.) ++nnuis;
+    bgzjes  = getBGErrorRel(bgznunu, "h_relUnc_JES",         fznunu, bTTZ); if(bgzjes  !=1.) ++nnuis;
+    bgzbsf  = getBGErrorRel(bgznunu, "h_relUnc_BTagSF",      fznunu, bTTZ); if(bgzbsf  !=1.) ++nnuis;
+    bgztpt  = getBGErrorRel(bgznunu, "h_relUnc_ttbar_pt",    fznunu, bTTZ); if(bgztpt  !=1.) ++nnuis;
+    bgzpdf  = getBGErrorRel(bgznunu, "h_relUnc_th_PDF_tot",  fznunu, bTTZ); if(bgzpdf  !=1.) ++nnuis;
+    bgzqsq  = getBGErrorRel(bgznunu, "h_relUnc_th_Scale",    fznunu, bTTZ); if(bgzqsq  !=1.) ++nnuis;
   }
   //cout << "Nuis after bgz " << nnuis << endl;
   //now ready to make the data card
   std::ostringstream* fLogStream     = 0;
   fLogStream = new std::ostringstream();
-  string binstring = "b" + std::to_string(bin);
+  string binstring = "b" + std::to_string(b);
   TString signalname = signaltype + "_" + std::to_string(stop) + "_" + std::to_string(lsp);
 
   
@@ -404,12 +420,13 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     if(bg1lbsf  !=1) *fLogStream << " BSFSyst1l" << b <<"       lnN  -  - "<< bg1lbsf  << "  -  -" << endl;
     //bg1ltop
     //bgznunu
-    if(bgzpu   !=1) *fLogStream << " PUSystZ         lnN  -  -  -  - "<< bgzpu   << endl;
-    if(bgzleff !=1) *fLogStream << " LEffSystZ       lnN  -  -  -  - "<< bgzleff << endl;
-    if(bgzjes  !=1) *fLogStream << " JESSystZ        lnN  -  -  -  - "<< bgzjes  << endl;
-    if(bgzbsf  !=1) *fLogStream << " BSFSystZ        lnN  -  -  -  - "<< bgzbsf  << endl;
-    if(bgztpt  !=1) *fLogStream << " QSqSystZ        lnN  -  -  -  - "<< bgztpt  << endl;
-    if(bgzpdf  !=1) *fLogStream << " PDFSystZ        lnN  -  -  -  - "<< bgzpdf  << endl;
+    if(bgzpu   !=1) *fLogStream << " PUSystZ" << b <<"         lnN  -  -  -  - "<< bgzpu   << endl;
+    if(bgzleff !=1) *fLogStream << " LEffSystZ" << b <<"       lnN  -  -  -  - "<< bgzleff << endl;
+    if(bgzjes  !=1) *fLogStream << " JESSystZ" << b <<"        lnN  -  -  -  - "<< bgzjes  << endl;
+    if(bgzbsf  !=1) *fLogStream << " BSFSystZ" << b <<"        lnN  -  -  -  - "<< bgzbsf  << endl;
+    if(bgztpt  !=1) *fLogStream << " TPtSystZ        lnN  -  -  -  - "<< bgztpt  << endl;
+    if(bgzpdf  !=1) *fLogStream << " PDFSystZ" << b <<"        lnN  -  -  -  - "<< bgzpdf  << endl;
+    if(bgzqsq  !=1) *fLogStream << " QsqSystZ" << b <<"        lnN  -  -  -  - "<< bgzqsq  << endl;
   }
   *fLogStream << endl;
 
@@ -535,7 +552,7 @@ double getSignalUncertainty(double origyield, TString upshape, TString downshape
   }
   double upcontent   = h3u->GetBinContent(bin);
   double downcontent = h3l->GetBinContent(bin);
-  if("SR_JESup"==upshape&&origyield!=1) cout << "orig " << origyield << " up " << upcontent << " down " << downcontent << endl;
+  //if("SR_JESup"==upshape&&origyield!=1) cout << "orig " << origyield << " up " << upcontent << " down " << downcontent << endl;
   //h3u->Delete();
   //h3l->Delete();
     double tmp;
@@ -546,6 +563,7 @@ double getSignalUncertainty(double origyield, TString upshape, TString downshape
   return tmp;
 }
 
+//up and down variations given
 double getBGUncertainty(double origyield, TString upshape, TString downshape, TFile *file, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins){
 //double getBGUncertainty(double origyield, TString upshape, TString downshape, TString filename, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins){
   if(origyield <= 0){
@@ -589,6 +607,7 @@ double getBGUncertainty(double origyield, TString upshape, TString downshape, TF
   return tmp;
 }
 
+//absolute error is given
 double getBGError(double origyield, TString errshape, TFile *file, int bin){
   if(origyield <= 0){
     cout << "This uncertainty should not exists, as there is no yield at all - returning 1." << endl;
@@ -604,6 +623,47 @@ double getBGError(double origyield, TString errshape, TFile *file, int bin){
   return err;
 }
 
+//relative error is given
+double getBGErrorRel(double origyield, TString errshape, TFile *file, int bin){
+  if(origyield <= 0){
+    cout << "This uncertainty should not exists, as there is no yield at all - returning 1." << endl;
+    return 1.;
+  }
+  double err=0; 
+  TH1D *h = (TH1D*)file->Get(errshape);
+  err   = 1+h->GetBinContent(bin);
+
+  h->Delete();
+  if(err<0) err = 0.0001;
+  else if (err>2) err = 2;
+  return err;
+}
+
+int GetLLBin(int b){
+  if(b==1) return 8;//2j,MET250
+  if(b==2) return 9;//2j,MET350
+  if(b==3) return 6;//3j,MET250
+  if(b==4) return 7;//3j,MET350
+  if(b==5) return 1;//lDM,MET250
+  if(b==6) return 2;//lDM,MET325
+  if(b==7) return 3;//hDM,MET250
+  if(b==8) return 4;//hDM,MET350
+  if(b==9) return 5;//hDM,MET450
+  cout << "This should not happen return -1" << endl;
+  return -1;
+}
+
+int GetTTZBin(int b){
+  if(b<1) {
+    cout << "This should not happen return -1" << endl;
+    return -1;
+  }
+  if(b>9){
+    cout << "This should not happen return -1" << endl;
+    return -1;
+  }
+  return b+1;//TTZ file has preselection as bin 1
+}
 
 //root [0] RooStats::PValueToSignificance(0.0762011)
 //(Double_t) 1.431098e+00
