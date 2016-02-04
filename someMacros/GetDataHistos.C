@@ -83,7 +83,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/ecalscn1043093_Dec01.txt");
   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/badResolutionTrack_Jan13.txt");
   metFilterTxt.loadBadEventList("/nfs-6/userdata/mt2utils/muonBadTrack_Jan13.txt");
-  
+  //metFilterTxt.loadBadEventList("badResolutionTrack_Jan13.txt");
+  //metFilterTxt.loadBadEventList("muonBadTrack_Jan13.txt");
+    
   // Loop over events to Analyze
   unsigned int nEventsTotal = 0;
   unsigned int nEventsChain = chain->GetEntries();

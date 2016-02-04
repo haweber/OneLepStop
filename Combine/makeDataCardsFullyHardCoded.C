@@ -146,7 +146,8 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     cout << "No 1l file - exit" << endl;
     return;
   }
-  filename = inputdir + "Background_1ltop_dummy.root";
+  //filename = inputdir + "Background_1ltop_dummy.root";
+  filename = inputdir + "TT1lyield2p3fbinv.root";
   ifstream infile1lt(filename.Data());
   if(!(infile1lt.good() ) ) return;
   TFile *f1ltop = new TFile(filename,"READ");
@@ -157,7 +158,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     return;
   }
   //filename = inputdir + "Background_ttz.root";
-  filename = inputdir + "hFile_TTZ_Syst_finalRelUnc_hists_0201_allfixJES_modtopness_nolabel.root";
+  filename = inputdir + "hFile_rare_Syst_correctSum_finalRelUnc_hists_0201_allfixJES_modtopness_with_toppt_reweight.root";
   ifstream infilettz(filename.Data());
   if(!(infilettz.good() ) ) return;
   TFile *fznunu = new TFile(filename,"READ");
@@ -170,7 +171,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   // XXX
   TFile *fdata;
   if(!fakedata) {
-    filename= inputdir + "Data.root";
+    filename= inputdir + "DATAyield2p3fbinv.root";
     ifstream infileData(filename.Data());
     if(!(infileData.good() ) ) return;
     fdata = new TFile(filename,"READ");
@@ -267,11 +268,12 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   //histname = "CR1lstat"; h = (TH1D*)f1l->Get(histname);
   //if(bg1l>0) {bg1lerr = 1.+((h->GetBinContent(b))/bg1l); ++nnuis;}
   if(bg1l>0) {bg1lerr = 1.+((h->GetBinError(b))/bg1l); ++nnuis;}
-  histname = "CR1ltt_est"; h = (TH1D*)f1ltop->Get(histname);
+  histname = "CRtt1l_yield"; h = (TH1D*)f1ltop->Get(histname);
   bg1ltop = h->GetBinContent(b); ++nbgs;
-  if(bg1ltop>0) { bg1ltoperr = 1.+h->GetBinError(b)/bg1ltop; ++nnuis;}
+  //if(bg1ltop>0) { bg1ltoperr = 1.+h->GetBinError(b)/bg1ltop; ++nnuis;}
+  if(bg1ltop>0) { bg1ltoperr = 2.; ++nnuis;}//100%
   //histname = "CRttz_est"; h = (TH1D*)fznunu->Get(histname);
-  histname = "h_signal_bins_TTZ"; h = (TH1D*)fznunu->Get(histname);
+  histname = "h_signal_bins_rare"; h = (TH1D*)fznunu->Get(histname);
   bgznunu = h->GetBinContent(bTTZ); ++nbgs;
   if(bgznunu>0) { bgznunuerr = 1.+h->GetBinError(bTTZ)/bgznunu; ++nnuis; }
   // XXX
@@ -355,7 +357,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     bgzjes  = getBGErrorRel(bgznunu, "h_relUnc_JES",         fznunu, bTTZ); if(bgzjes  !=1.) ++nnuis;
     bgzbsf  = getBGErrorRel(bgznunu, "h_relUnc_BTagSF",      fznunu, bTTZ); if(bgzbsf  !=1.) ++nnuis;
     bgztpt  = getBGErrorRel(bgznunu, "h_relUnc_ttbar_pt",    fznunu, bTTZ); if(bgztpt  !=1.) ++nnuis;
-    bgzpdf  = getBGErrorRel(bgznunu, "h_relUnc_th_PDF_tot",  fznunu, bTTZ); if(bgzpdf  !=1.) ++nnuis;
+    bgzpdf  = getBGErrorRel(bgznunu, "h_relUnc_th_PDF_total",fznunu, bTTZ); if(bgzpdf  !=1.) ++nnuis;
     bgzqsq  = getBGErrorRel(bgznunu, "h_relUnc_th_Scale",    fznunu, bTTZ); if(bgzqsq  !=1.) ++nnuis;
   }
   //cout << "Nuis after bgz " << nnuis << endl;
@@ -420,11 +422,11 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     if(bg1lbsf  !=1) *fLogStream << " BSFSyst1l" << b <<"       lnN  -  - "<< bg1lbsf  << "  -  -" << endl;
     //bg1ltop
     //bgznunu
-    if(bgzpu   !=1) *fLogStream << " PUSystZ" << b <<"         lnN  -  -  -  - "<< bgzpu   << endl;
-    if(bgzleff !=1) *fLogStream << " LEffSystZ" << b <<"       lnN  -  -  -  - "<< bgzleff << endl;
-    if(bgzjes  !=1) *fLogStream << " JESSystZ" << b <<"        lnN  -  -  -  - "<< bgzjes  << endl;
-    if(bgzbsf  !=1) *fLogStream << " BSFSystZ" << b <<"        lnN  -  -  -  - "<< bgzbsf  << endl;
-    if(bgztpt  !=1) *fLogStream << " TPtSystZ        lnN  -  -  -  - "<< bgztpt  << endl;
+    if(bgzpu   !=1) *fLogStream << " PUSystZ         lnN  -  -  -  - "<< bgzpu   << endl;
+    if(bgzleff !=1) *fLogStream << " LEffSystZ       lnN  -  -  -  - "<< bgzleff << endl;
+    if(bgzjes  !=1) *fLogStream << " JESSystZ        lnN  -  -  -  - "<< bgzjes  << endl;
+    if(bgzbsf  !=1) *fLogStream << " BSFSystZ        lnN  -  -  -  - "<< bgzbsf  << endl;
+    if(bgztpt  !=1) *fLogStream << " TPtSystZ" << b <<"        lnN  -  -  -  - "<< bgztpt  << endl;
     if(bgzpdf  !=1) *fLogStream << " PDFSystZ" << b <<"        lnN  -  -  -  - "<< bgzpdf  << endl;
     if(bgzqsq  !=1) *fLogStream << " QsqSystZ" << b <<"        lnN  -  -  -  - "<< bgzqsq  << endl;
   }
