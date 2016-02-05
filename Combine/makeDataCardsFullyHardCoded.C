@@ -319,13 +319,14 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   sigleffveto = 1.03; ++nnuis;
   //cout << "Nuis after sig " << nnuis << endl;
   //get bg2l uncertainties
-  double bg2lbsfhf(1.), bg2lbsflf(1.), bg2llepeff(1.), bg2ltoppt(1.), bg2lnjets(1.), bg2lpdf(1.), bg2lalphas(1.), bg2lmurf(1.), bg2ljes(1.), bg2lmet(1.);
+  double bg2lbsfhf(1.), bg2lbsflf(1.), bg2llepeff(1.), bg2ltoppt(1.), bg2lnjets3(1.), bg2lnjets4(1.), bg2lpdf(1.), bg2lalphas(1.), bg2lmurf(1.), bg2ljes(1.), bg2lmet(1.);
   if(!nobkgunc){
     bg2lbsfhf  = getBGUncertainty(bg2l, "CR2l_Bup_HF",    "CR2l_Bdown_HF",    f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lbsfhf !=1.) ++nnuis;
     bg2lbsflf  = getBGUncertainty(bg2l, "CR2l_Bup_LF",    "CR2l_Bdown_LF",    f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lbsflf !=1.) ++nnuis;
     bg2llepeff = getBGUncertainty(bg2l, "CR2l_LepEffup",  "CR2l_LepEffdown",  f2l, bLL, true, minbin, maxbin, corrbins); if(bg2llepeff!=1.) ++nnuis;
     bg2ltoppt  = getBGUncertainty(bg2l, "CR2l_TopPtup",   "CR2l_TopPtdown",   f2l, bLL, true, minbin, maxbin, corrbins); if(bg2ltoppt !=1.) ++nnuis;
-    bg2lnjets  = getBGUncertainty(bg2l, "CR2l_nJetsSFup", "CR2l_nJetsSFdown", f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lnjets !=1.) ++nnuis;
+    bg2lnjets3 = getBGUncertainty(bg2l, "CR2l_nJetsSFK3up", "CR2l_nJetsSFK3down", f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lnjets3!=1.) ++nnuis;
+    bg2lnjets4 = getBGUncertainty(bg2l, "CR2l_nJetsSFK4up", "CR2l_nJetsSFK4down", f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lnjets4!=1.) ++nnuis;
     bg2lpdf    = getBGUncertainty(bg2l, "CR2l_PDFup",     "CR2l_PDFdown",     f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lpdf   !=1.) ++nnuis;
     bg2lalphas = getBGUncertainty(bg2l, "CR2l_Alphasup",  "CR2l_Alphasdown",  f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lalphas!=1.) ++nnuis;
     bg2lmurf   = getBGUncertainty(bg2l, "CR2l_muRFup",    "CR2l_muRFdown",    f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lmurf  !=1.) ++nnuis;
@@ -409,7 +410,8 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     if(bg2lbsflf !=1) *fLogStream << " BLFSyst2l       lnN  - "<< bg2lbsflf   << " -  -  -" << endl;
     if(bg2llepeff!=1) *fLogStream << " LEffSyst2l      lnN  - "<< bg2llepeff  << " -  -  -" << endl;
     if(bg2ltoppt !=1) *fLogStream << " TopPtSyst2l     lnN  - "<< bg2ltoppt   << " -  -  -" << endl;
-    if(bg2lnjets !=1) *fLogStream << " NJSyst2l        lnN  - "<< bg2lnjets   << " -  -  -" << endl;
+    if(bg2lnjets3!=1) *fLogStream << " NJ3Syst2l       lnN  - "<< bg2lnjets3  << " -  -  -" << endl;
+    if(bg2lnjets4!=1) *fLogStream << " NJ4Syst2l       lnN  - "<< bg2lnjets4  << " -  -  -" << endl;
     if(bg2lpdf   !=1) *fLogStream << " PDFSyst2l       lnN  - "<< bg2lpdf     << " -  -  -" << endl;
     if(bg2lalphas!=1) *fLogStream << " AsSyst2l        lnN  - "<< bg2lalphas  << " -  -  -" << endl;
     if(bg2lmurf  !=1) *fLogStream << " muRFSyst2l      lnN  - "<< bg2lmurf    << " -  -  -" << endl;

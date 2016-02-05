@@ -362,20 +362,24 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
       //CR-1l
       int CR1l = -1;
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()==0&&ngoodjets()>=3&&MT2W()>200){
+      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()==0&&ngoodjets()==2&&topnessMod()>6.4){
+	CR1l = 1;
+      } else if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()==0&&ngoodjets()>=3&&MT2W()>200){
 	if(ngoodjets()==3){
-	  CR1l = 1;
-	} else {
 	  CR1l = 2;
+	} else {
+	  CR1l = 3;
 	}
       }
       //CR1l  1 --> SR  6
       //CR1l  2 --> SR  3-5
-      float CR1l_1_6 = 0.35*0.18;
-      float CR1l_1_7 = 0.35*0.18;
-      float CR1l_2_3 = 0.58*0.16;
-      float CR1l_2_4 = 0.23*0.31;
-      float CR1l_2_5 = 0.19*0.44;
+      float CR1l_1_1 = 0.76*0.07;
+      float CR1l_1_2 = 0.26*0.08;
+      float CR1l_2_3 = 0.68*0.09;
+      float CR1l_2_4 = 0.32*0.19;
+      float CR1l_3_7 = 0.57*0.14;
+      float CR1l_3_8 = 0.24*0.19;
+      float CR1l_3_9 = 0.18*0.27;
 
       //CR2l = -1;
       int lepind = -1;
@@ -385,17 +389,22 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()==2) lepind = 2;//one lepton + 1 add. loose,CR5
       else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()==0&&(!PassTrackVeto_v3()||!PassTauVeto())) lepind = 1;//exactly one lepton, but do not pass track/tau veto - i.e. one additional track or tau, CR6
       int CR2l = -1;
-      if((lepind==4||lepind==3||lepind==1)&&ngoodjets()>=3&&ngoodbtags()>=1){
-	if(MT2W()<=200) CR2l = 1;
-	else CR2l = 2;
+      if((lepind==4||lepind==3||lepind==1)&&ngoodjets()==2&&ngoodbtags()>=1&&topnessMod()>6.4){
+	CR2l = 1;
       }
-      float CR2l_1_1 = 0.61*0.48;
-      float CR2l_1_2 = 0.61*0.19;
-      float CR2l_2_3 = 0.44*0.39;
-      float CR2l_2_4 = 0.44*0.11;
-      float CR2l_2_5 = 0.44*0.07;
-      float CR2l_2_6 = 0.44*0.11;
-      float CR2l_2_7 = 0.44*0.11;
+      if((lepind==4||lepind==3||lepind==1)&&ngoodjets()>=3&&ngoodbtags()>=1){
+	if(MT2W()<=200) CR2l = 2;
+	else CR2l = 3;
+      }
+      float CR2l_1_1 = 0.49*0.88;
+      float CR2l_1_2 = 0.49*0.18;
+      float CR2l_2_5 = 0.70*0.49;
+      float CR2l_2_6 = 0.70*0.19;
+      float CR2l_3_3 = 0.50*0.33;
+      float CR2l_3_4 = 0.50*0.10;
+      float CR2l_3_7 = 0.50*0.38;
+      float CR2l_3_8 = 0.50*0.12;
+      float CR2l_3_9 = 0.50*0.08;
 
       if(SR==(-1)&&CR1l==(-1)&&CR2l==(-1)&&compressedSR==(-1)) continue;
       //implement some sanity checks
@@ -430,26 +439,32 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if(ngoodbtags()>=1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	//signal contamination in 0b control region, do correlations later during datacard making
 	if(CR1l==1){
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR1l_1_6);
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR1l_1_7);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,1,weight*CR1l_1_1);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,2,weight*CR1l_1_2);
 	} else if(CR1l==2){
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,7,weight*CR1l_2_3);
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,8,weight*CR1l_2_4);
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,9,weight*CR1l_2_5);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR1l_2_3);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR1l_2_4);
+	} else if(CR1l==3){
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,7,weight*CR1l_3_7);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,8,weight*CR1l_3_8);
+	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,9,weight*CR1l_3_9);
 	}
       } else if(CR2l>0){
 	if(nvetoleps()<=1||(nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto()))) cout << __LINE__ << " " << nvetoleps() << " " << PassTrackVeto_v3() << " " << PassTauVeto() << endl;
 	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	//signal contamination in 2l control region, do correlations later during datacard making
 	if(CR2l==1){
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,5,weight*CR2l_1_1);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,6,weight*CR2l_1_2);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,1,weight*CR2l_1_1);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,2,weight*CR2l_1_2);
 	} else if(CR2l==2){
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,7,weight*CR2l_2_3);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,8,weight*CR2l_2_4);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,9,weight*CR2l_2_5);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR2l_2_6);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR2l_2_7);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,5,weight*CR2l_2_5);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,6,weight*CR2l_2_6);
+	} else if(CR2l==3){
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,7,weight*CR2l_3_7);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,8,weight*CR2l_3_8);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,9,weight*CR2l_3_9);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR2l_3_3);
+	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR2l_3_4);
 
 	}
       } else if(SR>0){
