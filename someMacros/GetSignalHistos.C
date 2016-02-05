@@ -383,12 +383,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
       //CR2l = -1;
       int lepind = -1;
-      if(ngoodleps()>2&&NSLeps==2) lepind = 5;
-      else if(ngoodleps()==2&&NSLeps==2) lepind = 4;//exactly two leptons,CR4
-      //else if(ngoodleps()==1&&NSLeps==1&&NAddVetoLeps>=1) lepind = 3;//one lepton, but more than 1 add. loose,1l,>2l
-      else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()>1) lepind = 3;//one lepton, but more than 1 add. loose,1l,>2l
-      else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()==2) lepind = 2;//one lepton + 1 add. loose,CR5
-      else if(ngoodleps()==1&&NSLeps==1&&nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto())) lepind = 1;//exactly one lepton, but do not pass track/tau veto - i.e. one additional track or tau, CR6
+      if(ngoodleps()>2) lepind = 5;
+      else if(ngoodleps()==2) lepind = 4;//exactly two leptons,CR4
+      else if(ngoodleps()==1&&nvetoleps()==2&&lep2_pt()>=10) lepind = 3;//one lepton, but more than 1 add. loose,1l,>2l
+      else if(ngoodleps()==1&&nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto())) lepind = 1;//exactly one lepton, but do not pass track/tau veto - i.e. one additional track or tau, CR6
       int CR2l = -1;
       if((lepind==4||lepind==3||lepind==1)&&ngoodjets()==2&&ngoodbtags()>=1&&topnessMod()>6.4){
 	CR2l = 1;
