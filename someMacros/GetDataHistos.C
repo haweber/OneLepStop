@@ -16,7 +16,8 @@
 #include "TLorentzVector.h"
 
 // CMS3
-#include "CMS3_Data.cc"
+//#include "CMS3_Data.cc"
+#include "CMS3_dataFU.cc"
 
 #include "/home/users/haweber/CORE/Tools/goodrun.h"
 #include "/home/users/haweber/CORE/Tools/goodrun.cc"
@@ -40,6 +41,7 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
 
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
+  int count = 0; int badcount = 0;
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
@@ -55,6 +57,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   vector<float> hup;  hup.clear();
 
   histonames.push_back("Data");       hbins.push_back(9); hlow.push_back(  0.); hup.push_back(9.5);
+  histonames.push_back("Data_el");       hbins.push_back(9); hlow.push_back(  0.); hup.push_back(9.5);
+  histonames.push_back("Data_mu");       hbins.push_back(9); hlow.push_back(  0.); hup.push_back(9.5);
 
 
   for(unsigned int i = 0; i<histonames.size(); ++i){
@@ -120,8 +124,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
       bool triggered = false;
       if(HLT_MET170()>0) triggered = true;
-      if(HLT_SingleEl23()>0) triggered = true;
-      if(HLT_SingleMu20()>0) triggered = true;
+      if(lep1_is_el() && HLT_SingleEl23()>0) triggered = true;
+      if(lep1_is_mu() && HLT_SingleMu20()>0) triggered = true;
       if(!triggered) continue;//trigger requirement
 
       if( is_data() && !goodrun(run(), ls()) ) continue;
@@ -156,6 +160,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       filt_badevents = !(metFilterTxt.eventFails(run(), ls(), evt()));
       bool filter_badevents = false;
       if(!filt_badevents)     filter_badevents = true;
+      /*
       if(!filt_cscbeamhalo()) filter_badevents = true;
       if(!filt_eebadsc())     filter_badevents = true;
       if(!filt_goodvtx())     filter_badevents = true;
@@ -168,6 +173,32 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(!filt_trkPOG_tmc())  filter_badevents = true;
       if(!filt_trkPOG_tms())  filter_badevents = true;
       if(!filt_hbhenoise())   filter_badevents = true;
+      */
+      if(!filt_hbhenoise())   filter_badevents = true;
+      if(!filt_cscbeamhalo()) filter_badevents = true;
+      if(!filt_goodvtx())     filter_badevents = true;
+      if(!filt_eebadsc())     filter_badevents = true;
+
+      /*
+      if((run()==260431&&ls()==72&&evt()==123209001)||(run()==258712&&ls()==484&&evt()==758826409)||(run()==260538&&ls()==196&&evt()==330855682)){
+	cout << run() << ":" << ls() << ":" << evt() << " " << "filt_badevents " << filt_badevents << " filt_cscbeamhalo " << filt_cscbeamhalo() << " filt_eebadsc " << filt_eebadsc() << " filt_goodvtx " << filt_goodvtx() << " filt_goodvtx " << filt_goodvtx() << " filt_hbhenoise " << filt_hbhenoise() << endl;
+	cout << "NJ " << ngoodjets() << " NB " << ngoodbtags() << " NLeps " << ngoodleps() << " nveto " << nvetoleps() << " track " << PassTrackVeto_v3() << " tau " << PassTauVeto() << " MT " << mt_met_lep() << " MET " << pfmet() << " MDPhi " << mindphi_met_j1_j2() << " MT2W " << MT2W() << " tmod " << topnessMod() << endl;
+	for(int i = 0; i<ngoodjets(); ++i){
+	  cout << "Pt " << ak4pfjets_pt()[i] << " Eta " << ak4pfjets_eta()[i] << " Phi " << ak4pfjets_phi()[i] << " M " << ak4pfjets_mass()[i] << endl;
+	}
+      }
+      */
+      if((run()==259685&&ls()==408&&evt()==724276930)||(run()==259686&&ls()==104&&evt()==193933611)||(run()==260576&&ls()==328&&evt()==675758481)){
+	cout << run() << ":" << ls() << ":" << evt() << " " << "filt_badevents " << filt_badevents << " filt_cscbeamhalo " << filt_cscbeamhalo() << " filt_eebadsc " << filt_eebadsc() << " filt_goodvtx " << filt_goodvtx() << " filt_goodvtx " << filt_goodvtx() << " filt_hbhenoise " << filt_hbhenoise() << endl;
+	cout << "NJ " << ngoodjets() << " NB " << ngoodbtags() << " NLeps " << ngoodleps() << " nveto " << nvetoleps() << " track " << PassTrackVeto_v3() << " tau " << PassTauVeto() << " MT " << mt_met_lep() << " MET " << pfmet() << " MDPhi " << mindphi_met_j1_j2() << " MT2W " << MT2W() << " tmod " << topnessMod() << endl;
+	for(int i = 0; i<ngoodjets(); ++i){
+	  cout << "Pt " << ak4pfjets_pt()[i] << " Eta " << ak4pfjets_eta()[i] << " Phi " << ak4pfjets_phi()[i] << " M " << ak4pfjets_mass()[i] << endl;
+	}
+	cout << "triggered MET " << HLT_MET170() << " el " << HLT_SingleEl23() << " mu " << HLT_SingleMu20() << endl;
+      }
+
+
+
       //cout << "filt_badevents " << filt_badevents << " filt_cscbeamhalo " << filt_cscbeamhalo() << " filt_eebadsc " << filt_eebadsc() << " filt_goodvtx " << filt_goodvtx() << " filt_goodvtx " << filt_goodvtx() << " filt_ecallaser " << filt_ecallaser() << " filt_ecaltp " << filt_ecaltp() << " filt_hcallaser " << filt_hcallaser() << " filt_met " << filt_met() << " filt_trkfail " << filt_trkfail() << " filt_trkPOG_tmc " << filt_trkPOG_tmc() << " filt_trkPOG_tms " << filt_trkPOG_tms() << " filt_hbhenoise " << filt_hbhenoise() << endl;
 
       if(filter_badevents) continue;
@@ -202,7 +233,13 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       }
 
       if(SR>=0){
+	if(filt_hbheisonoise()) { cout <<"good event " << run() << ":" << ls() << ":" << evt() << endl; ++count;}
+	if(!filt_hbheisonoise()){ cout << "this event is additionally filtered: ";
+	  cout << run() << ":" << ls() << ":" << evt() << " SR " << SR << " is " << (lep1_is_mu() ? "mu" : "el") << endl; ++badcount;
+	continue;}
 	histos["Data"]->Fill(SR,1);
+	if(lep1_is_mu()) histos["Data_mu"]->Fill(SR,1);
+	if(lep1_is_el()) histos["Data_el"]->Fill(SR,1);
       }
 
     }//event loop
@@ -216,12 +253,13 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     cout << Form( "ERROR: number of events from files (%d) is not equal to total number of events (%d)", nEventsChain, nEventsTotal ) << endl;
   }
   
-  string filename = "rootfiles/DATAyield2p3fbinv.root";
+  string filename = "rootfiles/DATAyield_2p3fbinv_.root";
   TFile *f = new TFile(filename.c_str(),"RECREATE");
   f->cd();
   for(map<string,TH1D*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
   f->Close();
   cout << "Saved histos in " << f->GetName() << endl;
+  cout << count << " " << badcount << endl;
 
   // return
   bmark->Stop("benchmark");

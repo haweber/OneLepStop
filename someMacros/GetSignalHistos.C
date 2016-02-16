@@ -449,7 +449,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,9,weight*CR1l_3_9);
 	}
       } else if(CR2l>0){
-	if(nvetoleps()<=1||(nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto()))) cout << __LINE__ << " " << nvetoleps() << " " << PassTrackVeto_v3() << " " << PassTauVeto() << endl;
+	//if(nvetoleps()<=1||(nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto()))) cout << __LINE__ << " " << nvetoleps() << " " << PassTrackVeto_v3() << " " << PassTauVeto() << endl;
 	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
 	//signal contamination in 2l control region, do correlations later during datacard making
 	if(CR2l==1){

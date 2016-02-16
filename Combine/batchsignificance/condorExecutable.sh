@@ -11,13 +11,14 @@ echo ""
 
 # This stuff to drive the the limit macro
 #only input I need to define is
-postfit=$1
+posteriori=$1
+observed=$2
 
 #This stuff to get output back
-export COPYDIR=$2
-export CONDOR_DIR_NAME=$3
-export DATACARDS_TAR=$4
-export MAKER_NAME=$5
+export COPYDIR=$3
+export CONDOR_DIR_NAME=$4
+export DATACARDS_TAR=$5
+export MAKER_NAME=$6
 
 
 # Setup Environment
@@ -99,12 +100,12 @@ echo "    TIME = $RIGHT_NOW "
 echo "*************************************"
 echo ""
 
-methodcmd="--noFitAsimov"
-methodname="PreFit"
-if [ "${postfit}" = true ]
+methodcmd=""
+methodname="Priori"
+if [ "${posteriori}" = true ]
 then
-    methodcmd=" "
-    methodname="PostFit"
+    methodcmd="--toysFreq"
+    methodname="Posteriori"
 fi
 
 #get all datacards
@@ -119,11 +120,11 @@ for f in *; do
     #echo "mytest $mytest"
     if [ $mytest == "0" ]
     then
-        echo "passed $f"
+        #echo "passed $f"
         NameArray=("${NameArray[@]}" "${f}")
     fi
 done
-#echo "${NameArray[@]}"
+echo "${NameArray[@]}"
 
 #run over all datacards
 for Name in "${NameArray[@]}"
@@ -132,13 +133,23 @@ do
     stripone=`echo "datacard_"`
     #echo $stripone
     Signal=`echo ${filenamenoext#${stripone}}`
-    echo "get limit for $Signal"
+    #echo "get limit for $Signal"
     #computes automatically observed and expected limit together
-    combine  -M Asymptotic ${Name} ${methodcmd} -n ${methodname}${Signal}
+    if [ "${observed}" = true ]
+    then
+	echo "runing combine  -M ProfileLikelihood --significance ${Name} -n Obs${Signal} > /dev/null 2>&1"
+	combine  -M ProfileLikelihood --significance ${Name} -n Obs${Signal} > /dev/null 2>&1
+	ls
+	mv higgsCombineObs${Signal}.ProfileLikelihood.mH120.root Signif_ProfileLikelihood_Obs_${Signal}.root
+	ls
+    else
+	echo "runing  combine  -M ProfileLikelihood --significance ${Name} -n Exp${methodname}${Signal} -t -1 --expectSignal=1 ${methodcmd} > /dev/null 2>&1"
+	combine  -M ProfileLikelihood --significance ${Name} -n Exp${methodname}${Signal} -t -1 --expectSignal=1 ${methodcmd} > /dev/null 2>&1
+	ls
+	mv higgsCombineExp${methodname}${Signal}.ProfileLikelihood.mH120.root Signif_ProfileLikelihood_Exp${methodname}_${Signal}.root
+	ls
+    fi
     #> /dev/null 2>&1
-    ls
-    mv higgsCombine${methodname}${Signal}.Asymptotic.mH120.root Limits_Asymptotic_${methodname}_${Signal}.root
-    ls
 done
 
 

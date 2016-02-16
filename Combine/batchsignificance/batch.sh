@@ -12,7 +12,8 @@ MSTOP=-9
 MLSP=-9
 MCharg=-9
 xval=-1
-postfit=false
+posteriori=true
+observed=false
 #xsecup 1 xsecdown -1
 xsecupdown=0
 #SR=2 - compressed SR
@@ -159,14 +160,15 @@ do
     fi
 
     cp condorFileTemplate condorFile
-    sed -i "s,ARG1,$postfit,g" condorFile
-    sed -i "s,ARG2,$COPYDIR,g" condorFile
-    sed -i "s,ARG3,$CONDOR_DIR_NAME,g" condorFile
-    sed -i "s,ARG4,$DATACARDS_TAR,g" condorFile
-    sed -i "s,ARG5,$MAKER_NAME,g" condorFile
-    sed -i "s,ARG6,$TYPE_MASS,g" condorFile
-    sed -i "s,ARG7,$SCRATCH_DIR,g" condorFile
-    sed -i "s,ARG8,$USER_EMAIL,g" condorFile
+    sed -i "s,ARG1,$posteriori,g" condorFile
+    sed -i "s,ARG2,$observed,g" condorFile
+    sed -i "s,ARG3,$COPYDIR,g" condorFile
+    sed -i "s,ARG4,$CONDOR_DIR_NAME,g" condorFile
+    sed -i "s,ARG5,$DATACARDS_TAR,g" condorFile
+    sed -i "s,ARG6,$MAKER_NAME,g" condorFile
+    sed -i "s,ARG7,$TYPE_MASS,g" condorFile
+    sed -i "s,ARG8,$SCRATCH_DIR,g" condorFile
+    sed -i "s,ARG9,$USER_EMAIL,g" condorFile
     sed -i "s,USER_PROXY,$pathToProxy,g" condorFile
     sed -i "s,TARFILE1,$tar_file,g" condorFile
     sed -i "s,TARFILE2,$DATACARDS_TAR,g" condorFile

@@ -39,21 +39,26 @@ using namespace std;
 TString inputdir = "/hadoop/cms/store/user/haweber/condor/limits/";
 TString outputdir = "rootfiles/";
 
-void DropDiagonalGraph(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont);
+void DropDiagonalGraph(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont, bool correlated);
 TH2F* CopyHisto(TH2F *hold);
 TGraph* DropDiagonal(TGraph *g);
 
-void DropDiagonalGraph(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont){
+void DropDiagonalGraph(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont, bool correlated){
 
   TString myoutputdir = outputdir;
+  if(correlated) myoutputdir = myoutputdir + "correlated/";
   if(compressed==1) myoutputdir = myoutputdir + "compressed/";
   if(nosigunc&&nobkgunc) myoutputdir = myoutputdir + "nounc/";
   else if(nosigunc) myoutputdir = myoutputdir + "nosigunc/";
   else if(nobkgunc) myoutputdir = myoutputdir + "nobkgunc/";
   if(dropsigcont) myoutputdir = myoutputdir + "dropsigcont/";
   if(fakedata)   myoutputdir = myoutputdir + "fakedata/";
-  TString infilename = myoutputdir + "Limits2DHistograms.root";
-  TString outfilename = myoutputdir + "Limits2DHistogramsRemovedDiagonal.root";
+  TString infilename = myoutputdir + "Limits2DHistograms_"+signaltype+"_postfit.root";
+  TString outfilename = myoutputdir + "Limits2DHistograms_"+signaltype+"_postfit_RemovedDiagonal.root";
+  if(prefit){
+    infilename = myoutputdir + "Limits2DHistograms_"+signaltype+"_prefit.root";
+    outfilename = myoutputdir + "Limits2DHistograms_"+signaltype+"_prefit_RemovedDiagonal.root";
+  }
   
   ifstream infile(infilename.Data());
   if(!(infile.good() ) ) {

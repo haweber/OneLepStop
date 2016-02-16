@@ -6,12 +6,11 @@ MAKER_NAME=CMSSW_7_1_5/src/HiggsAnalysis/CombinedLimit/
 
 #COPYDIR=/hadoop/cms/store/user/haweber/condor/limits/dropsigcont/fakedata/
 #COPYDIR=/hadoop/cms/store/user/haweber/condor/limits/fakedata/
-COPYDIR=/hadoop/cms/store/user/haweber/condor/limits/
-#COPYDIR=/hadoop/cms/store/user/haweber/condor/limits/dropsigcont/
-#COPYDIR=/hadoop/cms/store/user/haweber/condor/limits/correlated/
-#COPYDIR=/hadoop/cms/store/user/haweber/condor/limits/correlated/dropsigcont/
+COPYDIR=/hadoop/cms/store/user/haweber/condor/significances/
+#COPYDIR=/hadoop/cms/store/user/haweber/condor/significances/correlated/
 
-SCRATCH_DIR=/data/tmp/haweber/limits/
+SCRATCH_DIR=/data/tmp/haweber/significances/
+#SCRATCH_DIR=/data/tmp/haweber/significances/correlated/
 
 CONDOR_DIR_NAME=HiggsCombine_CMSSW_7_1_5
 
@@ -21,9 +20,7 @@ USER_EMAIL=haweber@fnal.gov
 #DATACARD_DIR=../datacards2p3fbinv/dropsigcont/fakedata/combinedcards/
 #DATACARD_DIR=../datacards2p3fbinv/fakedata/combinedcards/
 DATACARD_DIR=../datacards2p3fbinv/combinedcards/
-#DATACARD_DIR=../datacards2p3fbinv/dropsigcont/combinedcards/
 #DATACARD_DIR=../datacards2p3fbinv/correlated/combinedcards/
-#DATACARD_DIR=../datacards2p3fbinv/correlated/dropsigcont/combinedcards/
 
 #
 # Input Sanitation

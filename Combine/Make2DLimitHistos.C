@@ -39,7 +39,7 @@ using namespace std;
 TString inputdir = "/hadoop/cms/store/user/haweber/condor/limits/";
 TString outputdir = "rootfiles/";
 
-void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont);
+void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont, bool correlated);
 TH2F* InterpolateThisHistogram(TH2F *hold);
 TGraph2D* GetInterpolatingGraph(TH2F *hold);
 TH2F* PassThisHistogram(TH2F *hold);
@@ -58,7 +58,7 @@ inline TString MakeOutputDir(TString dir){
 }
 
 
-void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont){
+void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont, bool correlated){
 
   TH1D *hxsec;
   TFile *fxsec = new TFile("xsec_stop_13TeV.root","READ");
@@ -78,6 +78,7 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   int nbinsy = (mLSPHigh - mLSPLow)/mLSPStep;
   
   TString myoutputdir = outputdir;
+  if(correlated) myoutputdir = myoutputdir + "correlated/";
   if(compressed==1) myoutputdir = myoutputdir + "compressed/";
   if(nosigunc&&nobkgunc) myoutputdir = myoutputdir + "nounc/";
   else if(nosigunc) myoutputdir = myoutputdir + "nosigunc/";
@@ -87,6 +88,7 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   cout << "make directory " << myoutputdir << endl;
   MakeOutputDir(myoutputdir);
   TString myinputdir = inputdir;
+  if(correlated) myinputdir = myinputdir + "correlated/";
   if(compressed==1) myinputdir = myinputdir + "compressed/";
   if(nosigunc&&nobkgunc) myinputdir = myinputdir + "nounc/";
   else if(nosigunc) myinputdir = myinputdir + "nosigunc/";
@@ -95,7 +97,8 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   if(fakedata)   myinputdir = myinputdir + "fakedata/";
   cout << "inputs from " << myinputdir << endl;
 
-  TString outfilename = myoutputdir + "Limits2DHistograms.root";
+  TString outfilename = myoutputdir + "Limits2DHistograms_"+signaltype+"_prefit.root";
+  if(!prefit) outfilename = myoutputdir + "Limits2DHistograms_"+signaltype+"_postfit.root";
   TFile *file = new TFile(outfilename, "recreate");
   file->cd();
   TH2F *hExpOrg   = new TH2F("hExpOrg",   "hExp"  , nbinsx, mStopLow, mStopHigh, nbinsy, mLSPLow, mLSPHigh);
@@ -153,6 +156,7 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
     for(int lsp = mLSPLow; lsp<=mLSPHigh; lsp += mLSPStep){
       TString limitfilebase = "Limits_Asymptotic_";
       if(prefit) limitfilebase = limitfilebase + "PreFit_";
+      if(!prefit) limitfilebase = limitfilebase + "PostFit_";
       TString signalname = signaltype + "_" + std::to_string(stop) + "_" + std::to_string(lsp);
       TString limitfile = myinputdir + limitfilebase + signalname + ".root";
       //cout << limitfile << endl;
@@ -223,7 +227,14 @@ void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosi
   hObs   = (TH2F*)InterpolateThisHistogram(hObsOrg);
   hObs1m = (TH2F*)InterpolateThisHistogram(hObs1mOrg);
   hObs1p = (TH2F*)InterpolateThisHistogram(hObs1pOrg);
-
+  for(unsigned int bx = hObsOrg->GetXaxis()->FindBin(125); bx<=hObsOrg->GetXaxis()->FindBin(250); ++bx){
+    if(hObsOrg->GetBinContent(bx,1)>1) hObsOrg->SetBinContent(bx,1,0.99);
+    if(hExpOrg->GetBinContent(bx,1)>1) hExpOrg->SetBinContent(bx,1,0.99);
+    if(hExp1mOrg->GetBinContent(bx,1)>1) hExp1mOrg->SetBinContent(bx,1,0.99);
+    if(hExp1pOrg->GetBinContent(bx,1)>1) hExp1pOrg->SetBinContent(bx,1,0.99);
+    if(hObs1mOrg->GetBinContent(bx,1)>1) hObs1mOrg->SetBinContent(bx,1,0.99);
+    if(hObs1pOrg->GetBinContent(bx,1)>1) hObs1pOrg->SetBinContent(bx,1,0.99);
+  }
   TGraph2D *g2Exp   = (TGraph2D*)GetInterpolatingGraph(hExpOrg);
   TGraph2D *g2Exp2m = (TGraph2D*)GetInterpolatingGraph(hExp2mOrg);
   TGraph2D *g2Exp1m = (TGraph2D*)GetInterpolatingGraph(hExp1mOrg);
