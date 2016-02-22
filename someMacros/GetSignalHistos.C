@@ -373,6 +373,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       }
       //CR1l  1 --> SR  6
       //CR1l  2 --> SR  3-5
+      float CR1l_1_1 = 0.743*0.072;
+      float CR1l_1_2 = 0.258*0.078;
+      float CR1l_2_3 = 0.69*0.0901;
+      float CR1l_2_4 = 0.312*0.191;
+      float CR1l_3_7 = 0.58*0.13;
+      float CR1l_3_8 = 0.241*0.186;
+      float CR1l_3_9 = 0.177*0.253;
+      /*
       float CR1l_1_1 = 0.76*0.07;
       float CR1l_1_2 = 0.26*0.08;
       float CR1l_2_3 = 0.68*0.09;
@@ -380,12 +388,13 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float CR1l_3_7 = 0.57*0.14;
       float CR1l_3_8 = 0.24*0.19;
       float CR1l_3_9 = 0.18*0.27;
+      */
 
       //CR2l = -1;
       int lepind = -1;
       if(ngoodleps()>2) lepind = 5;
       else if(ngoodleps()==2) lepind = 4;//exactly two leptons,CR4
-      else if(ngoodleps()==1&&nvetoleps()==2&&lep2_pt()>=10) lepind = 3;//one lepton, but more than 1 add. loose,1l,>2l
+      else if(ngoodleps()==1&&nvetoleps()>=2&&lep2_pt()>=10) lepind = 3;//one lepton, but more than 1 add. loose,1l,>2l
       else if(ngoodleps()==1&&nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto())) lepind = 1;//exactly one lepton, but do not pass track/tau veto - i.e. one additional track or tau, CR6
       int CR2l = -1;
       if((lepind==4||lepind==3||lepind==1)&&ngoodjets()==2&&ngoodbtags()>=1&&topnessMod()>6.4){
