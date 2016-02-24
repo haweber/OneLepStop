@@ -33,6 +33,8 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
 
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
+  int T2tb_BRselection = -1;
+  
   //load PUweights
   TFile *fPU = new TFile("puWeights.root","READ");
   TH1D *puWeight     = (TH1D*)fPU->Get("puWeight");
@@ -322,6 +324,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       weight *= (lepSF*lepSF_FS);
 
       
+      
       if(nvtxs()<0)               continue;
       if(ngoodleps()<1)           continue;//accomodate 2l-CR
       if(nvetoleps()<1)           continue;//accomodate 2l-CR
@@ -415,6 +418,30 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float CR2l_3_9 = 0.50*0.08;
 
       if(SR==(-1)&&CR1l==(-1)&&CR2l==(-1)&&compressedSR==(-1)) continue;
+
+      // T2tb_BRselection = -1;
+      if(T2tb_BRselection>0){
+	int tLSP = 0;
+	int bCharg = 0;
+	for(unsigned int i = 0; i<gensusy_id().size(); ++i){
+	  if(abs(gensusy_id())!=1000022) continue;
+	  if(gensusy_status()!=1) continue;
+	  if(abs(gensusy_motherid())==1000024) ++bCharg;
+	  if(abs(gensusy_motherid())==1000006) ++tLSP;
+	}
+	if((tLSP+bCharg)!=2) cout << "This should not happen, have " << tLSP << " stop decays to tLSP, and " << bCharg << " stop decays to bChargino" << endl;
+	if(T2tb_BRselection==1){
+	  if(tLSP!=2) continue;
+	}
+	if(T2tb_BRselection==2){
+	  if(tLSP!=1) continue;
+	  if(bCharg!=1) continue;
+	}
+	if(T2tb_BRselection==3){
+	  if(bCharg!=2) continue;
+	}
+      }
+      
       //implement some sanity checks
       if(CR1l!=(-1)&&CR2l!=(-1)) cout << "WTF CR1l " << CR1l << " CR2l " << CR2l << endl;
       if(SR!=(-1)&&CR1l!=(-1)) cout << "WTF SR " << SR << " CR1l " << CR1l << endl;
@@ -561,12 +588,18 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   }
   */
   string filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+".root";
+  if(T2tb_BRselection==1) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_tLSP.root";
+  if(T2tb_BRselection==2) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_mixed.root";
+  if(T2tb_BRselection==3) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_bCharg.root";
   TFile *f = new TFile(filename.c_str(),"RECREATE");
   f->cd();
   for(map<string,TH3D*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
   f->Close();
   cout << "Saved histos in " << f->GetName() << endl;
   string filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+".root";
+  if(T2tb_BRselection==1) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_tLSP.root";
+  if(T2tb_BRselection==2) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_mixed.root";
+  if(T2tb_BRselection==3) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_bCharg.root";
   TFile *f2 = new TFile(filename2.c_str(),"RECREATE");
   f2->cd();
   for(map<string,TH3D*>::iterator h=    histos2.begin(); h!=    histos2.end();++h) h->second->Write();

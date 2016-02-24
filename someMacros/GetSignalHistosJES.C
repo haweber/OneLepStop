@@ -33,6 +33,8 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
 
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
+  int T2tb_BRselection = -1;
+  
   int jes = 0;
   TString jestester = skimFilePrefix;
   if(jestester.Contains("JESup")){
@@ -310,6 +312,29 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(mindphi_met_j1_j2()<0.8) continue;
 
 
+      // T2tb_BRselection = -1;
+      if(T2tb_BRselection>0){
+	int tLSP = 0;
+	int bCharg = 0;
+	for(unsigned int i = 0; i<gensusy_id().size(); ++i){
+	  if(abs(gensusy_id())!=1000022) continue;
+	  if(gensusy_status()!=1) continue;
+	  if(abs(gensusy_motherid())==1000024) ++bCharg;
+	  if(abs(gensusy_motherid())==1000006) ++tLSP;
+	}
+	if((tLSP+bCharg)!=2) cout << "This should not happen, have " << tLSP << " stop decays to tLSP, and " << bCharg << " stop decays to bChargino" << endl;
+	if(T2tb_BRselection==1){
+	  if(tLSP!=2) continue;
+	}
+	if(T2tb_BRselection==2){
+	  if(tLSP!=1) continue;
+	  if(bCharg!=1) continue;
+	}
+	if(T2tb_BRselection==3){
+	  if(bCharg!=2) continue;
+	}
+      }
+      
       int SR = -1;
       int compressedSR = -1;
       if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()>=1) { //basis for SR 1l, >=1b
@@ -380,6 +405,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   }
   */
   string filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+".root";
+  if(T2tb_BRselection==1) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_tLSP.root";
+  if(T2tb_BRselection==2) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_mixed.root";
+  if(T2tb_BRselection==3) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_bCharg.root";
   TFile *f = new TFile(filename.c_str(),"RECREATE");
   f->cd();
   for(map<string,TH3D*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
