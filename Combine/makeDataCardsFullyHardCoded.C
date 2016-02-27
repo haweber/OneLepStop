@@ -54,7 +54,7 @@ inline TString MakeOutputDir(TString dir){
 void makeDataCardsFullyHardCodedOneBin(int bin=0, TString signaltype="T2tt", int stop=100, int lsp=0, int charg=-1, float xval=-1, bool fakedata=false, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false, bool correlated=false);
 void makeDataCardsFullyHardCodedAllBins(TString signaltype="T2tt", int stop=100, int lsp=0, int charg=-1, float xval=-1, bool fakedata=false, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false, bool correlated=false);
 void makeDataCardsFullyHardCodedOneScan(TString signaltype="T2tt", bool fakedata=false, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false, bool correlated=false);
-void makeDataCardsFullyHardCodedAllScans(bool fakedata, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false, bool correlated=false);
+void makeDataCardsFullyHardCodedAllScans(int v, bool fakedata, bool nosyst=false, int xsecupdown=-1, int compressed=0, bool dropsigcont=false, bool correlated=false);
 
 double getSignalUncertainty(double origyield, TString upshape, TString downshape, TFile *file, int bx, int by, int bz, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins);
 double getBGUncertainty(double origyield, TString upshape, TString downshape, TFile *file, int bin, bool correlated, int minbin, int maxbin, vector<int> corrbins);
@@ -65,17 +65,30 @@ double getBGErrorRel(double origyield, TString errshape, TFile *file, int bin);
 int GetLLBin(int b);
 int GetTTZBin(int b);
 
-void makeDataCardsFullyHardCodedAllScans(bool fakedata, bool nosyst, int xsecupdown, int compressed, bool dropsigcont, bool correlated){
+void makeDataCardsFullyHardCodedAllScans(int v, bool fakedata, bool nosyst, int xsecupdown, int compressed, bool dropsigcont, bool correlated){
+  if(v==1){
   makeDataCardsFullyHardCodedOneScan("T2tt",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  makeDataCardsFullyHardCodedOneScan("T2tt_lefthanded",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  makeDataCardsFullyHardCodedOneScan("T2tt_righthanded",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  makeDataCardsFullyHardCodedOneScan("T2bW",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  }
+  else if(v==2){
   makeDataCardsFullyHardCodedOneScan("T2tb",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2bW_x0p75",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2bW_x0p25",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-
+  makeDataCardsFullyHardCodedOneScan("T2tb_50_50",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  makeDataCardsFullyHardCodedOneScan("T2tb_0_100",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  makeDataCardsFullyHardCodedOneScan("T2tb_100_0",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  }
+  else if(v==3){
+  makeDataCardsFullyHardCodedOneScan("T2tb_75_25",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  makeDataCardsFullyHardCodedOneScan("T2tb_25_75",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  makeDataCardsFullyHardCodedOneScan("T2tb_67_33",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  makeDataCardsFullyHardCodedOneScan("T2tb_33_67",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+  }
 }
 
 void makeDataCardsFullyHardCodedOneScan(TString signaltype, bool fakedata, bool nosyst, int xsecupdown, int compressed, bool dropsigcont, bool correlated){
   float chargLow = -1;
-  for(int t = 0; t<=1000; t+=25){
+  for(int t = 100; t<=1000; t+=25){
     for(int l = 0; l<=450; l+=25){
       if(l>t) continue;
       int stop = t;
@@ -114,7 +127,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   // cout << __LINE__ << endl;
   int nbgs = 0;
   int nnuis = 0;
-  TString filename = inputdir + "Histos_Signal_" + signaltype + "_All.root";
+  TString filename = inputdir + "Histos_Signal_" + signaltype + "_all.root";
   ifstream infileSig(filename.Data());
   // cout << __LINE__ << endl;
   if(!(infileSig.good() ) ) return;
@@ -345,17 +358,31 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   //get bg2l uncertainties
   double bg2lbsfhf(1.), bg2lbsflf(1.), bg2llepeff(1.), bg2ltoppt(1.), bg2lnjets3(1.), bg2lnjets4(1.), bg2lpdf(1.), bg2lalphas(1.), bg2lmurf(1.), bg2ljes(1.), bg2lmet(1.);
   if(!nobkgunc){
+    //cout << __LINE__ << endl;
     bg2lbsfhf  = getBGUncertainty(bg2l, "CR2l_Bup_HF",    "CR2l_Bdown_HF",    f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lbsfhf !=1.) ++nnuis;
+    //cout << __LINE__ << endl;
     bg2lbsflf  = getBGUncertainty(bg2l, "CR2l_Bup_LF",    "CR2l_Bdown_LF",    f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lbsflf !=1.) ++nnuis;
+    //cout << __LINE__ << endl;
     bg2llepeff = getBGUncertainty(bg2l, "CR2l_LepEffup",  "CR2l_LepEffdown",  f2l, bLL, true, minbin, maxbin, corrbins); if(bg2llepeff!=1.) ++nnuis;
-    bg2ltoppt  = getBGUncertainty(bg2l, "CR2l_TopPtup",   "CR2l_TopPtdown",   f2l, bLL, true, minbin, maxbin, corrbins); if(bg2ltoppt !=1.) ++nnuis;
+    //cout << __LINE__ << endl;
+    //bg2ltoppt  = getBGUncertainty(bg2l, "CR2l_TopPtup",   "CR2l_TopPtdown",   f2l, bLL, true, minbin, maxbin, corrbins); if(bg2ltoppt !=1.) ++nnuis;
+    //cout << __LINE__ << endl;
+    bg2ltoppt  = getBGUncertainty(bg2l, "CR2l_diNuSFup",   "CR2l_diNuSFdown",   f2l, bLL, true, minbin, maxbin, corrbins); if(bg2ltoppt !=1.) ++nnuis;
+    //cout << __LINE__ << endl;
     bg2lnjets3 = getBGUncertainty(bg2l, "CR2l_nJetsSFK3up", "CR2l_nJetsSFK3down", f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lnjets3!=1.) ++nnuis;
+    //cout << __LINE__ << endl;
     bg2lnjets4 = getBGUncertainty(bg2l, "CR2l_nJetsSFK4up", "CR2l_nJetsSFK4down", f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lnjets4!=1.) ++nnuis;
+    //cout << __LINE__ << endl;
     bg2lpdf    = getBGUncertainty(bg2l, "CR2l_PDFup",     "CR2l_PDFdown",     f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lpdf   !=1.) ++nnuis;
+    //cout << __LINE__ << endl;
     bg2lalphas = getBGUncertainty(bg2l, "CR2l_Alphasup",  "CR2l_Alphasdown",  f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lalphas!=1.) ++nnuis;
+    //cout << __LINE__ << endl;
     bg2lmurf   = getBGUncertainty(bg2l, "CR2l_muRFup",    "CR2l_muRFdown",    f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lmurf  !=1.) ++nnuis;
+    //cout << __LINE__ << endl;
     bg2ljes    = getBGUncertainty(bg2l, "CR2l_JESup",     "CR2l_JESdown",     f2l, bLL, true, minbin, maxbin, corrbins); if(bg2ljes   !=1.) ++nnuis;
-    bg2lmet    = getBGUncertainty(bg2l, "CR2l_metResup",  "CR2l_metResdown",  f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lmet   !=1.) ++nnuis;
+    //cout << __LINE__ << endl;
+    bg2lmet    = getBGUncertainty(bg2l, "CR2l_metRESup",  "CR2l_metRESdown",  f2l, bLL, true, minbin, maxbin, corrbins); if(bg2lmet   !=1.) ++nnuis;
+    //cout << __LINE__ << endl;
   }
   //cout << "Nuis after bg2l " << nnuis << endl;
   //get bg1l uncertainties
@@ -420,7 +447,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   string binstring = "b" + std::to_string(b);
   TString signalname = signaltype + "_" + std::to_string(stop) + "_" + std::to_string(lsp);
 
-  
+  double lc = 1.026;//change in luminosity from last pixel calibration
   *fLogStream << "# My significance experiment" << endl
 	      << "imax  " << 1     << "  number of channels" << endl//single bin
 	      << "jmax  " << nbgs  << "  number of backgrounds" << endl
@@ -434,7 +461,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
   *fLogStream << "bin          " << b << "       " << b << "       " << b << "       " << b << "       " << b << "       " << endl;
   *fLogStream << "process     sig       2l       1l       1ltop       znunu" << endl;
   *fLogStream << "process      0     1    2    3       4" << endl;
-  *fLogStream << "rate        " << sig << "  " << bg2l << "  " << bg1l << "  " << bg1ltop << "  " << bgznunu << endl;
+  *fLogStream << "rate        " << sig*lc << "  " << bg2l << "  " << bg1l << "  " << bg1ltop*lc << "  " << bgznunu*lc << endl;
   *fLogStream << "------------" << endl;
   //next ALL control region statistical uncertainties
   int bWst = b;

@@ -34,6 +34,7 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
   int T2tb_BRselection = -1;//1: T2tt, 2: mixed, 3: T2bW, -1: default
+  int LR = +1;//-1: left-handed, +1: right-handed
   
   //load PUweights
   TFile *fPU = new TFile("puWeights.root","READ");
@@ -151,6 +152,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   histonames2.push_back("nevtsum");
   histonames2.push_back("lepsum");
   histonames2.push_back("lepSFsum");
+  histonames2.push_back("WLsum");
+  histonames2.push_back("WRsum");
   
   for(unsigned int i = 0; i<histonames.size(); ++i){
     string mapname = histonames[i];
@@ -441,6 +444,61 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  if(bCharg!=2) continue;
 	}
       }
+
+      double weight_pol_L = 1.0;
+      double weight_pol_R = 1.0;
+      if(mStop-mLSP>=175){
+	LorentzVector tl1, tl2;
+	//LorentzVector tW1, tW2;
+	LorentzVector tt1, tt2;
+	LorentzVector tst1, tst2;
+	for(unsigned int i = 0; i<gensusy_id().size(); ++i){
+	  if(gensusy_status()[i]!=1) continue;
+	  if(abs(gensusy_id()[i])==1000006) tst1 = gensusy_p4()[i];
+	  if(abs(gensusy_id()[i])==(-1000006)) tst2 = gensusy_p4()[i];
+	}
+	for(unsigned int i = 0; i<genleps_id().size(); ++i){
+	  if(genleps_status()[i] != 23 && genleps_status()[i] != 22 && genleps_status()[i] != 1) continue;
+	  if(abs(genleps_motherid()[i])!=24) continue;
+	  if(abs(genleps_gmotherid()[i])==6) { tt1 = genleps_gmotherp4()[i]; tl1 = genleps_p4()[i]; }
+	  if(abs(genleps_gmotherid()[i])==-6) { tt2 = genleps_gmotherp4()[i]; tl2 = genleps_p4()[i]; }
+	}
+      	for(unsigned int i = 0; i<genqs_id().size(); ++i){
+	  if(genqs_status()[i] != 23 && genqs_status()[i] != 22 && genqs_status()[i] != 1) continue;
+	  if(abs(genqs_motherid()[i])!=24) continue;
+	  if(abs(genqs_gmotherid()[i])==6) { tt1 = genqs_gmotherp4()[i]; tl1 = genqs_p4()[i]; }
+	  if(abs(genqs_gmotherid()[i])==-6) { tt2 = genqs_gmotherp4()[i]; tl2 = genqs_p4()[i]; }
+	}
+
+	TLorentzVector st1; st1.SetPxPyPzE(tst1.Px(),tst1.Py(),tst1.Pz(),tst1.E());
+	TLorentzVector st2; st2.SetPxPyPzE(tst2.Px(),tst2.Py(),tst2.Pz(),tst2.E());
+	TVector3 bV1(-st1.Px()/st1.Energy(),-st1.Py()/st1.Energy(),-st1.Pz()/st1.Energy());
+	TVector3 bV2(-st2.Px()/st2.Energy(),-st2.Py()/st2.Energy(),-st2.Pz()/st2.Energy());
+	TLorentzVector t1; t1.SetPxPyPzE(tt1.Px(),tt1.Py(),tt1.Pz(),tt1.E());
+	TLorentzVector t2; t2.SetPxPyPzE(tt2.Px(),tt2.Py(),tt2.Pz(),tt2.E());
+	TLorentzVector l1; l1.SetPxPyPzE(tl1.Px(),tl1.Py(),tl1.Pz(),tl1.E());
+	TLorentzVector l2; l2.SetPxPyPzE(tl2.Px(),tl2.Py(),tl2.Pz(),tl2.E());
+	t1.Boost(bV1);
+	t2.Boost(bV2);
+	l1.Boost(bV1);
+	l2.Boost(bV2);
+	if(t1.P()>0&&l1.P()>0){
+	  double costh = (t1.Px()*l1.Px()+t1.Py()*l1.Py()+t1.Pz()*l1.Pz())/t1.P()/l1.P();
+	  double weight_L = (t1.Energy()+t1.P())*(1-costh);
+	  double weight_R = (t1.Energy()-t1.P())*(1+costh);
+	  weight_pol_L *= 2*weight_L/(weight_R+weight_L);
+	  weight_pol_R *= 2*weight_R/(weight_R+weight_L);
+	}
+	if(t2.P()>0&&l2.P()>0){
+	  double costh = (t2.Px()*l2.Px()+t2.Py()*l2.Py()+t2.Pz()*l2.Pz())/t2.P()/l2.P();
+	  double weight_L = (t2.Energy()+t2.P())*(2-costh);
+	  double weight_R = (t2.Energy()-t2.P())*(2+costh);
+	  weight_pol_L *= 2*weight_L/(weight_R+weight_L);
+	  weight_pol_R *= 2*weight_R/(weight_R+weight_L);
+	}
+      }
+      if(LR==-1) weight *= weight_pol_L;
+      if(LR==+1) weight *= weight_pol_R;
       
       //implement some sanity checks
       if(CR1l!=(-1)&&CR2l!=(-1)) cout << "WTF CR1l " << CR1l << " CR2l " << CR2l << endl;
@@ -521,6 +579,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	histos2["nevtsum"]->Fill(mStop,mLSP,SR,nevts);
 	histos2["lepsum"]->Fill(mStop,mLSP,SR,lepSF);
 	histos2["lepSFsum"]->Fill(mStop,mLSP,SR,lepSF_FS);
+	histos2["WLsum"]->Fill(mStop,mLSP,SR,weight_pol_L);
+	histos2["WRsum"]->Fill(mStop,mLSP,SR,weight_pol_R);
 	
 	//finally - do signal regions!
 	histos["SRyield"]->Fill(mStop,mLSP,SR,weight);
@@ -591,6 +651,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   if(T2tb_BRselection==1) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_tLSP.root";
   if(T2tb_BRselection==2) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_mixed.root";
   if(T2tb_BRselection==3) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_bCharg.root";
+  if(LR==-1) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_lefthanded.root";
+  if(LR==+1) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_righthanded.root";
   TFile *f = new TFile(filename.c_str(),"RECREATE");
   f->cd();
   for(map<string,TH3D*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
@@ -600,6 +662,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   if(T2tb_BRselection==1) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_tLSP.root";
   if(T2tb_BRselection==2) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_mixed.root";
   if(T2tb_BRselection==3) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_bCharg.root";
+  if(LR==-1) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_lefthanded.root";
+  if(LR==+1) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_righthanded.root";
   TFile *f2 = new TFile(filename2.c_str(),"RECREATE");
   f2->cd();
   for(map<string,TH3D*>::iterator h=    histos2.begin(); h!=    histos2.end();++h) h->second->Write();

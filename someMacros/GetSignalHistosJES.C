@@ -33,7 +33,7 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
 
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
-  int T2tb_BRselection = -1;
+  int T2tb_BRselection = -1;//1: T2tt, 2: mixed, 3: T2bW, -1: default
   
   int jes = 0;
   TString jestester = skimFilePrefix;
@@ -160,13 +160,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);
     }
 
-  
-  
   // Loop over events to Analyze
   unsigned int nEventsTotal = 0;
   unsigned int nEventsChain = chain->GetEntries();
   if( nEvents >= 0 ) nEventsChain = nEvents;
   TObjArray *listOfFiles = chain->GetListOfFiles();
+  
   TIter fileIter(listOfFiles);
   TFile *currentFile = 0;
 
@@ -209,12 +208,11 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     if(fast) TTreeCache::SetLearnEntries(10);
     if(fast) tree->SetCacheSize(128*1024*1024);
     cms3.Init(tree);
-    
+ 
     // Loop over Events in current file
     if( nEventsTotal >= nEventsChain ) continue;
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
- 
       // Get Event Content
       if( nEventsTotal >= nEventsChain ) continue;
       if(fast) tree->LoadTree(event);
@@ -317,10 +315,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	int tLSP = 0;
 	int bCharg = 0;
 	for(unsigned int i = 0; i<gensusy_id().size(); ++i){
-	  if(abs(gensusy_id())!=1000022) continue;
-	  if(gensusy_status()!=1) continue;
-	  if(abs(gensusy_motherid())==1000024) ++bCharg;
-	  if(abs(gensusy_motherid())==1000006) ++tLSP;
+	  if(abs(gensusy_id()[i])!=1000022) continue;
+	  if(gensusy_status()[i]!=1) continue;
+	  if(abs(gensusy_motherid()[i])==1000024) ++bCharg;
+	  if(abs(gensusy_motherid()[i])==1000006) ++tLSP;
 	}
 	if((tLSP+bCharg)!=2) cout << "This should not happen, have " << tLSP << " stop decays to tLSP, and " << bCharg << " stop decays to bChargino" << endl;
 	if(T2tb_BRselection==1){

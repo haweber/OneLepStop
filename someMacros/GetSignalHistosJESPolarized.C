@@ -34,7 +34,21 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
   int T2tb_BRselection = -1;//1: T2tt, 2: mixed, 3: T2bW, -1: default
-  
+  int LR = -1;//-1: left-handed, +1: right-handed
+
+  int jes = 0;
+  TString jestester = skimFilePrefix;
+  if(jestester.Contains("JESup")){
+    jes = 1;
+    cout << "This is a JES up systematic from filename " << endl;
+  } else if(jestester.Contains("JESdown")){
+    jes = -1;
+    cout << "This is a JES down systematic from filename " << endl;
+  } else {
+    cout << "You did not provide a JES specific sample - quit." << endl;
+    cout << jestester << endl;
+    return 0;
+  }
   //load PUweights
   TFile *fPU = new TFile("puWeights.root","READ");
   TH1D *puWeight     = (TH1D*)fPU->Get("puWeight");
@@ -43,7 +57,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
   TFile *fxsec = new TFile("xsec_stop_13TeV.root","READ");
   TH1D *hxsec     = (TH1D*)fxsec->Get("stop");
-
+  
   TFile *f_el_SF       = new TFile("lepsf/kinematicBinSFele.root", "read");
   TFile *f_mu_SF_id    = new TFile("lepsf/TnP_MuonID_NUM_MediumID_DENOM_generalTracks_VAR_map_pt_eta.root", "read");
   TFile *f_mu_SF_iso   = new TFile("lepsf/TnP_MuonID_NUM_MiniIsoTight_DENOM_LooseID_VAR_map_pt_eta.root");
@@ -110,8 +124,6 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
   map<string, TH3D*> histos;//use D histos as weights can vary a lot among the signal
   vector<string> histonames; histonames.clear();
-  map<string, TH3D*> histos2;//use D histos as weights can vary a lot among the signal
-  vector<string> histonames2; histonames2.clear();
   //  vector<int> hbins; hbins.clear();
   //  vector<float> hlow; hlow.clear();
   //  vector<float> hup; hup.clear();
@@ -140,37 +152,21 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   histonames.push_back("SR_Xsecdown");
   histonames.push_back("CR1l_sigcontamination");//scaled to signalreg yield
   histonames.push_back("CR2l_sigcontamination");//scaled to signalreg yield
-  
-  histonames2.push_back("eventsum");
-  histonames2.push_back("rawweightsum");
-  histonames2.push_back("totweightsum");
-  histonames2.push_back("ISRsum");
-  histonames2.push_back("BSFsum");
-  histonames2.push_back("PUweightsum");
-  histonames2.push_back("xsecsum");
-  histonames2.push_back("nevtsum");
-  histonames2.push_back("lepsum");
-  histonames2.push_back("lepSFsum");
-  
+
+
   for(unsigned int i = 0; i<histonames.size(); ++i){
     string mapname = histonames[i];
     if(histos.count(mapname) == 0 ) histos[mapname] = new TH3D(mapname.c_str(), "", 37,99,1024, 19,-1,474, 9, 0.5,9.5);
     //mStop 100-1000, mLSP 0-450, SR 1-12, 9200 bins, SR 0 is non-SR - in case it it needed!!
       histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);
     }
-  for(unsigned int i = 0; i<histonames2.size(); ++i){
-    string mapname = histonames2[i];
-    if(histos2.count(mapname) == 0 ) histos2[mapname] = new TH3D(mapname.c_str(), "", 37,99,1024, 19,-1,474, 9, 0.5,9.5);
-    //mStop 100-1000, mLSP 0-450, SR 1-12, 9200 bins, SR 0 is non-SR - in case it it needed!!
-      histos2[mapname]->Sumw2(); histos2[mapname]->SetDirectory(rootdir);
-    }
-  
-  
+
   // Loop over events to Analyze
   unsigned int nEventsTotal = 0;
   unsigned int nEventsChain = chain->GetEntries();
   if( nEvents >= 0 ) nEventsChain = nEvents;
   TObjArray *listOfFiles = chain->GetListOfFiles();
+  
   TIter fileIter(listOfFiles);
   TFile *currentFile = 0;
 
@@ -213,12 +209,11 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     if(fast) TTreeCache::SetLearnEntries(10);
     if(fast) tree->SetCacheSize(128*1024*1024);
     cms3.Init(tree);
-    
+ 
     // Loop over Events in current file
     if( nEventsTotal >= nEventsChain ) continue;
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
- 
       // Get Event Content
       if( nEventsTotal >= nEventsChain ) continue;
       if(fast) tree->LoadTree(event);
@@ -238,43 +233,27 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       double nevts = double(Nevts);
       //float weight = cms3.scale1fb()*2.11;
       double PUweight     = puWeight    ->GetBinContent(puWeight    ->FindBin(pu_ntrue() ) );
-      double PUweightUp   = puWeightUp  ->GetBinContent(puWeightUp  ->FindBin(pu_ntrue() ) );
-      double PUweightDown = puWeightDown->GetBinContent(puWeightDown->FindBin(pu_ntrue() ) );
-      PUweightUp = 1; PUweightDown = PUweight; PUweight = 1; //now PU syst is applying vs not applying
-     double ISRnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,19));
-      double ISRnormup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,20));
-      double ISRnormdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,21));
+      //PUweightUp = 1; PUweightDown = PUweight; PUweight = 1; //now PU syst is applying vs not applying
+      PUweight = 1;
+      double ISRnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,19));
       double ISRweight = weight_ISR();
       double BSFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,14));
-      double BSFnormHup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,15));
-      double BSFnormLup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,16));
-      double BSFnormHdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,17));
-      double BSFnormLdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,18));
       double BSFweight = weight_btagsf();
-      double muRFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,1));
-      double muRFnormup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,5));
-      double muRFnormdown = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,9));
       if(ISRnorm>0) ISRweight*=nevts/ISRnorm;
-      if(ISRnorm<=0||ISRnormup<=0||ISRnormdown<=0){ ISRnormdown=1.; ISRnormup=1.; ISRnorm=1.;}
+      if(ISRnorm<=0){ ISRnorm=1.;}
       if(ISRweight!=weight_ISR()) cout << "ISRw " << ISRweight << " wISR " << weight_ISR() << " nevts " << nevts << " ISRn " << ISRnorm << endl;
       if(BSFnorm>0) BSFweight *=nevts/BSFnorm;
-      if(BSFnorm<=0||BSFnormHup<=0||BSFnormLup<=0||BSFnormHdown<=0||BSFnormLdown<=0){
-	BSFnorm=1; BSFnormHup=1; BSFnormLup=1; BSFnormHdown=1; BSFnormLdown=1;
-      }
-      if(muRFnorm<=0||muRFnormup<=0||muRFnormdown<=0){ muRFnormdown=1; muRFnormup=1; muRFnorm=1; }
+      if(BSFnorm<=0){ BSFnorm=1; }
       //lepSF is done below
       double xsection = hxsec->GetBinContent(hxsec->FindBin(mStop));
       double xsectionerr = hxsec->GetBinError(hxsec->FindBin(mStop));
-      //double rawweight = xsec()*2260./nevts;
       //double weight = xsec()*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
-      double rawweight = xsection*2260./nevts;
       double weight = xsection*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
       //did put ISRweight which should be ==1
       if(ISRweight!=1) cout << "ISRw " << ISRweight << endl;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
 
       int NSLeps = 0;
-      int NAddVetoLeps = 0;
       if(lep1_is_mu()){
 	if(lep1_pt()>20&&fabs(lep1_eta())<2.4) {++NSLeps;}
       } else if (lep1_is_el()){
@@ -283,11 +262,6 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if(lep2_pt()>20&&fabs(lep2_eta())<2.4) {++NSLeps;}
       } else if (lep2_is_el()){
 	if(lep2_pt()>20&&fabs(lep2_eta())<1.4442) {++NSLeps; }
-      }
-      if(lep2_is_mu()){
-	if(lep2_pt()>10&&fabs(lep2_eta())<2.4) {++NAddVetoLeps;}
-      } else if (lep2_is_el()){
-	if(lep2_pt()>10&&fabs(lep2_eta())<2.4) {++NAddVetoLeps; }
       }
       if(NSLeps<1) continue;//temp
       float lepSF_pt_cutoff = 100.0;
@@ -324,100 +298,18 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       weight *= (lepSF*lepSF_FS);
 
       
-      
       if(nvtxs()<0)               continue;
-      if(ngoodleps()<1)           continue;//accomodate 2l-CR
-      if(nvetoleps()<1)           continue;//accomodate 2l-CR
-    //if(!PassTrackVeto_v3())     continue;//accomodate 2l-CR
-    //if(!PassTauVeto())          continue;//accomodate 2l-CR
+      if(ngoodleps()!=1)          continue;
+      //if(NSLeps()!=1)             continue;
+      if(nvetoleps()!=1)          continue;
+      if(!PassTrackVeto_v3())     continue;
+      if(!PassTauVeto())          continue;
       if(ngoodjets()<2)           continue;
-      if(ngoodbtags()<0)          continue;//accomodate 1l-CR
+      if(ngoodbtags()<1)          continue;
       if(pfmet()<250)             continue;
       if(mt_met_lep()<150)        continue;
       if(mindphi_met_j1_j2()<0.8) continue;
 
-
-      int SR = -1;
-      int compressedSR = -1;
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()>=1) { //basis for SR 1l, >=1b
-	if(ngoodjets()>=4){
-	  if(MT2W()<=200){
-	    if(pfmet()>325) SR = 6;
-	    else SR = 5;
-	  } else { //high MT2W
-	    if(pfmet()>450) SR = 9;
-	    else if(pfmet()>350) SR = 8;
-	    else SR = 7;
-	  }
-	} else if(ngoodjets()==3 && MT2W()>200) {
-	  if(pfmet()>350) SR = 4;
-	  else SR = 3;
-	} else if(ngoodjets()==2 && topnessMod()>6.4) {
-	  if(pfmet()>350) SR = 2;
-	  else SR = 1;
-	}
-	//compressed region (jets are sorted by pt
-	//if(ngoodjets()>=5&&ak4pfjets_passMEDbtag()[0]==false&&ak4pfjets_pt()[0]>200.){
-	//  if(MT2W()<=200) compressedSR = 11;
-	//  else compressedSR = 12;
-	//}
-      }
-
-      //CR-1l
-      int CR1l = -1;
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()==0&&ngoodjets()==2&&topnessMod()>6.4){
-	CR1l = 1;
-      } else if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()==0&&ngoodjets()>=3&&MT2W()>200){
-	if(ngoodjets()==3){
-	  CR1l = 2;
-	} else {
-	  CR1l = 3;
-	}
-      }
-      //CR1l  1 --> SR  6
-      //CR1l  2 --> SR  3-5
-      float CR1l_1_1 = 0.743*0.072;
-      float CR1l_1_2 = 0.258*0.078;
-      float CR1l_2_3 = 0.69*0.0901;
-      float CR1l_2_4 = 0.312*0.191;
-      float CR1l_3_7 = 0.58*0.13;
-      float CR1l_3_8 = 0.241*0.186;
-      float CR1l_3_9 = 0.177*0.253;
-      /*
-      float CR1l_1_1 = 0.76*0.07;
-      float CR1l_1_2 = 0.26*0.08;
-      float CR1l_2_3 = 0.68*0.09;
-      float CR1l_2_4 = 0.32*0.19;
-      float CR1l_3_7 = 0.57*0.14;
-      float CR1l_3_8 = 0.24*0.19;
-      float CR1l_3_9 = 0.18*0.27;
-      */
-
-      //CR2l = -1;
-      int lepind = -1;
-      if(ngoodleps()>2) lepind = 5;
-      else if(ngoodleps()==2) lepind = 4;//exactly two leptons,CR4
-      else if(ngoodleps()==1&&nvetoleps()>=2&&lep2_pt()>=10) lepind = 3;//one lepton, but more than 1 add. loose,1l,>2l
-      else if(ngoodleps()==1&&nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto())) lepind = 1;//exactly one lepton, but do not pass track/tau veto - i.e. one additional track or tau, CR6
-      int CR2l = -1;
-      if((lepind==4||lepind==3||lepind==1)&&ngoodjets()==2&&ngoodbtags()>=1&&topnessMod()>6.4){
-	CR2l = 1;
-      }
-      if((lepind==4||lepind==3||lepind==1)&&ngoodjets()>=3&&ngoodbtags()>=1){
-	if(MT2W()<=200) CR2l = 2;
-	else CR2l = 3;
-      }
-      float CR2l_1_1 = 0.49*0.88;
-      float CR2l_1_2 = 0.49*0.18;
-      float CR2l_2_5 = 0.70*0.49;
-      float CR2l_2_6 = 0.70*0.19;
-      float CR2l_3_3 = 0.50*0.33;
-      float CR2l_3_4 = 0.50*0.10;
-      float CR2l_3_7 = 0.50*0.38;
-      float CR2l_3_8 = 0.50*0.12;
-      float CR2l_3_9 = 0.50*0.08;
-
-      if(SR==(-1)&&CR1l==(-1)&&CR2l==(-1)&&compressedSR==(-1)) continue;
 
       // T2tb_BRselection = -1;
       if(T2tb_BRselection>0){
@@ -441,68 +333,90 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  if(bCharg!=2) continue;
 	}
       }
+
+      double weight_pol_L = 1.0;
+      double weight_pol_R = 1.0;
+      if(mStop-mLSP>=175){
+	LorentzVector tl1, tl2;
+	//LorentzVector tW1, tW2;
+	LorentzVector tt1, tt2;
+	LorentzVector tst1, tst2;
+	for(unsigned int i = 0; i<gensusy_id().size(); ++i){
+	  if(gensusy_status()[i]!=1) continue;
+	  if(abs(gensusy_id()[i])==1000006) tst1 = gensusy_p4()[i];
+	  if(abs(gensusy_id()[i])==(-1000006)) tst2 = gensusy_p4()[i];
+	}
+	for(unsigned int i = 0; i<genleps_id().size(); ++i){
+	  if(genleps_status()[i] != 23 && genleps_status()[i] != 22 && genleps_status()[i] != 1) continue;
+	  if(abs(genleps_motherid()[i])!=24) continue;
+	  if(abs(genleps_gmotherid()[i])==6) { tt1 = genleps_gmotherp4()[i]; tl1 = genleps_p4()[i]; }
+	  if(abs(genleps_gmotherid()[i])==-6) { tt2 = genleps_gmotherp4()[i]; tl2 = genleps_p4()[i]; }
+	}
+      	for(unsigned int i = 0; i<genqs_id().size(); ++i){
+	  if(genqs_status()[i] != 23 && genqs_status()[i] != 22 && genqs_status()[i] != 1) continue;
+	  if(abs(genqs_motherid()[i])!=24) continue;
+	  if(abs(genqs_gmotherid()[i])==6) { tt1 = genqs_gmotherp4()[i]; tl1 = genqs_p4()[i]; }
+	  if(abs(genqs_gmotherid()[i])==-6) { tt2 = genqs_gmotherp4()[i]; tl2 = genqs_p4()[i]; }
+	}
+
+	TLorentzVector st1; st1.SetPxPyPzE(tst1.Px(),tst1.Py(),tst1.Pz(),tst1.E());
+	TLorentzVector st2; st2.SetPxPyPzE(tst2.Px(),tst2.Py(),tst2.Pz(),tst2.E());
+	TVector3 bV1(-st1.Px()/st1.Energy(),-st1.Py()/st1.Energy(),-st1.Pz()/st1.Energy());
+	TVector3 bV2(-st2.Px()/st2.Energy(),-st2.Py()/st2.Energy(),-st2.Pz()/st2.Energy());
+	TLorentzVector t1; t1.SetPxPyPzE(tt1.Px(),tt1.Py(),tt1.Pz(),tt1.E());
+	TLorentzVector t2; t2.SetPxPyPzE(tt2.Px(),tt2.Py(),tt2.Pz(),tt2.E());
+	TLorentzVector l1; l1.SetPxPyPzE(tl1.Px(),tl1.Py(),tl1.Pz(),tl1.E());
+	TLorentzVector l2; l2.SetPxPyPzE(tl2.Px(),tl2.Py(),tl2.Pz(),tl2.E());
+	t1.Boost(bV1);
+	t2.Boost(bV2);
+	l1.Boost(bV1);
+	l2.Boost(bV2);
+	if(t1.P()>0&&l1.P()>0){
+	  double costh = (t1.Px()*l1.Px()+t1.Py()*l1.Py()+t1.Pz()*l1.Pz())/t1.P()/l1.P();
+	  double weight_L = (t1.Energy()+t1.P())*(1-costh);
+	  double weight_R = (t1.Energy()-t1.P())*(1+costh);
+	  weight_pol_L *= 2*weight_L/(weight_R+weight_L);
+	  weight_pol_R *= 2*weight_R/(weight_R+weight_L);
+	}
+	if(t2.P()>0&&l2.P()>0){
+	  double costh = (t2.Px()*l2.Px()+t2.Py()*l2.Py()+t2.Pz()*l2.Pz())/t2.P()/l2.P();
+	  double weight_L = (t2.Energy()+t2.P())*(2-costh);
+	  double weight_R = (t2.Energy()-t2.P())*(2+costh);
+	  weight_pol_L *= 2*weight_L/(weight_R+weight_L);
+	  weight_pol_R *= 2*weight_R/(weight_R+weight_L);
+	}
+      }
+      if(LR==-1) weight *= weight_pol_L;
+      if(LR==+1) weight *= weight_pol_R;
+   
       
-      //implement some sanity checks
-      if(CR1l!=(-1)&&CR2l!=(-1)) cout << "WTF CR1l " << CR1l << " CR2l " << CR2l << endl;
-      if(SR!=(-1)&&CR1l!=(-1)) cout << "WTF SR " << SR << " CR1l " << CR1l << endl;
-      if(SR!=(-1)&&CR2l!=(-1)) cout << "WTF SR " << SR << " CR2l " << CR2l << endl;
-
-      //ISR reweighting, get stop pair using last copy:
-      double ISRup = weight_ISRup()/weight_ISR()*ISRnorm/ISRnormup;
-      double ISRdown = weight_ISRdown()/weight_ISR()*ISRnorm/ISRnormdown;
-      //double XSup = (xsec()+xsec_uncert())/xsec();
-      //double XSdown = (xsec()-xsec_uncert())/xsec();
-      double XSup = (xsection+xsectionerr)/xsection;
-      double XSdown = (xsection-xsectionerr)/xsection;
-      double PUup = PUweightUp/PUweight;
-      double PUdown = PUweightDown/PUweight;
-      double lEffup = lepSF_Up/lepSF;
-      double lEffdown = lepSF_Dn/lepSF;
-      double lEffFSup = lepSF_FS_Up/lepSF_FS;
-      double lEffFSdown = lepSF_FS_Dn/lepSF_FS;
-      double BSFHup = weight_btagsf_heavy_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
-      double BSFLup = weight_btagsf_light_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
-      double BSFHdown = weight_btagsf_heavy_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
-      double BSFLdown = weight_btagsf_light_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
-      double muRFup = genweights().at(4)/genweights().at(0)*muRFnorm/muRFnormup;
-      double muRFdown = genweights().at(8)/genweights().at(0)*muRFnorm/muRFnormdown;
-
-      if(CR1l>0){
-	if(ngoodleps()!=1) cout << __LINE__ << " " << ngoodleps() << endl;
-	if(NSLeps!=1) cout << __LINE__ << " " << NSLeps << endl;
-	if(nvetoleps()!=1) cout << __LINE__ << " " << nvetoleps() << endl;
-	if(ngoodbtags()>=1) cout << __LINE__ << " " << ngoodbtags() << endl;
-	//signal contamination in 0b control region, do correlations later during datacard making
-	if(CR1l==1){
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,1,weight*CR1l_1_1);
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,2,weight*CR1l_1_2);
-	} else if(CR1l==2){
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR1l_2_3);
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR1l_2_4);
-	} else if(CR1l==3){
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,7,weight*CR1l_3_7);
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,8,weight*CR1l_3_8);
-	  histos["CR1l_sigcontamination"]->Fill(mStop,mLSP,9,weight*CR1l_3_9);
+      int SR = -1;
+      int compressedSR = -1;
+      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto_v3()&&PassTauVeto()&&ngoodbtags()>=1) { //basis for SR 1l, >=1b
+	if(ngoodjets()>=4){
+	  if(MT2W()<=200){
+	    if(pfmet()>325) SR = 6;
+	    else SR = 5;
+	  } else { //high MT2W
+	    if(pfmet()>450) SR = 9;
+	    else if(pfmet()>350) SR = 8;
+	    else SR = 7;
+	  }
+	} else if(ngoodjets()==3 && MT2W()>200) {
+	  if(pfmet()>350) SR = 4;
+	  else SR = 3;
+	} else if(ngoodjets()==2 && topnessMod()>6.4) { //2 or 3 jets
+	  if(pfmet()>350) SR = 2;
+	  else SR = 1;
 	}
-      } else if(CR2l>0){
-	//if(nvetoleps()<=1||(nvetoleps()==1&&(!PassTrackVeto_v3()||!PassTauVeto()))) cout << __LINE__ << " " << nvetoleps() << " " << PassTrackVeto_v3() << " " << PassTauVeto() << endl;
-	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
-	//signal contamination in 2l control region, do correlations later during datacard making
-	if(CR2l==1){
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,1,weight*CR2l_1_1);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,2,weight*CR2l_1_2);
-	} else if(CR2l==2){
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,5,weight*CR2l_2_5);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,6,weight*CR2l_2_6);
-	} else if(CR2l==3){
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,7,weight*CR2l_3_7);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,8,weight*CR2l_3_8);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,9,weight*CR2l_3_9);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,3,weight*CR2l_3_3);
-	  histos["CR2l_sigcontamination"]->Fill(mStop,mLSP,4,weight*CR2l_3_4);
+	//compressed region (jets are sorted by pt
+	//if(ngoodjets()>=5&&ak4pfjets_passMEDbtag()[0]==false&&ak4pfjets_pt()[0]>200.){
+	//  if(MT2W()<=200) compressedSR = 11;
+	//  else compressedSR = 12;
+	//}
+      }
 
-	}
-      } else if(SR>0){
+      if(SR>0){
 	if(ngoodleps()!=1) cout << __LINE__ << " " << ngoodleps() << endl;
 	if(NSLeps!=1) cout << __LINE__ << " " << NSLeps << endl;
 	if(nvetoleps()!=1) cout << __LINE__ << " " << nvetoleps() << endl;
@@ -510,57 +424,15 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if(!PassTauVeto())  cout << __LINE__ << endl;
 	//if(SR<=6&&ngoodjets()<3) cout << __LINE__ << " " << ngoodjets() << endl;
 	if(ngoodbtags()<1) cout << __LINE__ << " " << ngoodbtags() << endl;
-	
-	histos2["eventsum"]->Fill(mStop,mLSP,SR,1.);
-	histos2["rawweightsum"]->Fill(mStop,mLSP,SR,rawweight);
-	histos2["totweightsum"]->Fill(mStop,mLSP,SR,weight);
-	histos2["ISRsum"]->Fill(mStop,mLSP,SR,ISRweight);
-	histos2["BSFsum"]->Fill(mStop,mLSP,SR,BSFweight);
-	histos2["PUweightsum"]->Fill(mStop,mLSP,SR,PUweight);
-	histos2["xsecsum"]->Fill(mStop,mLSP,SR,xsection);
-	histos2["nevtsum"]->Fill(mStop,mLSP,SR,nevts);
-	histos2["lepsum"]->Fill(mStop,mLSP,SR,lepSF);
-	histos2["lepSFsum"]->Fill(mStop,mLSP,SR,lepSF_FS);
-	
 	//finally - do signal regions!
-	histos["SRyield"]->Fill(mStop,mLSP,SR,weight);
-	histos["SR_ISRup"]->Fill(mStop,mLSP,SR,weight*ISRup);
-	histos["SR_ISRdown"]->Fill(mStop,mLSP,SR,weight*ISRdown);
-	histos["SR_Xsecup"]->Fill(mStop,mLSP,SR,weight*XSup);
-	histos["SR_Xsecdown"]->Fill(mStop,mLSP,SR,weight*XSdown);
-	histos["SR_PUup"]->Fill(mStop,mLSP,SR,weight*PUup);
-	histos["SR_PUdown"]->Fill(mStop,mLSP,SR,weight*PUdown);
-	histos["SR_Bup_HF"]->Fill(mStop,mLSP,SR,weight*BSFHup);
-	histos["SR_Bup_LF"]->Fill(mStop,mLSP,SR,weight*BSFLup);
-	histos["SR_Bdown_HF"]->Fill(mStop,mLSP,SR,weight*BSFHdown);
-	histos["SR_Bdown_LF"]->Fill(mStop,mLSP,SR,weight*BSFLdown);
-	histos["SR_LepEffup"]->Fill(mStop,mLSP,SR,weight*lEffup);
-	histos["SR_LepEffdown"]->Fill(mStop,mLSP,SR,weight*lEffdown);
-	histos["SR_LepEffFSup"]->Fill(mStop,mLSP,SR,weight*lEffFSup);
-	histos["SR_LepEffFSdown"]->Fill(mStop,mLSP,SR,weight*lEffFSdown);
-	histos["SR_muRFup"]->Fill(mStop,mLSP,SR,weight*muRFup);
-	histos["SR_muRFdown"]->Fill(mStop,mLSP,SR,weight*muRFdown);
+	if(jes==1) histos["SR_JESup"]->Fill(mStop,mLSP,SR,weight);
+	else if(jes==(-1)) histos["SR_JESdown"]->Fill(mStop,mLSP,SR,weight);
       }
       if(compressedSR>0){
 	if(compressedSR<=6) cout << __LINE__ << " " << compressedSR << endl;
 	//compressedSR is defined to not overlap with SR - can use same histogram!
-	histos["SRyield"]->Fill(mStop,mLSP,compressedSR,weight);
-	histos["SR_ISRup"]->Fill(mStop,mLSP,compressedSR,weight*ISRup);
-	histos["SR_ISRdown"]->Fill(mStop,mLSP,compressedSR,weight*ISRdown);
-	histos["SR_Xsecup"]->Fill(mStop,mLSP,compressedSR,weight*XSup);
-	histos["SR_Xsecdown"]->Fill(mStop,mLSP,compressedSR,weight*XSdown);
-	histos["SR_PUup"]->Fill(mStop,mLSP,compressedSR,weight*PUup);
-	histos["SR_PUdown"]->Fill(mStop,mLSP,compressedSR,weight*PUdown);
-	histos["SR_Bup_HF"]->Fill(mStop,mLSP,compressedSR,weight*BSFHup);
-	histos["SR_Bup_LF"]->Fill(mStop,mLSP,compressedSR,weight*BSFLup);
-	histos["SR_Bdown_HF"]->Fill(mStop,mLSP,compressedSR,weight*BSFHdown);
-	histos["SR_Bdown_LF"]->Fill(mStop,mLSP,compressedSR,weight*BSFLdown);
-	histos["SR_LepEffup"]->Fill(mStop,mLSP,compressedSR,weight*lEffup);
-	histos["SR_LepEffdown"]->Fill(mStop,mLSP,compressedSR,weight*lEffdown);
-	histos["SR_LepEffFSup"]->Fill(mStop,mLSP,compressedSR,weight*lEffFSup);
-	histos["SR_LepEffFSdown"]->Fill(mStop,mLSP,compressedSR,weight*lEffFSdown);
-	histos["SR_muRFup"]->Fill(mStop,mLSP,compressedSR,weight*muRFup);
-	histos["SR_muRFdown"]->Fill(mStop,mLSP,compressedSR,weight*muRFdown);
+	if(jes==1) histos["SR_JESup"]->Fill(mStop,mLSP,compressedSR,weight);
+	else if(jes==(-1)) histos["SR_JESdown"]->Fill(mStop,mLSP,compressedSR,weight);
       }
 
     }//event loop
@@ -591,21 +463,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   if(T2tb_BRselection==1) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_tLSP.root";
   if(T2tb_BRselection==2) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_mixed.root";
   if(T2tb_BRselection==3) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_bCharg.root";
+  if(LR==-1) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_lefthanded.root";
+  if(LR==+1) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_righthanded.root";
   TFile *f = new TFile(filename.c_str(),"RECREATE");
   f->cd();
   for(map<string,TH3D*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
   f->Close();
   cout << "Saved histos in " << f->GetName() << endl;
-  string filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+".root";
-  if(T2tb_BRselection==1) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_tLSP.root";
-  if(T2tb_BRselection==2) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_mixed.root";
-  if(T2tb_BRselection==3) filename2 = "rootfiles/signalyields/CheckHistos_"+skimFilePrefix+"_bCharg.root";
-  TFile *f2 = new TFile(filename2.c_str(),"RECREATE");
-  f2->cd();
-  for(map<string,TH3D*>::iterator h=    histos2.begin(); h!=    histos2.end();++h) h->second->Write();
-  f2->Close();
-  cout << "Saved histos in " << f2->GetName() << endl;
-  
+
   f_el_SF->Close();
   f_mu_SF_id->Close();
   f_mu_SF_iso->Close();
