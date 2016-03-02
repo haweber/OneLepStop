@@ -67,22 +67,22 @@ int GetTTZBin(int b);
 
 void makeDataCardsFullyHardCodedAllScans(int v, bool fakedata, bool nosyst, int xsecupdown, int compressed, bool dropsigcont, bool correlated){
   if(v==1){
-  makeDataCardsFullyHardCodedOneScan("T2tt",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2tt_lefthanded",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2tt_righthanded",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2bW",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tt",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tt_lefthanded",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tt_righthanded",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2bW",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
   }
   else if(v==2){
-  makeDataCardsFullyHardCodedOneScan("T2tb",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2tb_50_50",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2tb_0_100",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2tb_100_0",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tb",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tb_50_50",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tb_0_100",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tb_100_0",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
   }
   else if(v==3){
-  makeDataCardsFullyHardCodedOneScan("T2tb_75_25",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2tb_25_75",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2tb_67_33",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
-  makeDataCardsFullyHardCodedOneScan("T2tb_33_67",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tb_75_25",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tb_25_75",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tb_67_33",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
+    makeDataCardsFullyHardCodedOneScan("T2tb_33_67",fakedata, nosyst, xsecupdown, compressed, dropsigcont, correlated);
   }
 }
 
@@ -605,7 +605,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     cout << "wrote results into  " << logname <<  " (old file replaced)" << endl;
   }
   delete fLogStream;
-  if(updateplottinghisto && (signalname=="T2tt_750_50" || signalname=="T2tt_600_250" || signalname=="T2tt_500_100" || signalname=="T2tt_300_200" || signalname=="T2bW_600_50" || signalname=="T2bW_500_200" || signalname=="T2bW_300_150") ){
+  if(updateplottinghisto && (signalname=="T2tt_750_50" || signalname=="T2tt_600_250" || signalname=="T2tt_500_100" || signalname=="T2tt_300_200" || signalname=="T2bW_600_50" || signalname=="T2bW_500_200" || signalname=="T2bW_300_150" || signalname=="T2tt_700_50" || signalname=="T2tt_600_200" || signalname=="T2tt_600_50" || signalname=="T2tt_500_200" || signalname=="T2tt_300_150" || signalname=="T2bW_600_200" || signalname=="T2bW_700_50" || signalname=="T2tb_600_50" || signalname=="T2tb_600_50" || signalname=="T2tb_500_200" || signalname=="T2tb_300_150" || signalname=="T2tb_600_200" || signalname=="T2tb_700_50" || signalname=="T2tt_600_50"  ) ){
     bool updatesignal = false;
     TString uname = inputdir;
     if(compressed==1) uname = uname + "compressed/";
@@ -625,13 +625,19 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     TH1D *rpt_tt1l  = (TH1D*)updatefile->Get("rpt_tt1l");
     TH1D *rpt_znunu = (TH1D*)updatefile->Get("rpt_znunu");
     TH1D *rpt_sig;
-    if(     signalname=="T2tt_750_50" ){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2tt_750_50" ); }
-    else if(signalname=="T2tt_600_250"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2tt_600_250"); }
-    else if(signalname=="T2tt_500_100"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2tt_500_100"); }
-    else if(signalname=="T2tt_300_200"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2tt_300_200"); }
-    else if(signalname=="T2bW_600_50" ){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2bW_600_50" ); }
-    else if(signalname=="T2bW_500_200"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2bW_500_200"); }
-    else if(signalname=="T2bW_300_150"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2bW_300_150"); }
+    TString sigtemp = "rpt_" + signalname;
+    if(updatefile->GetListOfKeys()->Contains(sigtemp.Data())){
+      updatesignal = true; rpt_sig = (TH1D*)updatefile->Get(sigtemp.Data() );
+    } else {
+      updatesignal = false; rpt_sig = new TH1D(sigtemp.Data(),"",9,0,9);
+    }
+    //if(     signalname=="T2tt_750_50" ){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2tt_750_50" ); }
+    //else if(signalname=="T2tt_600_250"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2tt_600_250"); }
+    //else if(signalname=="T2tt_500_100"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2tt_500_100"); }
+    //else if(signalname=="T2tt_300_200"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2tt_300_200"); }
+    //else if(signalname=="T2bW_600_50" ){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2bW_600_50" ); }
+    //else if(signalname=="T2bW_500_200"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2bW_500_200"); }
+    //else if(signalname=="T2bW_300_150"){ updatesignal = true; rpt_sig = (TH1D*)updatefile->Get("rpt_T2bW_300_150"); }
    rpt_Data->SetBinContent(b,int(data)); rpt_Data->SetBinError(b,sqrt(data));
     rpt_LLest->SetBinContent(b,bg2l); rpt_LLest->SetBinError(b,bg2l*sqrt(pow(1.-bg2lerr,2) + pow(1.-bg2lbsfhf,2)+pow(1.-bg2lbsflf,2)+pow(1.-bg2llepeff,2)+pow(1.-bg2ltoppt,2)+pow(1.-bg2lnjets3,2)+pow(1.-bg2lnjets4,2)+pow(1.-bg2lpdf,2)+pow(1.-bg2lalphas,2)+pow(1.-bg2lmurf,2)+pow(1.-bg2ljes,2)+pow(1.-bg2lmet,2) ) );
     //rpt_0best->SetBinContent(b,bg1l); rpt_0best->SetBinError(b,bg1l*sqrt( pow(1.-bg1lerr,2)+pow(1.-bg1lmc,2)+pow(1.-bg1lcont,2)+pow(1.-bg1lmet,2)+pow(1.-bg1lbsf,2) ) );
@@ -651,6 +657,9 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     if(updatesignal) {
       cout << "updated signal hist " << rpt_sig->GetName() << endl;
       rpt_sig  ->Write(rpt_sig  ->GetName(),TObject::kOverwrite);
+    } else {
+      cout << "updated new signal hist " << rpt_sig->GetName() << endl;
+      rpt_sig  ->Write();
     }
     updatefile->Close();
     //rpt_Data ->Delete();
@@ -659,6 +668,7 @@ void makeDataCardsFullyHardCodedOneBin(int bin,TString signaltype, int stop, int
     //rpt_tt1l ->Delete();
     //rpt_znunu->Delete();
     //if(updatesignal) rpt_sig->Delete();
+    //if(!updatesignal) rpt_sig->Delete();
     delete updatefile;
   }
    // cout << __LINE__ << endl;

@@ -33,6 +33,7 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
 
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
+  //float sumB=0; float suml=0; float sumL=0; float sumN=0; float sumW = 0; float sumR = 0;
   int T2tb_BRselection = -1;//1: T2tt, 2: mixed, 3: T2bW, -1: default
   
   //load PUweights
@@ -441,7 +442,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  if(bCharg!=2) continue;
 	}
       }
-      
+      //if(SR==1&&T2tb_BRselection==2&&mStop==600&&mLSP==50){
+      //cout << "ls " << ls() << " event " << evt() << " weight " << weight << " raw " << rawweight << " PU " << PUweight << " ISR " << ISRweight << " BSF " << BSFweight << " lSF " << lepSF << " lFS " << lepSF_FS << endl;
+      //sumB +=BSFweight; suml += lepSF; sumL += lepSF_FS; sumN += 1; sumW += weight; sumR += rawweight;
+      //}
+
+	      
       //implement some sanity checks
       if(CR1l!=(-1)&&CR2l!=(-1)) cout << "WTF CR1l " << CR1l << " CR2l " << CR2l << endl;
       if(SR!=(-1)&&CR1l!=(-1)) cout << "WTF SR " << SR << " CR1l " << CR1l << endl;
@@ -587,6 +593,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     //h->second->SetBinError(1, sqrt(pow(h->second->GetBinError(1),2)+pow(h->second->GetBinError(0),2) ) );
   }
   */
+  //cout << "avgBSF " << sumB/sumN << " avgLSF " << suml/sumN << " avgLFS " << sumL/sumN << " raw " << sumR << " all " << sumW << endl;
+
   string filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+".root";
   if(T2tb_BRselection==1) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_tLSP.root";
   if(T2tb_BRselection==2) filename = "rootfiles/signalyields/Histos_"+skimFilePrefix+"_mixed.root";

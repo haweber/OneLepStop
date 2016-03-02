@@ -35,7 +35,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
   int T2tb_BRselection = -1;//1: T2tt, 2: mixed, 3: T2bW, -1: default
   int LR = +1;//-1: left-handed, +1: right-handed
-  
+
+  int countercheck = 1;
   //load PUweights
   TFile *fPU = new TFile("puWeights.root","READ");
   TH1D *puWeight     = (TH1D*)fPU->Get("puWeight");
@@ -421,7 +422,6 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float CR2l_3_9 = 0.50*0.08;
 
       if(SR==(-1)&&CR1l==(-1)&&CR2l==(-1)&&compressedSR==(-1)) continue;
-
       // T2tb_BRselection = -1;
       if(T2tb_BRselection>0){
 	int tLSP = 0;
@@ -444,30 +444,45 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  if(bCharg!=2) continue;
 	}
       }
+      //++countercheck;
 
       double weight_pol_L = 1.0;
       double weight_pol_R = 1.0;
-      if(mStop-mLSP>=175){
+      if(mStop-mLSP>=170){
 	LorentzVector tl1, tl2;
 	//LorentzVector tW1, tW2;
 	LorentzVector tt1, tt2;
 	LorentzVector tst1, tst2;
 	for(unsigned int i = 0; i<gensusy_id().size(); ++i){
 	  if(gensusy_status()[i]!=1) continue;
-	  if(abs(gensusy_id()[i])==1000006) tst1 = gensusy_p4()[i];
-	  if(abs(gensusy_id()[i])==(-1000006)) tst2 = gensusy_p4()[i];
+	  //cout << gensusy_status()[i] << " " << gensusy_id()[i] << " motherid/status " << gensusy_motherstatus()[i] << " " << gensusy_motherid()[i] << " grandmotherid/status " << gensusy_gmotherstatus()[i] << " " << gensusy_gmotherid()[i] << endl;
+	  //cout << gensusy_p4()[i].Pt() << " " <<  gensusy_id()[i] << " "  << gensusy_motherp4()[i].Pt() << " " <<  gensusy_motherid()[i] << endl;
+	  if((gensusy_id()[i])==1000022&&(gensusy_motherid()[i])==1000006) { /*cout << "am here " << endl;*/ tst1 = gensusy_motherp4()[i]; }//mother of LSP - safer
+	  if((gensusy_id()[i])==1000022&&(gensusy_motherid()[i])==-1000006) { /*cout << "am there " << endl;*/  tst2 = gensusy_motherp4()[i]; }
+	  if(countercheck%10000==0) cout << "this is my stop " << gensusy_motherid()[i] << " " << gensusy_motherp4()[i].Pt() << endl;
 	}
 	for(unsigned int i = 0; i<genleps_id().size(); ++i){
 	  if(genleps_status()[i] != 23 && genleps_status()[i] != 22 && genleps_status()[i] != 1) continue;
 	  if(abs(genleps_motherid()[i])!=24) continue;
-	  if(abs(genleps_gmotherid()[i])==6) { tt1 = genleps_gmotherp4()[i]; tl1 = genleps_p4()[i]; }
-	  if(abs(genleps_gmotherid()[i])==-6) { tt2 = genleps_gmotherp4()[i]; tl2 = genleps_p4()[i]; }
+	  if((genleps_gmotherid()[i])==6&&genleps_gmotherid()[i]*genleps_id()[i]<0) { tt1 = genleps_gmotherp4()[i]; tl1 = genleps_p4()[i]; }
+	  if((genleps_gmotherid()[i])==-6&&genleps_gmotherid()[i]*genleps_id()[i]<0) { tt2 = genleps_gmotherp4()[i]; tl2 = genleps_p4()[i]; }
+	  if(countercheck%10000==0&&abs(genleps_gmotherid()[i])==6&&genleps_gmotherid()[i]*genleps_id()[i]<0) cout << "this is my top " << genleps_gmotherid()[i] << " " <<  genleps_gmotherp4()[i].Pt() << " and lepton " << genleps_id()[i] << " " << genleps_p4()[i].Pt() << endl;
+	}
+	for(unsigned int i = 0; i<gennus_id().size(); ++i){
+	  if(gennus_status()[i] != 23 && gennus_status()[i] != 22 && gennus_status()[i] != 1) continue;
+	  if(abs(gennus_motherid()[i])!=24) continue;
+	  if((gennus_gmotherid()[i])==6&&gennus_gmotherid()[i]*gennus_id()[i]<0) { tt1 = gennus_gmotherp4()[i]; tl1 = gennus_p4()[i]; }
+	  if((gennus_gmotherid()[i])==-6&&gennus_gmotherid()[i]*gennus_id()[i]<0) { tt2 = gennus_gmotherp4()[i]; tl2 = gennus_p4()[i]; }
+	  if(countercheck%10000==0&&abs(gennus_gmotherid()[i])==6&&gennus_gmotherid()[i]*gennus_id()[i]<0) cout << "this is my top " << gennus_gmotherid()[i] << " " <<  gennus_gmotherp4()[i].Pt() << " and neutrino " << gennus_id()[i] << " " << gennus_p4()[i].Pt() << endl;
+
 	}
       	for(unsigned int i = 0; i<genqs_id().size(); ++i){
 	  if(genqs_status()[i] != 23 && genqs_status()[i] != 22 && genqs_status()[i] != 1) continue;
 	  if(abs(genqs_motherid()[i])!=24) continue;
-	  if(abs(genqs_gmotherid()[i])==6) { tt1 = genqs_gmotherp4()[i]; tl1 = genqs_p4()[i]; }
-	  if(abs(genqs_gmotherid()[i])==-6) { tt2 = genqs_gmotherp4()[i]; tl2 = genqs_p4()[i]; }
+	  if((genqs_gmotherid()[i])==6&&genqs_gmotherid()[i]*genqs_id()[i]<0) { tt1 = genqs_gmotherp4()[i]; tl1 = genqs_p4()[i]; }
+	  if((genqs_gmotherid()[i])==-6&&genqs_gmotherid()[i]*genqs_id()[i]<0) { tt2 = genqs_gmotherp4()[i]; tl2 = genqs_p4()[i]; }
+	  if(countercheck%10000==0&&abs(genqs_gmotherid()[i])==6&&genqs_gmotherid()[i]*genqs_id()[i]<0) cout << "this is my top " << genqs_gmotherid()[i] << " " <<  genqs_gmotherp4()[i].Pt() << " and quark " << genqs_id()[i] << " " << genqs_p4()[i].Pt() << endl;
+
 	}
 
 	TLorentzVector st1; st1.SetPxPyPzE(tst1.Px(),tst1.Py(),tst1.Pz(),tst1.E());
@@ -482,23 +497,36 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	t2.Boost(bV2);
 	l1.Boost(bV1);
 	l2.Boost(bV2);
+	if(countercheck%10000==0){
+	  cout << "Boost Pt " <<  bV1.Pt() << " " << bV2.Pt() << endl;
+	  cout << "Check " << t1.P() << " " << l1.P() << " "  << t2.P() << " " << l2.P() << endl;
+	  cout << " stops " << st1.Px() << " " << st1.Py() << " " << st1.Pz() << " " << st1.E() << " " <<  st2.Px() << " " << st2.Py() << " " << st2.Pz() << " " << st2.E() << endl;
+	  cout << "Tops before boost " << tt1.Px() << " " << tt1.Py() << " " << tt1.Pz() << " " << tt1.E() << " " <<  tt2.Px() << " " << tt2.Py() << " " << tt2.Pz() << " " << tt2.E() << endl;
+	  cout << "Tops after boost " << t1.Px() << " " << t1.Py() << " " << t1.Pz() << " " << t1.E() << " " <<  t2.Px() << " " << t2.Py() << " " << t2.Pz() << " " << t2.E() << endl;
+	}
+	//cout << t1.P() << " " << l1.P()  << t2.P() << " " << l2.P() << endl;
 	if(t1.P()>0&&l1.P()>0){
 	  double costh = (t1.Px()*l1.Px()+t1.Py()*l1.Py()+t1.Pz()*l1.Pz())/t1.P()/l1.P();
 	  double weight_L = (t1.Energy()+t1.P())*(1-costh);
 	  double weight_R = (t1.Energy()-t1.P())*(1+costh);
+	  if(countercheck%10000==0) cout << "1 costh wL wR " << costh << " " << weight_L << " " << weight_R << endl;
 	  weight_pol_L *= 2*weight_L/(weight_R+weight_L);
 	  weight_pol_R *= 2*weight_R/(weight_R+weight_L);
 	}
 	if(t2.P()>0&&l2.P()>0){
 	  double costh = (t2.Px()*l2.Px()+t2.Py()*l2.Py()+t2.Pz()*l2.Pz())/t2.P()/l2.P();
-	  double weight_L = (t2.Energy()+t2.P())*(2-costh);
-	  double weight_R = (t2.Energy()-t2.P())*(2+costh);
+	  double weight_L = (t2.Energy()+t2.P())*(1-costh);
+	  double weight_R = (t2.Energy()-t2.P())*(1+costh);
+	  if(countercheck%10000==0) cout << "2 costh wL wR  " << costh << " " << weight_L << " " << weight_R << endl;
 	  weight_pol_L *= 2*weight_L/(weight_R+weight_L);
 	  weight_pol_R *= 2*weight_R/(weight_R+weight_L);
 	}
       }
       if(LR==-1) weight *= weight_pol_L;
       if(LR==+1) weight *= weight_pol_R;
+      if(countercheck%10000==0){
+	cout << "This is it " << weight_pol_L << " " << weight_pol_R << endl;
+      }
       
       //implement some sanity checks
       if(CR1l!=(-1)&&CR2l!=(-1)) cout << "WTF CR1l " << CR1l << " CR2l " << CR2l << endl;

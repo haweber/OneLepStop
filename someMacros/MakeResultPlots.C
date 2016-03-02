@@ -39,7 +39,9 @@
 
 using namespace std;
 
-void MakeResultPlots(TString inputfile){
+void MakeResultPlots(TString inputfile, int version){
+    
+    //int version = 2;
 
   ifstream infile(inputfile.Data());
   if(!(infile.good() ) ) {
@@ -64,6 +66,11 @@ void MakeResultPlots(TString inputfile){
   TH1D *ts600 = (TH1D*)f->Get("rpt_T2tt_600_250");
   TH1D *ts500 = (TH1D*)f->Get("rpt_T2tt_500_100");
   TH1D *ts300 = (TH1D*)f->Get("rpt_T2tt_300_200");
+    TH1D *ts6002 = (TH1D*)f->Get("rpt_T2bW_600_50");
+    TH1D *ts5002 = (TH1D*)f->Get("rpt_T2bW_500_200");
+    TH1D *ts3002 = (TH1D*)f->Get("rpt_T2bW_300_150");
+    TH1D *ts3003 = (TH1D*)f->Get("rpt_T2tb_300_150");
+    TH1D *ts6003 = (TH1D*)f->Get("rpt_T2tb_600_200");
 /*
     TH1D *Data = new TH1D("Data","",9,0,9);
     TH1D *LL   = new TH1D("LL"  ,"",9,0,9);
@@ -84,6 +91,11 @@ void MakeResultPlots(TString inputfile){
   TH1D *s600 = (TH1D*)ts600->Clone("T2tt_600_250");
   TH1D *s500 = (TH1D*)ts500->Clone("T2tt_500_100");
   TH1D *s300 = (TH1D*)ts300->Clone("T2tt_300_200");
+  TH1D *s6002 = (TH1D*)ts6002->Clone("T2bW_600_50");
+  TH1D *s5002 = (TH1D*)ts5002->Clone("T2bW_500_200");
+    TH1D *s3002 = (TH1D*)ts3002->Clone("T2bW_300_150");
+    TH1D *s3003 = (TH1D*)ts3003->Clone("T2tb_300_150");
+    TH1D *s6003 = (TH1D*)ts3003->Clone("T2tb_600_200");
   
     //Data->SetBinContent(5,14);
     TH1D *Data = new TH1D("Data","",9,0,9);
@@ -293,6 +305,7 @@ void MakeResultPlots(TString inputfile){
     legs->SetFillStyle(1001);
     */
     
+    if(version<=1||version>=100){
     s750->SetLineStyle(4);
     s750->SetLineWidth(4);
     //s750->SetLineColor(  kViolet+9);//orig
@@ -327,6 +340,173 @@ void MakeResultPlots(TString inputfile){
     s300->SetMarkerColor(kAzure+6);
     s300->Draw("samehist");
     legs->AddEntry(s300, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0} (300,200)", "l");
+    }
+    else if(version==2){
+        s6002->SetLineStyle(4);
+        s6002->SetLineWidth(4);
+        //s6002->SetLineColor(  kViolet+9);//orig
+        //s6002->SetMarkerColor(kViolet+9);//orig
+        s6002->SetLineColor(  kMagenta-4);
+        s6002->SetMarkerColor(kMagenta-4);
+        s6002->Draw("samehist");
+        legs->AddEntry(s6002, " #tilde{t}#rightarrow b#tilde{#chi}_{0}^{#pm} (600,50)", "l");
+        
+        s5002->SetLineStyle(5);
+        s5002->SetLineWidth(4);
+        //s5002->SetLineColor(  kRed+1);//orig
+        //s5002->SetMarkerColor(kRed+1);//orig
+        s5002->SetLineColor(  kSpring-2);
+        s5002->SetMarkerColor(kSpring-2);
+        s5002->Draw("samehist");
+        legs->AddEntry(s5002, " #tilde{t}#rightarrow b#tilde{#chi}_{0}^{#pm} (500,200)", "l");
+        s3002->SetLineStyle(8);
+        s3002->SetLineWidth(4);
+        //s3002->SetLineColor(  kYellow-1);//orig
+        //s3002->SetMarkerColor(kYellow-1);//orig
+        s3002->SetLineColor(  kAzure+6);
+        s3002->SetMarkerColor(kAzure+6);
+        s3002->Draw("samehist");
+        legs->AddEntry(s3002, " #tilde{t}#rightarrow b#tilde{#chi}_{0}^{#pm} (300,150)", "l");
+    }
+    else if(version==3){
+    s750->SetLineStyle(4);
+    s750->SetLineWidth(4);
+    //s750->SetLineColor(  kViolet+9);//orig
+    //s750->SetMarkerColor(kViolet+9);//orig
+    s750->SetLineColor(  kMagenta-4);
+    s750->SetMarkerColor(kMagenta-4);
+    s750->Draw("samehist");
+    //legs->AddEntry(s750, "M_{#tilde{t}} = 750 GeV, M_{#tilde{#chi}_{1}^{0}} = 50 GeV", "l");
+    legs->AddEntry(s750, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0} (750,50)", "l");
+    
+    s600->SetLineStyle(5);
+    s600->SetLineWidth(4);
+    //s600->SetLineColor(  kRed+1);//orig
+    //s600->SetMarkerColor(kRed+1);//orig
+    s600->SetLineColor(  kSpring-2);
+    s600->SetMarkerColor(kSpring-2);
+    s600->Draw("samehist");
+    legs->AddEntry(s600, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0} (600,250)", "l");
+    s3002->SetLineStyle(8);
+    s3002->SetLineWidth(4);
+    //s3002->SetLineColor(  kYellow-1);//orig
+    //s3002->SetMarkerColor(kYellow-1);//orig
+    s3002->SetLineColor(  kAzure+6);
+    s3002->SetMarkerColor(kAzure+6);
+    s3002->Draw("samehist");
+    legs->AddEntry(s3002, " #tilde{t}#rightarrow b#tilde{#chi}_{1}^{#pm} (300,150)", "l");
+    }
+    if(version==4){
+    s750->SetLineStyle(4);
+    s750->SetLineWidth(4);
+    //s750->SetLineColor(  kViolet+9);//orig
+    //s750->SetMarkerColor(kViolet+9);//orig
+    s750->SetLineColor(  kMagenta-4);
+    s750->SetMarkerColor(kMagenta-4);
+    s750->Draw("samehist");
+    //legs->AddEntry(s750, "M_{#tilde{t}} = 750 GeV, M_{#tilde{#chi}_{1}^{0}} = 50 GeV", "l");
+    legs->AddEntry(s750, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0} (750,50)", "l");
+    
+    s6002->SetLineStyle(5);
+    s6002->SetLineWidth(4);
+    //s6002->SetLineColor(  kRed+1);//orig
+    //s6002->SetMarkerColor(kRed+1);//orig
+    s6002->SetLineColor(  kSpring-2);
+    s6002->SetMarkerColor(kSpring-2);
+    s6002->Draw("samehist");
+    legs->AddEntry(s6002, " #tilde{t}#rightarrow b#tilde{#chi}_{1}^{#pm} (600,50)", "l");
+    s300->SetLineStyle(8);
+    s300->SetLineWidth(4);
+    //s300->SetLineColor(  kYellow-1);//orig
+    //s300->SetMarkerColor(kYellow-1);//orig
+    s300->SetLineColor(  kAzure+6);
+    s300->SetMarkerColor(kAzure+6);
+    s300->Draw("samehist");
+    legs->AddEntry(s300, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0} (300,200)", "l");
+    }
+    if(version==5){
+        s750->SetLineStyle(4);
+        s750->SetLineWidth(4);
+        //s750->SetLineColor(  kViolet+9);//orig
+        //s750->SetMarkerColor(kViolet+9);//orig
+        s750->SetLineColor(  kMagenta-4);
+        s750->SetMarkerColor(kMagenta-4);
+        s750->Draw("samehist");
+        //legs->AddEntry(s750, "M_{#tilde{t}} = 750 GeV, M_{#tilde{#chi}_{1}^{0}} = 50 GeV", "l");
+        legs->AddEntry(s750, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0} (750,50)", "l");
+        
+        s6002->SetLineStyle(5);
+        s6002->SetLineWidth(4);
+        //s6002->SetLineColor(  kRed+1);//orig
+        //s6002->SetMarkerColor(kRed+1);//orig
+        s6002->SetLineColor(  kSpring-2);
+        s6002->SetMarkerColor(kSpring-2);
+        s6002->Draw("samehist");
+        legs->AddEntry(s6002, " #tilde{t}#rightarrow b#tilde{#chi}_{1}^{#pm} (600,50)", "l");
+        s3002->SetLineStyle(8);
+        s3002->SetLineWidth(4);
+        //s3002->SetLineColor(  kYellow-1);//orig
+        //s3002->SetMarkerColor(kYellow-1);//orig
+        s3002->SetLineColor(  kAzure+6);
+        s3002->SetMarkerColor(kAzure+6);
+        s3002->Draw("samehist");
+        legs->AddEntry(s3002, " #tilde{t}#rightarrow b#tilde{#chi}_{1}^{#pm} (300,150)", "l");
+    }
+    if(version==6){
+        s750->SetLineStyle(4);
+        s750->SetLineWidth(4);
+        //s750->SetLineColor(  kViolet+9);//orig
+        //s750->SetMarkerColor(kViolet+9);//orig
+        s750->SetLineColor(  kMagenta-4);
+        s750->SetMarkerColor(kMagenta-4);
+        s750->Draw("samehist");
+        //legs->AddEntry(s750, "M_{#tilde{t}} = 750 GeV, M_{#tilde{#chi}_{1}^{0}} = 50 GeV", "l");
+        legs->AddEntry(s750, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0} (700,50)", "l");
+        
+        s6002->SetLineStyle(5);
+        s6002->SetLineWidth(4);
+        //s6002->SetLineColor(  kRed+1);//orig
+        //s6002->SetMarkerColor(kRed+1);//orig
+        s6002->SetLineColor(  kSpring-2);
+        s6002->SetMarkerColor(kSpring-2);
+        s6002->Draw("samehist");
+        legs->AddEntry(s6002, " #tilde{t}#rightarrow b#tilde{#chi}_{1}^{#pm} (600,200)", "l");
+        s3003->SetLineStyle(8);
+        s3003->SetLineWidth(4);
+        //s3003->SetLineColor(  kYellow-1);//orig
+        //s3003->SetMarkerColor(kYellow-1);//orig
+        s3003->SetLineColor(  kAzure+6);
+        s3003->SetMarkerColor(kAzure+6);
+        s3003->Draw("samehist");
+        legs->AddEntry(s3003, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0}/#tilde{t}#rightarrow b#tilde{#chi}_{1}^{#pm} (300,150)", "l");
+    }
+    if(version==7){
+        s750->SetLineStyle(4);
+        s750->SetLineWidth(4);
+        //s750->SetLineColor(  kViolet+9);//orig
+        //s750->SetMarkerColor(kViolet+9);//orig
+        s750->SetLineColor(  kMagenta-4);
+        s750->SetMarkerColor(kMagenta-4);
+        s750->Draw("samehist");
+        //legs->AddEntry(s750, "M_{#tilde{t}} = 750 GeV, M_{#tilde{#chi}_{1}^{0}} = 50 GeV", "l");
+        legs->AddEntry(s750, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0} (700,50)", "l");
+        s6003->SetLineStyle(5);
+        s6003->SetLineWidth(4);
+        //s6002->SetLineColor(  kRed+1);//orig
+        //s6002->SetMarkerColor(kRed+1);//orig
+        s6003->SetLineColor(  kSpring-2);
+        s6003->SetMarkerColor(kSpring-2);
+        s6003->Draw("samehist");
+        legs->AddEntry(s6003, " #tilde{t}#rightarrow t#tilde{#chi}_{1}^{0}/#tilde{t}#rightarrow b#tilde{#chi}_{1}^{#pm} (600,200)", "l");
+        s3002->SetLineStyle(8);
+        s3002->SetLineWidth(4);
+        //s3003->SetLineColor(  kYellow-1);//orig
+        //s3003->SetMarkerColor(kYellow-1);//orig
+        s3002->SetLineColor(  kAzure+6);
+        s3002->SetMarkerColor(kAzure+6);
+        s3002->Draw("samehist");
+        legs->AddEntry(s3002, " #tilde{t}#rightarrow b#tilde{#chi}_{1}^{#pm} (300,150)", "l");
+    }
     
     leg->Draw();
     legs->Draw();
