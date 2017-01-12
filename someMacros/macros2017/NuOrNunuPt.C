@@ -12,6 +12,7 @@
 #include "TDirectory.h"
 #include "TFile.h"
 #include "TROOT.h"
+#include "TMath.h"
 #include "TTreeCache.h"
 #include "TLorentzVector.h"
 
@@ -32,6 +33,12 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
 
   return sqrt(dphi*dphi + deta*deta);
 }
+
+float dPhibetweenVectors(float phi1,float phi2 ){                                                                                                              
+
+  return sqrt(pow(TMath::Min(float(fabs(phi1-phi2)),float(2*M_PI-fabs(phi1-phi2)) ),2));
+}
+
 
 float calculateMt(LorentzVector p4, LorentzVector met){
   float phi1 = p4.Phi();
@@ -80,6 +87,13 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   histonames.push_back("NuOrNunuPt_MET150_4j_MT120_Mlbgt175");      hbins.push_back(100); hlow.push_back(  0.); hup.push_back(1000);
   histonames.push_back("NuOrNunuPt_MET150_23j_MT150_Mlbgt175");     hbins.push_back(100); hlow.push_back(  0.); hup.push_back(1000);
   histonames.push_back("NuOrNunuPt_MET150_4j_MT150_Mlbgt175");      hbins.push_back(100); hlow.push_back(  0.); hup.push_back(1000);
+
+  histonames.push_back("NuOrNunuPt_MET150_5j_MT120_leppTle150");      hbins.push_back(100); hlow.push_back(  0.); hup.push_back(1000);
+  histonames.push_back("NuOrNunuPt_MET150_5j_MT120_DPhiLepMETle2");   hbins.push_back(100); hlow.push_back(  0.); hup.push_back(1000);
+  histonames.push_back("NuOrNunuPt_MET150_5j_MT150_leppTle150");      hbins.push_back(100); hlow.push_back(  0.); hup.push_back(1000);
+  histonames.push_back("NuOrNunuPt_MET150_5j_MT150_DPhiLepMETle2");   hbins.push_back(100); hlow.push_back(  0.); hup.push_back(1000);
+  histonames.push_back("NuOrNunuPt_MET150_5j_MT120_DPhiLepMETle2_leppTle150");   hbins.push_back(100); hlow.push_back(  0.); hup.push_back(1000);
+  histonames.push_back("NuOrNunuPt_MET150_5j_MT150_DPhiLepMETle2_leppTle150");   hbins.push_back(100); hlow.push_back(  0.); hup.push_back(1000);
 
   
   for(unsigned int i = 0; i<histonames.size(); ++i){
@@ -218,8 +232,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  else                histos["NuOrNunuPt_MET150_4j_MT120_tmodgt0_"+samplename]->Fill(NuOrNunuPt,weight);
 	  if(Mlb<=175) histos["NuOrNunuPt_MET150_4j_MT120_Mlble175_"+samplename]->Fill(NuOrNunuPt,weight);
 	  else         histos["NuOrNunuPt_MET150_4j_MT120_Mlbgt175_"+samplename]->Fill(NuOrNunuPt,weight);
-	  if(NJ>=5) histos["NuOrNunuPt_MET150_5j_MT120_"+samplename]->Fill(NuOrNunuPt,weight);
-
+	  if(NJ>=5) {
+	    histos["NuOrNunuPt_MET150_5j_MT120_"+samplename]->Fill(NuOrNunuPt,weight);
+	    if(dPhibetweenVectors(lep1_p4().Phi(),pfmet_phi())<=2) {
+	      histos["NuOrNunuPt_MET150_5j_MT120_DPhiLepMETle2_"+samplename]->Fill(NuOrNunuPt,weight);
+	      if(lep1_p4().Pt()<=150) histos["NuOrNunuPt_MET150_5j_MT120_DPhiLepMETle2_leppTle150_"+samplename]->Fill(NuOrNunuPt,weight);
+	    }
+	    if(lep1_p4().Pt()<=150) histos["NuOrNunuPt_MET150_5j_MT120_leppTle150_"+samplename]->Fill(NuOrNunuPt,weight);
+	  }
 	}
       }
       if(mt_met_lep()>150){
@@ -236,7 +256,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  else                histos["NuOrNunuPt_MET150_4j_MT150_tmodgt0_"+samplename]->Fill(NuOrNunuPt,weight);
 	  if(Mlb<=175) histos["NuOrNunuPt_MET150_4j_MT150_Mlble175_"+samplename]->Fill(NuOrNunuPt,weight);
 	  else         histos["NuOrNunuPt_MET150_4j_MT150_Mlbgt175_"+samplename]->Fill(NuOrNunuPt,weight);
-	  if(NJ>=5) histos["NuOrNunuPt_MET150_5j_MT150_"+samplename]->Fill(NuOrNunuPt,weight);
+	  if(NJ>=5) {
+	    histos["NuOrNunuPt_MET150_5j_MT150_"+samplename]->Fill(NuOrNunuPt,weight);
+	    if(dPhibetweenVectors(lep1_p4().Phi(),pfmet_phi())<=2) {
+	      histos["NuOrNunuPt_MET150_5j_MT150_DPhiLepMETle2_"+samplename]->Fill(NuOrNunuPt,weight);
+	      if(lep1_p4().Pt()<=150) histos["NuOrNunuPt_MET150_5j_MT150_DPhiLepMETle2_leppTle150_"+samplename]->Fill(NuOrNunuPt,weight);
+	    }
+	    if(lep1_p4().Pt()<=150) histos["NuOrNunuPt_MET150_5j_MT150_leppTle150_"+samplename]->Fill(NuOrNunuPt,weight);
+	  }
 	}
       }
     }//event loop

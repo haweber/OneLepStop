@@ -63,8 +63,8 @@
 \RequirePackage{lineno}
 %\usepackage{enumitem}
 \usepackage[absolute,overlay]{textpos}
-\usepackage{fancyvrb}
-\usepackage{pict2e}
+
+
 
 \makeatletter
 \newcommand{\saveframenumber}[1]{%
@@ -305,16 +305,10 @@
   \vspace{36pt}
 \leftskip=24pt\rightskip=0.05\textwidth
   \usebeamerfont{institute}\usebeamercolor[fg]{titleaddition}\normalsize\insertauthor~(\insertshortinstitute)\par\vspace{3pt}
-  \vspace{-25pt}
-  \usebeamercolor[fg]{titlegraphic}\inserttitlegraphic
-  \vspace{10pt}
-  %\vspace{12pt}
-  %\leftskip=64pt\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic
   %\usebeamerfont{date}\insertdate\par
 \column{.35\textwidth}
-  $~$
   %\leftskip=64pt\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic
-  %\hfill\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic\rightskip=10pt
+  \hfill\usebeamercolor[fg]{titlegraphic}\inserttitlegraphic\rightskip=10pt
 \end{columns}
 }
 

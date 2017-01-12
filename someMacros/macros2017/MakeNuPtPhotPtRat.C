@@ -27,12 +27,12 @@ void MakeNuPtPhotPtRat(){
   TH1F* h23j_hMlb_1ltop = (TH1F*)fnu->Get("NuOrNunuPt_MET150_23j_MT120_Mlbgt175_1ltop");
   TH1F* h4j_lMlb_1ltop  = (TH1F*)fnu->Get("NuOrNunuPt_MET150_4j_MT120_Mlble175_1ltop");
   TH1F* h4j_hMlb_1ltop  = (TH1F*)fnu->Get("NuOrNunuPt_MET150_4j_MT120_Mlbgt175_1ltop");
-  TH1F* h5j_1ltop       = (TH1F*)fnu->Get("NuOrNunuPt_MET150_5j_MT120_1ltop");
+  TH1F* h5j_1ltop       = (TH1F*)fnu->Get("NuOrNunuPt_MET150_5j_MT120_DPhiLepMETle2_leppTle150_1ltop");
   TH1F* h23j_ltmod_2l = (TH1F*)fnu->Get("NuOrNunuPt_MET150_23j_MT150_tmodle0_2l");
   TH1F* h23j_htmod_2l = (TH1F*)fnu->Get("NuOrNunuPt_MET150_23j_MT150_tmodgt0_2l");
   TH1F* h4j_ltmod_2l  = (TH1F*)fnu->Get("NuOrNunuPt_MET150_4j_MT150_tmodle0_2l");
   TH1F* h4j_htmod_2l  = (TH1F*)fnu->Get("NuOrNunuPt_MET150_4j_MT150_tmodgt0_2l");
-  TH1F* h5j_2l        = (TH1F*)fnu->Get("NuOrNunuPt_MET150_5j_MT150_2l");
+  TH1F* h5j_2l        = (TH1F*)fnu->Get("NuOrNunuPt_MET150_5j_MT150_DPhiLepMETle2_leppTle150_2l");
  TFile *fphsim  = TFile::Open("rootfiles/PhotonMETResolution/PhotPt_Sim.root");
   fphsim->cd();
   TH1F *h23j_sim = (TH1F*)fphsim->Get("PhotPt_MET150_23j_Sim");

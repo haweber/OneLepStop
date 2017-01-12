@@ -20,6 +20,8 @@
 #include "CMS3_photon.cc"
 #include "/home/users/haweber/CORE/Tools/dorky/dorky.h"
 #include "/home/users/haweber/CORE/Tools/dorky/dorky.cc"
+#include "/home/users/haweber/CORE/Tools/goodrun.h"
+#include "/home/users/haweber/CORE/Tools/goodrun.cc"
 
 //MT2 variants
 
@@ -144,6 +146,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);
   }
 
+  const char* json_file = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
+  set_goodrun_file_json(json_file);
+
   // Loop over events to Analyze
   unsigned int nEventsTotal = 0;
   unsigned int nEventsChain = chain->GetEntries();
@@ -195,6 +200,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(ph_met()<150)               continue;
       if(ph_mindphi_met_j1_j2()<0.8) continue;
       if(ph_selectedidx()<0)         continue;
+
+      if( is_data() && !goodrun(run(), ls()) ) continue;
 
       float PhotPt = ph_pt()[ph_selectedidx()];
       if(PhotPt<55) continue;
