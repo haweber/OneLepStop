@@ -21,7 +21,7 @@
 // CMS3
 //#include "CMS3_old20150505.cc"
 //#include "CMS3_fuckingsync.cc"
-#include "CMS3_Oct16.cc"
+#include "CMS3_Moriond17.cc"
 #include "/home/users/haweber/CORE/Tools/dorky/dorky.h"
 #include "/home/users/haweber/CORE/Tools/dorky/dorky.cc"
 #include "/home/users/haweber/CORE/Tools/goodrun.h"
@@ -161,26 +161,15 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //if(lep1_is_mu())         ++something;
       //else                     ++somethingelse;
 
-      int NJ = ngoodjets();
-
-      int tightB = 0;
-      for(unsigned int j = 0; j<ak4pfjets_p4().size(); ++j){
-	if(fabs(ak4pfjets_p4()[j].Pt())<30) continue;
-	if(fabs(ak4pfjets_p4()[j].Eta())>2.4) continue;
-	if(!(ak4pfjets_loose_pfid()[j])) continue;
-	if(ak4pfjets_CSV()[j]>0.935) ++tightB;
-      }
-      if(tightB>ngoodbtags()) cout << "WTF" << endl;
-
       if(is_data()) weight = 1.;
       if(is_data()){
 	//if(!(HLT_MET()||HLT_SingleEl()||HLT_SingleMu())) continue;
 	if(abs(lep1_pdgid())==11){
-	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_SingleEl())) continue;
+	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleEl())) continue;
 	  //if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleEl())) continue;
 	}
 	if(abs(lep1_pdgid())==13){
-	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_SingleMu())) continue;
+	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleMu())) continue;
 	  //if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleMu())) continue;
 	}
       }
@@ -188,6 +177,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	duplicate_removal::DorkyEventIdentifier id(run(), evt(), ls());
 	if (is_duplicate(id) ) continue;
       }
+      if(is_data()){
+	//if(filt_met()&&filt_badChargedCandidateFilter()&&filt_jetWithBadMuon()&&filt_pfovercalomet()) continue;
+	  if(!filt_met()) continue;
+	  if(!filt_badChargedCandidateFilter()) continue;
+	  if(!filt_jetWithBadMuon()) continue;
+	  if(!filt_pfovercalomet()) continue;
+      }
+      
       int SR = -1;
       int cSR = -1;
       if(mindphi_met_j1_j2()>0.8){
@@ -197,7 +194,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	    else if(pfmet()>450) SR = 3;
 	    else if(pfmet()>350) SR = 2;
 	    else if(pfmet()>250) SR = 1;
-	  } else if(tightB>=1&&Mlb_closestb()>175.) {
+	  } else if(ntightbtags()>=1&&Mlb_closestb()>175.) {
 	    if(     pfmet()>600) SR = 7;
 	    else if(pfmet()>450) SR = 6;
 	    else if(pfmet()>250) SR = 5;
@@ -209,7 +206,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	    else if(pfmet()>450) SR = 10;
 	    else if(pfmet()>350) SR = 9;
 	    else if(pfmet()>250) SR = 8;
-	  } else if(tightB>=1&&Mlb_closestb()>175.) {
+	  } else if(ntightbtags()>=1&&Mlb_closestb()>175.) {
 	    if(     pfmet()>550) SR = 16;
 	    else if(pfmet()>450) SR = 15;
 	    else if(pfmet()>350) SR = 14;
@@ -220,7 +217,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	    if(     pfmet()>550) SR = 19;
 	    else if(pfmet()>350) SR = 18;
 	    else if(pfmet()>250) SR = 17;
-	  } else if(tightB>=1&&Mlb_closestb()>175.) {
+	  } else if(ntightbtags()>=1&&Mlb_closestb()>175.) {
 	    if(     pfmet()>450) SR = 21;
 	    else if(pfmet()>250) SR = 20;
 	  }
@@ -230,7 +227,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	    else if(pfmet()>450) SR = 24;
 	    else if(pfmet()>350) SR = 23;
 	    else if(pfmet()>250) SR = 22;
-	  } else if(tightB>=1&&Mlb_closestb()>175.) {
+	  } else if(ntightbtags()>=1&&Mlb_closestb()>175.) {
 	    if(     pfmet()>450) SR = 27;
 	    else if(pfmet()>250) SR = 26;
 	  }
@@ -284,19 +281,38 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	cout << endl;
       }
       */
+      /*
       if((run()==273725&&ls()==584&&evt()==892006781)){
       //if(SR>0){
 	cout << "run:ls:evt " << run() << ":" << ls() << ":" << evt() <<  " SRbin " << SR << endl;
 	cout << "Triggered? " << "MET " << HLT_MET() << " Ele " << HLT_SingleEl() << " Muo " << HLT_SingleMu() << endl;
 	cout << "NJ " << ngoodjets() << " NB " << ngoodbtags() << " nvetoleps " << nvetoleps() << " MDPhi(MET,j12) " << mindphi_met_j1_j2() << " tmod " << topnessMod() << " Mlb " << Mlb_closestb() << " MT " << mt_met_lep() <<  " pfMET " << pfmet() << " (phi " << pfmet_phi() << ") caloMET " << calomet() << " (phi " << calomet_phi() << ")" << endl;
-	cout << "Lep ID " << lep1_pdgid() << " Pt " << lep1_p4().Pt() << " Eta " << lep1_p4().Eta() << " Phi " << lep1_p4().Phi() << endl;
+	cout << "Lep ID " << lep1_pdgid() << " Pt " << lep1_p4().Pt() << " Eta " << lep1_p4().Eta() << " Phi " << lep1_p4().Phi() << " M " << lep1_p4().M() << endl;
+	cout << "Lep ID " << lep1_pdgid() << " Px " << lep1_p4().Px() << " Py " << lep1_p4().Py() << " Pz " << lep1_p4().Pz() << " E " << lep1_p4().E() << endl;
 	cout << "    passVeto/Loose/Medium/Tight " << lep1_passVeto() << "/" << lep1_passLooseID() << "/" << lep1_passMediumID() << "/" << lep1_passTightID() << endl;
 	for(unsigned int j = 0; j<ak4pfjets_p4().size();++j){
-	  cout << "jet" << j+1 << " Pt " << ak4pfjets_p4()[j].Pt() << " Eta " << ak4pfjets_p4()[j].Eta() << " Phi " << ak4pfjets_p4()[j].Phi() << " CSV " << ak4pfjets_CSV()[j] << endl;
+	  cout << "jet" << j+1 << " Pt " << ak4pfjets_p4()[j].Pt() << " Eta " << ak4pfjets_p4()[j].Eta() << " Phi " << ak4pfjets_p4()[j].Phi() << " M " << ak4pfjets_p4()[j].M() << " CSV " << ak4pfjets_CSV()[j] << endl;
+	  cout << "jet" << j+1 << " Px " << ak4pfjets_p4()[j].Px() << " Py " << ak4pfjets_p4()[j].Py() << " Pz " << ak4pfjets_p4()[j].Pz() << " E " << ak4pfjets_p4()[j].E() << " CSV " << ak4pfjets_CSV()[j] << endl;
 	}
 	cout << endl;
-      }
-
+	}
+      */
+      /*
+      if((run()==278167&&ls()==2148&&evt()==3802320550)||(run()==279715&&ls()==213&&evt()==271744185)||(run()==277127&&ls()==100&&evt()==190758468)) {
+	cout << "run:ls:evt " << run() << ":" << ls() << ":" << evt() <<  " SRbin " << SR << endl;
+	cout << "Triggered? " << "MET " << HLT_MET() << " Ele " << HLT_SingleEl() << " Muo " << HLT_SingleMu() << endl;
+	cout << "NJ " << ngoodjets() << " NB " << ngoodbtags() << " nvetoleps " << nvetoleps() << " MDPhi(MET,j12) " << mindphi_met_j1_j2() << " tmod " << topnessMod() << " Mlb " << Mlb_closestb() << " MT " << mt_met_lep() <<  " pfMET " << pfmet() << " (phi " << pfmet_phi() << ") caloMET " << calomet() << " (phi " << calomet_phi() << ")" << endl;
+	cout << "Lep ID " << lep1_pdgid() << " Pt " << lep1_p4().Pt() << " Eta " << lep1_p4().Eta() << " Phi " << lep1_p4().Phi() << " M " << lep1_p4().M() << endl;
+	cout << "Lep ID " << lep1_pdgid() << " Px " << lep1_p4().Px() << " Py " << lep1_p4().Py() << " Pz " << lep1_p4().Pz() << " E " << lep1_p4().E() << endl;
+	cout << "    passVeto/Loose/Medium/Tight " << lep1_passVeto() << "/" << lep1_passLooseID() << "/" << lep1_passMediumID() << "/" << lep1_passTightID() << endl;
+	for(unsigned int j = 0; j<ak4pfjets_p4().size();++j){
+	  cout << "jet" << j+1 << " Pt " << ak4pfjets_p4()[j].Pt() << " Eta " << ak4pfjets_p4()[j].Eta() << " Phi " << ak4pfjets_p4()[j].Phi() << " M " << ak4pfjets_p4()[j].M() << " CSV " << ak4pfjets_CSV()[j] << endl;
+	  cout << "jet" << j+1 << " Px " << ak4pfjets_p4()[j].Px() << " Py " << ak4pfjets_p4()[j].Py() << " Pz " << ak4pfjets_p4()[j].Pz() << " E " << ak4pfjets_p4()[j].E() << " CSV " << ak4pfjets_CSV()[j] << endl;
+	}
+	cout << endl;
+	}
+      */
+      //if(SR==8) cout << run() << ":" << ls() << ":" << evt() << endl;
     }//event loop
   
     // Clean Up
@@ -314,7 +330,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   for(map<string,TH1F*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
   f->Close();
   cout << "Saved histos in " << f->GetName() << endl;
-
+  /*
   TString logname = "tempfiles/SRevts_MET250.txt";
   ofstream f_log1 (logname.Data(), ios::trunc);
   f_log1 << fLogStreamSR1->str();
@@ -351,7 +367,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   logname = "tempfiles/detailedcSRevts_MET450.txt";
   ofstream cf_log3t (logname.Data(), ios::trunc);
   cf_log3t << tfLogStreamcSR3->str();
-  
+  */
   // return
   bmark->Stop("benchmark");
   cout << endl;

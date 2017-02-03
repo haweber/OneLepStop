@@ -16,6 +16,7 @@
 #include "TH2F.h"
 #include "TTreeCache.h"
 #include "TLorentzVector.h"
+#include "Math/VectorUtil.h"
 
 // CMS3
 //#include "CMS3_old20150505.cc"
@@ -51,6 +52,15 @@ float calculateMt(LorentzVector p4, LorentzVector met){
   return sqrt(2*Et1*Et2*(1.0 - cos(phi1-phi2)));
 }
 
+float calculateMT(LorentzVector p4, float met, float metphi){
+  float phi1 = p4.Phi();
+  float phi2 = metphi;
+  float Et1  = p4.Et();
+  float Et2  = met;
+
+  return sqrt(2*Et1*Et2*(1.0 - cos(phi1-phi2)));
+}
+
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
   float SRevts(0), SRevtsMuF(0), SRevtsCalo(0),  CR2levts(0), CR2levtsMuF(0), CR2levtsCalo(0),  CR0bevts(0), CR0bevtsMuF(0), CR0bevtsCalo(0);
@@ -62,30 +72,20 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
 
 
-  map<string, TH2D*> histos;
+  map<string, TH1D*> histos;
   vector<string> histonames; histonames.clear();
 
-  histonames.push_back("AllBJets");
-  histonames.push_back("AllLooseBTaggedBJets");
-  histonames.push_back("AllMediumBTaggedBJets");
-  histonames.push_back("AllTightBTaggedBJets");
-  histonames.push_back("AllCJets");
-  histonames.push_back("AllLooseBTaggedCJets");
-  histonames.push_back("AllMediumBTaggedCJets");
-  histonames.push_back("AllTightBTaggedCJets");
-  histonames.push_back("AllLJets");
-  histonames.push_back("AllLooseBTaggedLJets");
-  histonames.push_back("AllMediumBTaggedLJets");
-  histonames.push_back("AllTightBTaggedLJets");
-  histonames.push_back("LooseBEfficiency");
-  histonames.push_back("LooseCEfficiency");
-  histonames.push_back("LooseLEfficiency");
-  histonames.push_back("MediumBEfficiency");
-  histonames.push_back("MediumCEfficiency");
-  histonames.push_back("MediumLEfficiency");
-  histonames.push_back("TightBEfficiency");
-  histonames.push_back("TightCEfficiency");
-  histonames.push_back("TightLEfficiency");
+  histonames.push_back("recoMT_MET50");
+  histonames.push_back("recoMT_MET100");
+  histonames.push_back("recoMT_MET150");
+  histonames.push_back("recoMT_MET200");
+  histonames.push_back("recoMT_MET250");
+  histonames.push_back("truthMT_MET50");
+  histonames.push_back("truthMT_MET100");
+  histonames.push_back("truthMT_MET150");
+  histonames.push_back("truthMT_MET200");
+  histonames.push_back("truthMT_MET250");
+  
 
 
   double xbins[11] = {20.,30.,50.,70.,100.,140.,200.,300.,450.,700.,1000};
@@ -93,9 +93,15 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   
   
   for(unsigned int i = 0; i<histonames.size(); ++i){
-      string mapname = histonames[i];
-      if(histos.count(mapname) == 0 ) histos[mapname] = new TH2D(mapname.c_str(), "", 10, xbins, 3, ybins);
+    //for(unsigned int b = 0; b<3; ++b){
+      //string mysample;
+      //if(b==0) mysample = "TT1l";
+      //else if(b==1) mysample = "TT2l";
+      //else mysample = "W";
+      string mapname = histonames[i] + "_" + skimFilePrefix;
+      if(histos.count(mapname) == 0 ) histos[mapname] = new TH1D(mapname.c_str(), "", 50, 0,500);
       histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);
+      //}
   }
 
   unsigned int nEventsRunning = 0;
@@ -142,14 +148,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
        // Analysis Code
        float weight = cms3.scale1fb()*36.6;//actually doesn't matter really
        TString currentfilename = currentFile->GetTitle();
-       /*
+       
        if(currentfilename.Contains("ttbar_diLept_madgraph_pythia8_25ns")) weight *= 5.77109e+06/(5.77109e+06 + 2.34556e+07);
        if(currentfilename.Contains("ttbar_diLept_madgraph_pythia8_ext1_25ns")) weight *= 2.34556e+07/(5.77109e+06 + 2.34556e+07);
        if(currentfilename.Contains("ttbar_singleLeptFromT_madgraph_pythia8_25ns")) weight *= 1.16509e+07/(1.16509e+07 + 4.08199e+07);
        if(currentfilename.Contains("ttbar_singleLeptFromT_madgraph_pythia8_ext1_25ns")) weight *= 4.08199e+07/(1.16509e+07 + 4.08199e+07);
        if(currentfilename.Contains("ttbar_singleLeptFromTbar_madgraph_pythia8_25ns")) weight *= 1.13617e+07/(1.13617e+07 + 4.63189e+07);
        if(currentfilename.Contains("ttbar_singleLeptFromTbar_madgraph_pythia8_ext1_25ns")) weight *= 4.63189e+07/(1.13617e+07 + 4.63189e+07);
-       */
+       
        if(issignal){
 	 if(mass_stop()>1000) continue;
 	 if(mass_lsp()>425) continue;
@@ -163,61 +169,43 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(nvetoleps()<1)           continue;
       if(ngoodjets()<2)           continue;
       //if(ngoodbtags()<1)          continue;
-      if(pfmet()<175)             continue;//relaxed for MC
-      if(mt_met_lep()<120)        continue;//relaxed for MC
+      //if(pfmet()<175)             continue;//relaxed for MC
+      //if(mt_met_lep()<120)        continue;//relaxed for MC
       //if(mindphi_met_j1_j2()<0.8) continue;
 
-      if(pfmet()>250&&mt_met_lep()>150&&mindphi_met_j1_j2()>0.8){
-	if(ngoodbtags()>1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()){
-	  SRevts += weight;
-	  //if(filt_jetWithBadMuon()) SRevtsMuF += weight;
-	  //if(filt_pfovercalomet()) SRevtsCalo += weight;
-	  if(!(calomet()>0&&pfmet()/calomet()>5)) SRevtsCalo += weight;
-	} else if(ngoodbtags()>1&&nvetoleps()==2){
-	  CR2levts += weight;
-	  //if(filt_jetWithBadMuon()) CR2levtsMuF += weight;
-	  //if(filt_pfovercalomet()) CR2levtsCalo += weight;
-	  if(!(calomet()>0&&pfmet()/calomet()>5)) CR2levtsCalo += weight;
-	} else if(ngoodbtags()==0&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()){
-	  CR0bevts += weight;
-	  //if(filt_jetWithBadMuon()) CR0bevtsMuF += weight;
-	  //if(filt_pfovercalomet()) CR0bevtsCalo += weight;
-	  if(!(calomet()>0&&pfmet()/calomet()>5)) CR0bevtsCalo += weight;
-	}
+      LorentzVector genlep; genlep.SetPxPyPzE(0,0,0,0);
+      for(unsigned int n = 0; n< genleps_id().size(); ++n){
+	//if(genleps_status()[n]!=1) continue;
+	//if((abs(genleps_id()[n])==11||abs(genleps_id()[n])==13)&&nEventsTotal%100000==0)
+	//  cout << "id " << genleps_id()[n] << " status " << genleps_status()[n] << " last copy " << genleps_isLastCopy()[n] << " mid " << genleps_motherid()[n] << "gmid " << genleps_gmotherid()[n] << " DR true lep " << ROOT::Math::VectorUtil::DeltaR(genleps_p4()[n], lep1_p4()) << " Pt " << genleps_p4()[n].Pt() << endl;
+	 if( !genleps_isLastCopy()[n] ) continue;
+	 if(abs(genleps_id()[n])!=11&&abs(genleps_id()[n])!=13) continue;
+	 if(!(abs(genleps_motherid()[n])==24||(abs(genleps_motherid()[n])==13&&abs(genleps_gmotherid()[n])==24)) ) continue;
+	 if( ROOT::Math::VectorUtil::DeltaR(genleps_p4()[n], lep1_p4())>0.4 ) continue;
+	 if(genleps_p4()[n].Pt()<2) continue;
+	 genlep = genleps_p4()[n];
+	 break;
       }
+      //if(nEventsTotal%100000==0) cout << endl;
+      
 
-      for(unsigned int j = 0; j<ak4pfjets_p4().size(); ++j){
-	if(fabs(ak4pfjets_p4()[j].Pt())<20) continue;
-	if(fabs(ak4pfjets_p4()[j].Eta())>2.4) continue;
-	if(!(ak4pfjets_loose_pfid()[j])) continue;
-	bool isloose = (ak4pfjets_CSV()[j]>0.5426);
-	bool ismedium = (ak4pfjets_CSV()[j]>0.8484);
-	bool istight  = (ak4pfjets_CSV()[j]>0.9535);
-	bool isb = (abs(ak4pfjets_hadron_flavor()[j])==5);
-	bool isc = (abs(ak4pfjets_hadron_flavor()[j])==4);
-	bool isl = true;
-	if(isc||isb) isl = false;
-	float pt = TMath::Min(ak4pfjets_p4()[j].Pt(),(float)999.);
-	float eta = fabs(ak4pfjets_p4()[j].Eta());
-	if(isb){
-	  histos["AllBJets"]->Fill(pt,eta,weight);
-	  if(isloose)  histos["AllLooseBTaggedBJets"]->Fill(pt,eta,weight);
-	  if(ismedium) histos["AllMediumBTaggedBJets"]->Fill(pt,eta,weight);
-	  if(istight)  histos["AllTightBTaggedBJets"]->Fill(pt,eta,weight);
-	}
-	if(isc){
-	  histos["AllCJets"]->Fill(pt,eta,weight);
-	  if(isloose ) histos["AllLooseBTaggedCJets"]->Fill(pt,eta,weight);
-	  if(ismedium) histos["AllMediumBTaggedCJets"]->Fill(pt,eta,weight);
-	  if(istight)  histos["AllTightBTaggedCJets"]->Fill(pt,eta,weight);
-	}
-	if(isl){
-	  histos["AllLJets"]->Fill(pt,eta,weight);
-	  if(isloose)  histos["AllLooseBTaggedLJets"]->Fill(pt,eta,weight);
-	  if(ismedium) histos["AllMediumBTaggedLJets"]->Fill(pt,eta,weight);
-	  if(istight)  histos["AllTightBTaggedLJets"]->Fill(pt,eta,weight);
-	}
-      }//j
+      if(pfmet()<50) continue;
+      histos["recoMT_MET50_"+skimFilePrefix]->Fill(calculateMT(lep1_p4(),pfmet(),pfmet_phi()),weight);
+      if(genlep.Pt()>0) histos["truthMT_MET50_"+skimFilePrefix]->Fill(calculateMT(genlep,genmet(),genmet_phi()),weight);
+      if(pfmet()<100) continue;
+      histos["recoMT_MET100_"+skimFilePrefix]->Fill(calculateMT(lep1_p4(),pfmet(),pfmet_phi()),weight);
+      if(genlep.Pt()>0) histos["truthMT_MET100_"+skimFilePrefix]->Fill(calculateMT(genlep,genmet(),genmet_phi()),weight);
+      if(pfmet()<150) continue;
+      histos["recoMT_MET150_"+skimFilePrefix]->Fill(calculateMT(lep1_p4(),pfmet(),pfmet_phi()),weight);
+      if(genlep.Pt()>0) histos["truthMT_MET150_"+skimFilePrefix]->Fill(calculateMT(genlep,genmet(),genmet_phi()),weight);
+      if(pfmet()<200) continue;
+      histos["recoMT_MET200_"+skimFilePrefix]->Fill(calculateMT(lep1_p4(),pfmet(),pfmet_phi()),weight);
+      if(genlep.Pt()>0) histos["truthMT_MET200_"+skimFilePrefix]->Fill(calculateMT(genlep,genmet(),genmet_phi()),weight);
+      if(pfmet()<250) continue;
+      histos["recoMT_MET250_"+skimFilePrefix]->Fill(calculateMT(lep1_p4(),pfmet(),pfmet_phi()),weight);
+      if(genlep.Pt()>0) histos["truthMT_MET250_"+skimFilePrefix]->Fill(calculateMT(genlep,genmet(),genmet_phi()),weight);
+
+
     }//event loop
   
     // Clean Up
@@ -232,26 +220,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   // Example Histograms
   // samplehisto->Draw();
 
-  histos["LooseBEfficiency"]->Divide(histos["AllLooseBTaggedBJets"],histos["AllBJets"]);
-  histos["LooseCEfficiency"]->Divide(histos["AllLooseBTaggedCJets"],histos["AllCJets"]);
-  histos["LooseLEfficiency"]->Divide(histos["AllLooseBTaggedLJets"],histos["AllLJets"]);
-  histos["MediumBEfficiency"]->Divide(histos["AllMediumBTaggedBJets"],histos["AllBJets"]);
-  histos["MediumCEfficiency"]->Divide(histos["AllMediumBTaggedCJets"],histos["AllCJets"]);
-  histos["MediumLEfficiency"]->Divide(histos["AllMediumBTaggedLJets"],histos["AllLJets"]);
-  histos["TightBEfficiency"]->Divide(histos["AllTightBTaggedBJets"],histos["AllBJets"]);
-  histos["TightCEfficiency"]->Divide(histos["AllTightBTaggedCJets"],histos["AllCJets"]);
-  histos["TightLEfficiency"]->Divide(histos["AllTightBTaggedLJets"],histos["AllLJets"]);
-
-  string filename = "rootfiles/BTaggingInput_"+skimFilePrefix+".root";
-  TFile *f = new TFile(filename.c_str(),"RECREATE");
+  string filename = "rootfiles/MThistosforPaper.root";
+  TFile *f = new TFile(filename.c_str(),"UPDATE");
   f->cd();
-  for(map<string,TH2D*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
+  for(map<string,TH1D*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write(h->first.c_str(),TObject::kOverwrite);
   f->Close();
   cout << "Saved histos in " << f->GetName() << endl;
-
-  cout << "SR   evts " << SRevts << " w/ muF filter " << SRevtsMuF << " w/ caloPFfilter " << SRevtsCalo << endl;
-  cout << "CR2l evts " << CR2levts << " w/ muF filter " << CR2levtsMuF << " w/ caloPFfilter " << CR2levtsCalo << endl;
-  cout << "CR0b evts " << CR0bevts << " w/ muF filter " << CR0bevtsMuF << " w/ caloPFfilter " << CR0bevtsCalo << endl;
 
   // return
   bmark->Stop("benchmark");

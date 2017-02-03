@@ -18,7 +18,7 @@
 #include "TH2F.h"
 
 // CMS3
-#include "CMS3_Jan17.cc"
+#include "CMS3_Moriond17.cc"
 
 using namespace std;
 using namespace tas;
@@ -158,7 +158,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       counterhistSig->SetDirectory(0); 
       histNEvts = (TH2F*)file->Get("histNEvts");
       histNEvts->SetDirectory(0);
-      thisisfirst = false;
+      thisisfirst = true;
     }
     file->cd();
     TTree *tree = (TTree*)file->Get("t");
@@ -232,8 +232,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       double xsectionerr = hxsec->GetBinError(hxsec->FindBin(mStop));
      double mylumi = 36600.;
       double rawweight = xsection*mylumi/nevts;
-      double weight = xsection*mylumi/nevts*PUweight*ISRweight*BSFweight*lepSFweight*lepFSSFweight;//xsec given in pb
-      //if(nEventsTotal%1000==0) cout << "mstop " << mStop << " " <<xsection << " " << weight << " " << nevts << " " << counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,36)) << endl;
+      //double weight = xsection*mylumi/nevts*PUweight*ISRweight*BSFweight*lepSFweight*lepFSSFweight;//xsec given in pb
+      double weight = xsection*mylumi/nevts*ISRweight*BSFweight*lepSFweight*lepFSSFweight;//xsec given in pb
+      if(event==0) cout << "mstop " << mStop << " " << mLSP << " " <<xsection << " " << weight << " " << nevts << " " << counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,36)) << " " << PUweight << " " << ISRweight << " " << BSFweight << " " << lepSFweight << " " << lepFSSFweight << endl;
+      //if(event==0) cout << histNEvts->GetBinContent(histNEvts->FindBin(mStop,mLSP)) << endl;
       //did put ISRweight which should be ==1
       //if(ISRweight!=1) cout << "ISRw " << ISRweight << endl;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
@@ -301,7 +303,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  }
 	}
       }
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&ngoodbtags()>=1&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET()<2.0&&mindphi_met_j1_j2()>0.5&&pfmet()>=250&&mt_met_lep()>150){
+      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&ngoodbtags()>=1&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET()<2.0&&mindphi_met_j1_j2()>0.5&&pfmet()>=250&&mt_met_lep()>150&&ak4pfjets_passMEDbtag()[0]==false){
 	if(     pfmet()>550) cSR = 4;
 	else if(pfmet()>450) cSR = 3;
 	else if(pfmet()>350) cSR = 2;
@@ -355,7 +357,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  }
 	}
       }
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&jup_ngoodbtags()>=1&&jup_ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET_jup()<2.0&&mindphi_met_j1_j2_jup()>0.5&&pfmet_jup()>=250&&mt_met_lep_jup()>150){
+      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&jup_ngoodbtags()>=1&&jup_ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET_jup()<2.0&&mindphi_met_j1_j2_jup()>0.5&&pfmet_jup()>=250&&mt_met_lep_jup()>150&&jup_ak4pfjets_passMEDbtag()[0]==false){
 	if(     pfmet_jup()>550) cSRu = 4;
 	else if(pfmet_jup()>450) cSRu = 3;
 	else if(pfmet_jup()>350) cSRu = 2;
@@ -407,7 +409,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  }
 	}
       }
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&jdown_ngoodbtags()>=1&&jdown_ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET_jdown()<2.0&&mindphi_met_j1_j2_jdown()>0.5&&pfmet_jdown()>=250&&mt_met_lep_jdown()>150){
+      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&jdown_ngoodbtags()>=1&&jdown_ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET_jdown()<2.0&&mindphi_met_j1_j2_jdown()>0.5&&pfmet_jdown()>=250&&mt_met_lep_jdown()>150&&jdown_ak4pfjets_passMEDbtag()[0]==false){
 	if(     pfmet_jdown()>550) cSRd = 4;
 	else if(pfmet_jdown()>450) cSRd = 3;
 	else if(pfmet_jdown()>350) cSRd = 2;
@@ -424,7 +426,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	    else if(pfmet()>450) CR1l = 3;
 	    else if(pfmet()>350) CR1l = 2;
 	    else if(pfmet()>250) CR1l = 1;
+	    //} else if(ngoodbtags()==0&&Mlb_lead_bdiscr()>175.) {
 	  } else if(ntightbtags()==0&&Mlb_lead_bdiscr()>175.) {
+	    //if(ngoodbtags()!=0) cout << "WTF" << endl;
 	    if(     pfmet()>600) CR1l = 7;
 	    else if(pfmet()>450) CR1l = 6;
 	    else if(pfmet()>250) CR1l = 5;
@@ -457,18 +461,21 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	    else if(pfmet()>450) CR1l = 24;
 	    else if(pfmet()>350) CR1l = 23;
 	    else if(pfmet()>250) CR1l = 22;
+	    //} else if(ngoodbtags()==0&&Mlb_lead_bdiscr()>175.) {
 	  } else if(ntightbtags()==0&&Mlb_lead_bdiscr()>175.) {
 	    if(     pfmet()>450) CR1l = 27;
 	    else if(pfmet()>250) CR1l = 26;
 	  }
 	}
       }
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&ngoodbtags()==0&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET()<2.0&&mindphi_met_j1_j2()>0.5&&pfmet()>=250&&mt_met_lep()>150){
+      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&ngoodbtags()==0&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET()<2.0&&mindphi_met_j1_j2()>0.5&&pfmet()>=250&&mt_met_lep()>150&&ak4pfjets_passMEDbtag()[0]==false){
 	if(     pfmet()>550) cCR1l = 4;
 	else if(pfmet()>450) cCR1l = 3;
 	else if(pfmet()>350) cCR1l = 2;
 	else if(pfmet()>250) cCR1l = 1;
       }
+      //added protection for cases with =0 tight CR (high Mlb), but >=2 medium SR (low Mlb)
+      if(SR>0) CR1l = -1;
 
       float SF_CR1l = 1.0;
       float SF_cCR1l = 1.0;
@@ -559,7 +566,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  }
 	}
       }
-      if(lepind>=3&&ngoodbtags()>=1&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET_rl()<2.0&&mindphi_met_j1_j2_rl()>0.5&&pfmet_rl()>=250&&mt_met_lep_rl()>150){
+      if(lepind>=3&&ngoodbtags()>=1&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET_rl()<2.0&&mindphi_met_j1_j2_rl()>0.5&&pfmet_rl()>=250&&mt_met_lep_rl()>150&&ak4pfjets_passMEDbtag()[0]==false){
 	if(     pfmet_rl()>550) cCR2l = 4;
 	else if(pfmet_rl()>450) cCR2l = 3;
 	else if(pfmet_rl()>350) cCR2l = 2;
@@ -700,8 +707,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //double XSdown = (xsec()-xsec_uncert())/xsec();
       double XSup = (xsection+xsectionerr)/xsection;
       double XSdown = (xsection-xsectionerr)/xsection;
-      double PUup = PUweightUp/PUweight;
-      double PUdown = PUweightDown/PUweight;
+      double PUup = PUweightUp/PUweight;//THESE ARE WRONG RIGHT NOW
+      double PUdown = PUweightDown/PUweight;//THESE ARE WRONG RIGHT NOW
       double lEffup = weight_lepSF_up()/weight_lepSF()*lepSFnorm/lepSFnormup;
       double lEffdown = weight_lepSF_down()/weight_lepSF()*lepSFnorm/lepSFnormdown;
       double lEffFSup = weight_lepSF_fastSim_up()/weight_lepSF_fastSim()*lepFSSFnorm/lepFSSFnormup;
@@ -716,7 +723,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       double BSFLdown = weight_btagsf_light_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
       double BSFFSup = weight_btagsf_fastsim_UP()/weight_btagsf()*BSFnorm/BSFnormFSup;
       double BSFFSdown = weight_btagsf_fastsim_DN()/weight_btagsf()*BSFnorm/BSFnormFSdown;
-      if((SR>=5&&SR<=7)||(SR>=13&&SR<=16)||(SR>=20&&SR<=21)||(SR>=26&&SR<=27)||CR2l==5||(CR2l>=13&&CR2l<=16)||CR2l==20||CR2l==26||(CR1l>=5&&CR1l<=7)||(CR1l>=26&&CR1l<=27)){
+      if((SR>=5&&SR<=7)||(SR>=13&&SR<=16)||(SR>=20&&SR<=21)||(SR>=26&&SR<=27)||CR2l==5||(CR2l>=13&&CR2l<=16)||CR2l==20||CR2l==26/*||(CR1l>=5&&CR1l<=7)||(CR1l>=26&&CR1l<=27)*/){
 	if(BSFweight>0) weight /= BSFweight;
 	BSFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,37));
 	BSFnormHup = counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,38));
@@ -797,8 +804,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	histos["SR_LepEffdown"  +T2tbhelper]->Fill(mStop,mLSP,SR,weight*lEffdown);
 	histos["SR_LepEffFSup"  +T2tbhelper]->Fill(mStop,mLSP,SR,weight*lEffFSup);
 	histos["SR_LepEffFSdown"+T2tbhelper]->Fill(mStop,mLSP,SR,weight*lEffFSdown);
-	histos["SR_muRFup"      +T2tbhelper]->Fill(mStop,mLSP,SR,weight*muRFup/counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,1))*counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,2)));
-	histos["SR_muRFdown"    +T2tbhelper]->Fill(mStop,mLSP,SR,weight*muRFdown/counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,1))*counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,2)));
+	//histos["SR_muRFup"      +T2tbhelper]->Fill(mStop,mLSP,SR,weight*muRFup/counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,1))*counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,2)));
+	//histos["SR_muRFdown"    +T2tbhelper]->Fill(mStop,mLSP,SR,weight*muRFdown/counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,1))*counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,2)));
+	histos["SR_muRFup"      +T2tbhelper]->Fill(mStop,mLSP,SR,weight*muRFup);
+	histos["SR_muRFdown"      +T2tbhelper]->Fill(mStop,mLSP,SR,weight*muRFdown);
 	if(isT2tt){
 	  histos["SRyield_polL"]        ->Fill(mStop,mLSP,SR,weight*weight_pol_L);
 	  histos["SR_ISRup_polL"]       ->Fill(mStop,mLSP,SR,weight*weight_pol_L*ISRup);

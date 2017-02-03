@@ -18,7 +18,7 @@
 #include "TH2F.h"
 
 // CMS3
-#include "CMS3.cc"
+#include "CMS3_Jan17.cc"
 
 using namespace std;
 using namespace tas;
@@ -135,7 +135,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       counterhistSig->SetDirectory(0); 
       histNEvts = (TH2F*)file->Get("histNEvts");
       histNEvts->SetDirectory(0);
-      thisisfirst = false;
+      thisisfirst = true;
     }
     file->cd();
     TTree *tree = (TTree*)file->Get("t");
@@ -187,7 +187,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //double weight = xsec()*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
       double mylumi = 36600.;
       double rawweight = xsection*mylumi/nevts;
-      double weight = xsection*mylumi/nevts*PUweight*ISRweight*BSFweight*lepSFweight*lepFSSFweight;//xsec given in pb
+      //double weight = xsection*mylumi/nevts*PUweight*ISRweight*BSFweight*lepSFweight*lepFSSFweight;//xsec given in pb
+      double weight = xsection*mylumi/nevts*ISRweight*BSFweight*lepSFweight*lepFSSFweight;//xsec given in pb
       //did put ISRweight which should be ==1
       //if(ISRweight!=1) cout << "ISRw " << ISRweight << endl;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
@@ -255,7 +256,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  }
 	}
       }
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&ngoodbtags()>=1&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET()<2.0&&mindphi_met_j1_j2()>0.5&&pfmet()>=250&&mt_met_lep()>150){
+      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&ngoodbtags()>=1&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET()<2.0&&mindphi_met_j1_j2()>0.5&&pfmet()>=250&&mt_met_lep()>150&&ak4pfjets_passMEDbtag()[0]==false){
 	if(     pfmet()>550) cSR = 4;
 	else if(pfmet()>450) cSR = 3;
 	else if(pfmet()>350) cSR = 2;
@@ -272,6 +273,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	    else if(pfmet()>450) CR1l = 3;
 	    else if(pfmet()>350) CR1l = 2;
 	    else if(pfmet()>250) CR1l = 1;
+	    //} else if(ngoodbtags()==0&&Mlb_lead_bdiscr()>175.) {
 	  } else if(ntightbtags()==0&&Mlb_lead_bdiscr()>175.) {
 	    if(     pfmet()>600) CR1l = 7;
 	    else if(pfmet()>450) CR1l = 6;
@@ -305,19 +307,22 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	    else if(pfmet()>450) CR1l = 24;
 	    else if(pfmet()>350) CR1l = 23;
 	    else if(pfmet()>250) CR1l = 22;
+	  //} else if(ngoodbtags()==0&&Mlb_lead_bdiscr()>175.) {
 	  } else if(ntightbtags()==0&&Mlb_lead_bdiscr()>175.) {
 	    if(     pfmet()>450) CR1l = 27;
 	    else if(pfmet()>250) CR1l = 26;
 	  }
 	}
       }
-      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&ngoodbtags()==0&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET()<2.0&&mindphi_met_j1_j2()>0.5&&pfmet()>=250&&mt_met_lep()>150){
+      if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&ngoodbtags()==0&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET()<2.0&&mindphi_met_j1_j2()>0.5&&pfmet()>=250&&mt_met_lep()>150&&ak4pfjets_passMEDbtag()[0]==false){
 	if(     pfmet()>550) cCR1l = 4;
 	else if(pfmet()>450) cCR1l = 3;
 	else if(pfmet()>350) cCR1l = 2;
 	else if(pfmet()>250) cCR1l = 1;
       }
-
+      //added protection for cases with =0 tight CR (high Mlb), but >=2 medium SR (low Mlb)
+      if(SR>0) CR1l = -1;
+      
       float SF_CR1l = 1.0;
       float SF_cCR1l = 1.0;
       if(CR1l== 1) SF_CR1l = 0.1199;
@@ -407,7 +412,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	  }
 	}
       }
-      if(lepind>=3&&ngoodbtags()>=1&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET_rl()<2.0&&mindphi_met_j1_j2_rl()>0.5&&pfmet_rl()>=250&&mt_met_lep_rl()>150){
+      if(lepind>=3&&ngoodbtags()>=1&&ngoodjets()>=5&&lep1_p4().Pt()<150.&&lep1_dphiMET_rl()<2.0&&mindphi_met_j1_j2_rl()>0.5&&pfmet_rl()>=250&&mt_met_lep_rl()>150&&ak4pfjets_passMEDbtag()[0]==false){
 	if(     pfmet_rl()>550) cCR2l = 4;
 	else if(pfmet_rl()>450) cCR2l = 3;
 	else if(pfmet_rl()>350) cCR2l = 2;
@@ -539,7 +544,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	      
       //implement some sanity checks
       if(CR1l!=(-1)&&CR2l!=(-1)) cout << "WTF CR1l " << CR1l << " CR2l " << CR2l << endl;
-      if(SR!=(-1)&&CR1l!=(-1)) cout << "WTF SR " << SR << " CR1l " << CR1l << endl;
+      if(SR!=(-1)&&CR1l!=(-1)) { cout << "WTF SR " << SR << " CR1l " << CR1l << endl;
+		cout << "NJ " << ngoodjets() << " NB_m " << ngoodbtags() << " NB_t " << ntightbtags() << " tmod " << topnessMod() << " Mlb_SR " << Mlb_closestb() << " Mlb_CR0b " << Mlb_lead_bdiscr() << " MET " << pfmet() << endl;
+      }
       if(SR!=(-1)&&CR2l!=(-1)) cout << "WTF SR " << SR << " CR2l " << CR2l << endl;
 
       if((SR>=5&&SR<=7)||(SR>=13&&SR<=16)||(SR>=20&&SR<=21)||(SR>=26&&SR<=27)||CR2l==5||(CR2l>=13&&CR2l<=16)||CR2l==20||CR2l==26||(CR1l>=5&&CR1l<=7)||(CR1l>=26&&CR1l<=27)){

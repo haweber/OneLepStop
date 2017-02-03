@@ -129,7 +129,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   // Example Histograms
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
 
-  TFile *fw = new TFile("rootfiles/PhotonMETResolution/NuOrNunuPtVsPhotPt.root","RECREATE");
+  TFile *fw = new TFile("rootfiles/PhotonMETResolution/NuOrNunuPtVsPhotPt.root","READ");
   fw->cd();
   TH1F* hrat_data_23j_lMlb_1ltop = (TH1F*)fw->Get("NuPtVsPhotPt_23j_lMlb_1ltopVsData");
   TH1F* hrat_data_23j_hMlb_1ltop = (TH1F*)fw->Get("NuPtVsPhotPt_23j_hMlb_1ltopVsData");
@@ -238,7 +238,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //cout <<  " filename " << currentFile->GetTitle() << endl;
 
       // Analysis Code
-      float weight = cms3.scale1fb()*31;
+      float weight = cms3.scale1fb()*36.6;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
 
       if(nvtxs()<0)                  continue;
@@ -259,8 +259,9 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(photon_tightid(ph_selectedidx() )==false) continue;
 
       TString currentfilename = currentFile->GetTitle();
-      if(currentfilename.Contains("GJets_DR0p4_HT")) { if(ph_drMinParton()[selectedidx]< 0.4) continue; }
-      if(currentfilename.Contains("GJets_HT"))       { if(ph_drMinParton()[selectedidx]>=0.4) continue; }
+      if(currentfilename.Contains("GJets_DR0p4_HT")) { if(ph_drMinParton()[ph_selectedidx()]< 0.4) continue; }
+      //if(currentfilename.Contains("GJets_HT"))       { if(ph_drMinParton()[ph_selectedidx()]>=0.4) continue; }
+      if(currentfilename.Contains("GJets_HT")&&!currentfilename.Contains("GJets_HT400to600_25ns"))       { if(ph_drMinParton()[ph_selectedidx()]>=0.4) continue; }
 
       if(is_data()) weight = 1.;
       int trigscal = 0;
@@ -273,7 +274,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       else if(PhotPt>95 &&HLT_Photon90_R9Id90_HE10_IsoM()>0 ) trigscal = HLT_Photon90_R9Id90_HE10_IsoM();
       else if(PhotPt>80 &&HLT_Photon75_R9Id90_HE10_IsoM()>0 ) trigscal = HLT_Photon75_R9Id90_HE10_IsoM();
       else if(PhotPt>55 &&HLT_Photon50_R9Id90_HE10_IsoM()>0 ) trigscal = HLT_Photon50_R9Id90_HE10_IsoM();
-      else if(PhotPt>125 &&HLT_Photon120()>0 )                trigscal = HLTPhoton120();
+      else if(PhotPt>125 &&HLT_Photon120()>0 )                trigscal = HLT_Photon120();
       if(is_data()&&trigscal<=0) continue;
       if(is_data()) weight = weight * (float)trigscal;
       if( is_data() ) {
@@ -293,7 +294,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float weight1l5j = -1;
       int NJ = ph_ngoodjets();
 
-      if(isdata()){
+      if(is_data()){
 	if(ph_ngoodjets()<=3){
 	  weight2lltmod = hrat_data_23j_ltmod_2l->GetBinContent(hrat_data_23j_ltmod_2l->FindBin(TMath::Min(PhotPt,(float)999.99)));
 	  weight2lhtmod = hrat_data_23j_htmod_2l->GetBinContent(hrat_data_23j_htmod_2l->FindBin(TMath::Min(PhotPt,(float)999.99)));
@@ -388,8 +389,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   for(map<string,TH1F*>::iterator h=histos.begin(); h!=histos.end();++h) delete h->second;
 
 
-  fhelp->Close();
-  delete fhelp;
+  fw->Close();
+  delete fw;
   // return
   bmark->Stop("benchmark");
   cout << endl;

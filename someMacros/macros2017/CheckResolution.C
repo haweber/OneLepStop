@@ -15,21 +15,25 @@
 #include "TTreeCache.h"
 #include "TLorentzVector.h"
 #include "TRandom3.h"
+#include "Math/LorentzVector.h"
 //#include "TDatime.h"
+typedef ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > LorentzVector;
 
 // CMS3
 //#include "CMS3_old20150505.cc"
-#include "CMS3_Oct16.cc"
+#include "CMS3_Jan17.cc"
 
 //MT2 variants
 
 //#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/Davismt2.h"
 //#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/MT2_implementations.h"
-#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/JetUtil.h"
+//#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/JetUtil.h"
 //#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/mt2w.h"
 //#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/mt2w_bisect.h"
 //#include "StopAnalysis/StopBabyMaker/stop_variables/topness.h"
-#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/topness.h"
+//#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/topness.h"
+#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/JetUtil.cc"
+#include "/home/users/haweber/StopAnalysis/AnalysisCode/StopAnalysis/StopBabyMaker/stop_variables/topness.cc"
 
 using namespace std;
 using namespace tas;
@@ -90,17 +94,17 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   histonames.push_back("MET_4j_htmod_hMlb");
   histonames.push_back("MET_5j");
 
-  for(unsigned int b = 0; b<4; ++b){
+  for(unsigned int b = 0; b<3; ++b){
     string prefix;
     if(b==0) prefix = "res0";
-    if(b==1) prefix = "res10";
-    if(b==2) prefix = "res20";
-    if(b==3) prefix = "floatres";
+    if(b==1) prefix = "floatres";
+    if(b==2) prefix = "floatworseres";
     for(unsigned int i = 0; i<histonames.size(); ++i){
       string mapname;
       mapname = histonames[i] + "_" + prefix;
       if(histos.count(mapname) == 0 ) histos[mapname] = new TH1F(mapname.c_str(), "", 10, 250, 750);
-      histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);    
+      histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);
+      cout << mapname << endl;
     }
   }
 
@@ -199,23 +203,43 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
       float floatresX, floatresY;
       if(pfmet()<250){
-	floatresX = rndm->Gaus(1.10,0.015);
-	floatresY = rndm2->Gaus(1.10,0.015);
+	floatresX = rndm->Gaus(0.925,0.075);
+	floatresY = rndm2->Gaus(0.925,0.075);
       } else if(pfmet()<350){
-	floatresX = rndm2->Gaus(1.05,0.0075);
-	floatresY = rndm->Gaus(1.05,0.0075);
+	floatresX = rndm2->Gaus(0.95,0.05);
+	floatresY = rndm->Gaus(0.95,0.05);
       } else if(pfmet()<450){
-	floatresX = rndm->Gaus(0.90,0.025);
-	floatresY = rndm2->Gaus(0.90,0.025);
+	floatresX = rndm->Gaus(1.07,0.07);
+	floatresY = rndm2->Gaus(1.07,0.07);
       } else if(pfmet()<550){
-	floatresX = rndm->Gaus(0.85,0.0375);
-	floatresY = rndm2->Gaus(0.85,0.0375);
+	floatresX = rndm->Gaus(1.125,0.125);
+	floatresY = rndm2->Gaus(1.125,0.125);
       } else if(pfmet()<650){
-	floatresX = rndm->Gaus(0.75,0.055);
-	floatresY = rndm2->Gaus(0.75,0.055);
+	floatresX = rndm->Gaus(1.2,0.2);
+	floatresY = rndm2->Gaus(1.2,0.2);
       } else {
-	floatresX = rndm2->Gaus(0.55,0.05);
-	floatresY = rndm->Gaus(0.55,0.05);
+	floatresX = rndm2->Gaus(1.25,0.25);
+	floatresY = rndm->Gaus(1.25,0.25);
+      }
+      float floatresXX, floatresYY;
+      if(pfmet()<250){
+	floatresXX = rndm->Gaus(2.-0.925,0.075);
+	floatresYY = rndm2->Gaus(2.-0.925,0.075);
+      } else if(pfmet()<350){
+	floatresXX = rndm2->Gaus(2.-0.95,0.05);
+	floatresYY = rndm->Gaus(2.-0.95,0.05);
+      } else if(pfmet()<450){
+	floatresXX = rndm->Gaus(2.-1.07,0.07);
+	floatresYY = rndm2->Gaus(2.-1.07,0.07);
+      } else if(pfmet()<550){
+	floatresXX = rndm->Gaus(2.-1.125,0.125);
+	floatresYY = rndm2->Gaus(2.-1.125,0.125);
+      } else if(pfmet()<650){
+	floatresXX = rndm->Gaus(2.-1.2,0.2);
+	floatresYY = rndm2->Gaus(2.-1.2,0.2);
+      } else {
+	floatresXX = rndm2->Gaus(2.-1.25,0.25);
+	floatresYY = rndm->Gaus(2.-1.25,0.25);
       }
 
       float METresX = METx - gMETx;
@@ -225,24 +249,29 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float METx_res20 = gMETx + rndm->Gaus(1.20,0.20)*METresX;
       float METy_res20 = gMETy + rndm2->Gaus(1.20,0.20)*METresY;
       float METx_floatres = gMETx + floatresX*METresX;
-      float METy_floatres = gMETy + floatresX*METresY;  
+      float METy_floatres = gMETy + floatresY*METresY;  
+      float METx_floatworseres = gMETx + floatresXX*METresX;
+      float METy_floatworseres = gMETy + floatresYY*METresY;  
       LorentzVector METlv;
       LorentzVector METlvres10;
       LorentzVector METlvres15;
       LorentzVector METlvres20;
       LorentzVector METlvfloatres;
+      LorentzVector METlvfloatworseres;
       METlv.SetPxPyPzE(     METx ,METy ,0,sqrt(METx *METx  + METy *METy ));
       METlvres10.SetPxPyPzE(METx_res10,METy_res10,0,sqrt(METx_res10*METx_res10 + METy_res10*METy_res10));
       METlvres20.SetPxPyPzE(METx_res20,METy_res20,0,sqrt(METx_res20*METx_res20 + METy_res20*METy_res20));
       METlvfloatres.SetPxPyPzE(METx_floatres,METy_floatres,0,sqrt(METx_floatres*METx_floatres + METy_floatres*METy_floatres));
-      if(METlv.Pt()<250 && METlvres10.Pt()<250 && METlvres20.Pt()<250 && METlvfloatres.Pt()<250) continue;
+      METlvfloatworseres.SetPxPyPzE(METx_floatworseres,METy_floatworseres,0,sqrt(METx_floatworseres*METx_floatworseres + METy_floatworseres*METy_floatworseres));
+      if(METlv.Pt()<250 && METlvres10.Pt()<250 && METlvres20.Pt()<250 && METlvfloatres.Pt()<250 && METlvfloatworseres.Pt()<250) continue;
       float MT = calculateMt(leplv,METlv);
       if(TMath::Abs(MT-mt_met_lep())>1) cout << "MT " << MT << " mt_met_lep " << mt_met_lep() << endl;
       float MTres10 = calculateMt(leplv,METlvres10);
       float MTres15 = calculateMt(leplv,METlvres15);
       float MTres20 = calculateMt(leplv,METlvres20);
       float MTfloatres = calculateMt(leplv,METlvfloatres);
-      if(MT<150 && MTres10<150 && MTres20<150 && MTfloatres<150) continue;
+      float MTfloatworseres = calculateMt(leplv,METlvfloatworseres);
+      if(MT<150 && MTres10<150 && MTres20<150 && MTfloatres<150 && MTfloatworseres<150) continue;
 
       float minDPhi = TMath::Min(DPhi_met_lep(jetlv[0],METlv),DPhi_met_lep(jetlv[1],METlv) );
       if(TMath::Abs(minDPhi-mindphi_met_j1_j2())>0.1){
@@ -251,12 +280,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float minDPhires10 = TMath::Min(DPhi_met_lep(jetlv[0],METlvres10),DPhi_met_lep(jetlv[1],METlvres10) );
       float minDPhires20 = TMath::Min(DPhi_met_lep(jetlv[0],METlvres20),DPhi_met_lep(jetlv[1],METlvres20) );
       float minDPhifloatres = TMath::Min(DPhi_met_lep(jetlv[0],METlvfloatres),DPhi_met_lep(jetlv[1],METlvfloatres) );
-      if(minDPhi<0.5 && minDPhires10<0.5 && minDPhires20<0.5 && minDPhifloatres<0.5) continue;
+      float minDPhifloatworseres = TMath::Min(DPhi_met_lep(jetlv[0],METlvfloatworseres),DPhi_met_lep(jetlv[1],METlvfloatworseres) );
+      if(minDPhi<0.5 && minDPhires10<0.5 && minDPhires20<0.5 && minDPhifloatres<0.5 && minDPhifloatworseres < 0.5) continue;
 
       float DPhiMETlep = DPhi_met_lep(lep1_p4(),METlv);
       float DPhiMETlepres10 = DPhi_met_lep(lep1_p4(),METlvres10);
       float DPhiMETlepres20 = DPhi_met_lep(lep1_p4(),METlvres20);
       float DPhiMETlepfloatres = DPhi_met_lep(lep1_p4(),METlvfloatres);
+      float DPhiMETlepfloatworseres = DPhi_met_lep(lep1_p4(),METlvfloatworseres);
       
       vector<int> jetIndexSortedCSV = JetUtil::JetIndexCSVsorted(ak4pfjets_CSV(),ak4pfjets_p4(),ak4pfjets_loose_pfid(),30.,2.4,true);
       vector<LorentzVector> mybjets; vector<LorentzVector> myaddjets;
@@ -273,6 +304,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float topmodres10 =  CalcTopness_(1,METlvres10.Pt(),METlvres10.Phi(),lep1_p4(),mybjets,myaddjets);
       float topmodres20 =  CalcTopness_(1,METlvres20.Pt(),METlvres20.Phi(),lep1_p4(),mybjets,myaddjets);
       float topmodfloatres =  CalcTopness_(1,METlvfloatres.Pt(),METlvfloatres.Phi(),lep1_p4(),mybjets,myaddjets);
+      float topmodfloatworseres =  CalcTopness_(1,METlvfloatworseres.Pt(),METlvfloatworseres.Phi(),lep1_p4(),mybjets,myaddjets);
       
       if(nEventsCount%100000==0){
 	cout << "genMET " << genmet() << " MET " << pfmet() << " res00 " << METlv.Pt() << " res10 " << METlvres10.Pt() << " res20 " << METlvres20.Pt() << " floatres " << METlvfloatres.Pt() << endl;
@@ -284,46 +316,55 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(ngoodjets()<=3){
 	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    > 10. && Mlb_closestb()<=175) histos["MET_23j_lMlb_res0"]->Fill(METlv.Pt()     ,weight);
 	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    > 10. && Mlb_closestb()> 175) histos["MET_23j_hMlb_res0"]->Fill(METlv.Pt()     ,weight);
-	if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10> 10. && Mlb_closestb()<=175) histos["MET_23j_lMlb_res10"]->Fill(METlvres10.Pt(),weight);
-	if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10> 10. && Mlb_closestb()> 175) histos["MET_23j_hMlb_res10"]->Fill(METlvres10.Pt(),weight);
-	if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20> 10. && Mlb_closestb()<=175) histos["MET_23j_lMlb_res20"]->Fill(METlvres20.Pt(),weight);
-	if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20> 10. && Mlb_closestb()> 175) histos["MET_23j_hMlb_res20"]->Fill(METlvres20.Pt(),weight);
+	//if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10> 10. && Mlb_closestb()<=175) histos["MET_23j_lMlb_res10"]->Fill(METlvres10.Pt(),weight);
+	//if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10> 10. && Mlb_closestb()> 175) histos["MET_23j_hMlb_res10"]->Fill(METlvres10.Pt(),weight);
+	//if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20> 10. && Mlb_closestb()<=175) histos["MET_23j_lMlb_res20"]->Fill(METlvres20.Pt(),weight);
+	//if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20> 10. && Mlb_closestb()> 175) histos["MET_23j_hMlb_res20"]->Fill(METlvres20.Pt(),weight);
 	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres> 10. && Mlb_closestb()<=175) histos["MET_23j_lMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);	 
 	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres> 10. && Mlb_closestb()> 175) histos["MET_23j_hMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);	 
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.8&&METlvfloatworseres.Pt()>250.&&topmodfloatworseres> 10. && Mlb_closestb()<=175) histos["MET_23j_lMlb_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);	 
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.8&&METlvfloatworseres.Pt()>250.&&topmodfloatworseres> 10. && Mlb_closestb()> 175) histos["MET_23j_hMlb_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);	 
       }
-      if(ngoodjets()>=4){
-	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    <= 0. && Mlb_closestb()<=175) histos["MET_23j_ltmod_lMlb_res0"]->Fill(METlv.Pt()     ,weight);
-	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    <= 0. && Mlb_closestb()> 175) histos["MET_23j_ltmod_hMlb_res0"]->Fill(METlv.Pt()     ,weight);
-	if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10<= 0. && Mlb_closestb()<=175) histos["MET_23j_ltmod_lMlb_res10"]->Fill(METlvres10.Pt(),weight);
-	if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10<= 0. && Mlb_closestb()> 175) histos["MET_23j_ltmod_hMlb_res10"]->Fill(METlvres10.Pt(),weight);
-	if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20<= 0. && Mlb_closestb()<=175) histos["MET_23j_ltmod_lMlb_res20"]->Fill(METlvres20.Pt(),weight);
-	if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20<= 0. && Mlb_closestb()> 175) histos["MET_23j_ltmod_hMlb_res20"]->Fill(METlvres20.Pt(),weight);
-	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres<= 0. && Mlb_closestb()<=175) histos["MET_23j_ltmod_lMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);	 
-	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres<= 0. && Mlb_closestb()> 175) histos["MET_23j_ltmod_hMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);
+      if(ngoodjets()>=4){	       												
+	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    <= 0. && Mlb_closestb()<=175) histos["MET_4j_ltmod_lMlb_res0"]->Fill(METlv.Pt()     ,weight);
+	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    <= 0. && Mlb_closestb()> 175) histos["MET_4j_ltmod_hMlb_res0"]->Fill(METlv.Pt()     ,weight);
+	//if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10<= 0. && Mlb_closestb()<=175) histos["MET_4j_ltmod_lMlb_res10"]->Fill(METlvres10.Pt(),weight);
+	//if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10<= 0. && Mlb_closestb()> 175) histos["MET_4j_ltmod_hMlb_res10"]->Fill(METlvres10.Pt(),weight);
+	//if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20<= 0. && Mlb_closestb()<=175) histos["MET_4j_ltmod_lMlb_res20"]->Fill(METlvres20.Pt(),weight);
+	//if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20<= 0. && Mlb_closestb()> 175) histos["MET_4j_ltmod_hMlb_res20"]->Fill(METlvres20.Pt(),weight);
+	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres<= 0. && Mlb_closestb()<=175) histos["MET_4j_ltmod_lMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);	 
+	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres<= 0. && Mlb_closestb()> 175) histos["MET_4j_ltmod_hMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.8&&METlvfloatworseres.Pt()>250.&&topmodfloatworseres<= 0. && Mlb_closestb()<=175) histos["MET_4j_ltmod_lMlb_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);	 
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.8&&METlvfloatworseres.Pt()>250.&&topmodfloatworseres<= 0. && Mlb_closestb()> 175) histos["MET_4j_ltmod_hMlb_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);
 
-	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    >0.&&topmod_    <=10. && Mlb_closestb()<=175) histos["MET_23j_mtmod_lMlb_res0"]->Fill(METlv.Pt()     ,weight);
-	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    >0.&&topmod_    <=10. && Mlb_closestb()> 175) histos["MET_23j_mtmod_hMlb_res0"]->Fill(METlv.Pt()     ,weight);
-	if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10>0.&&topmodres10<=10. && Mlb_closestb()<=175) histos["MET_23j_mtmod_lMlb_res10"]->Fill(METlvres10.Pt(),weight);
-	if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10>0.&&topmodres10<=10. && Mlb_closestb()> 175) histos["MET_23j_mtmod_hMlb_res10"]->Fill(METlvres10.Pt(),weight);
-	if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20>0.&&topmodres20<=10. && Mlb_closestb()<=175) histos["MET_23j_mtmod_lMlb_res20"]->Fill(METlvres20.Pt(),weight);
-	if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20>0.&&topmodres20<=10. && Mlb_closestb()> 175) histos["MET_23j_mtmod_hMlb_res20"]->Fill(METlvres20.Pt(),weight);
-	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres>0.&&topmodfloatres<=10. && Mlb_closestb()<=175) histos["MET_23j_mtmod_lMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);	 
-	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres>0.&&topmodfloatres<=10. && Mlb_closestb()> 175) histos["MET_23j_mtmod_hMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);
+	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    >0.&&topmod_    <=10. && Mlb_closestb()<=175) histos["MET_4j_mtmod_lMlb_res0"]->Fill(METlv.Pt()     ,weight);
+	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    >0.&&topmod_    <=10. && Mlb_closestb()> 175) histos["MET_4j_mtmod_hMlb_res0"]->Fill(METlv.Pt()     ,weight);
+	//if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10>0.&&topmodres10<=10. && Mlb_closestb()<=175) histos["MET_4j_mtmod_lMlb_res10"]->Fill(METlvres10.Pt(),weight);
+	//if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10>0.&&topmodres10<=10. && Mlb_closestb()> 175) histos["MET_4j_mtmod_hMlb_res10"]->Fill(METlvres10.Pt(),weight);
+	//if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20>0.&&topmodres20<=10. && Mlb_closestb()<=175) histos["MET_4j_mtmod_lMlb_res20"]->Fill(METlvres20.Pt(),weight);
+	//if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20>0.&&topmodres20<=10. && Mlb_closestb()> 175) histos["MET_4j_mtmod_hMlb_res20"]->Fill(METlvres20.Pt(),weight);
+	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres>0.&&topmodfloatres<=10. && Mlb_closestb()<=175) histos["MET_4j_mtmod_lMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);	 
+	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres>0.&&topmodfloatres<=10. && Mlb_closestb()> 175) histos["MET_4j_mtmod_hMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.8&&METlvfloatworseres.Pt()>250.&&topmodfloatworseres>0.&&topmodfloatworseres<=10. && Mlb_closestb()<=175) histos["MET_4j_mtmod_lMlb_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);	 
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.8&&METlvfloatworseres.Pt()>250.&&topmodfloatworseres>0.&&topmodfloatworseres<=10. && Mlb_closestb()> 175) histos["MET_4j_mtmod_hMlb_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);
 	
-	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    > 10. && Mlb_closestb()<=175) histos["MET_23j_htmod_lMlb_res0"]->Fill(METlv.Pt()     ,weight);
-	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    > 10. && Mlb_closestb()> 175) histos["MET_23j_htmod_hMlb_res0"]->Fill(METlv.Pt()     ,weight);
-	if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10> 10. && Mlb_closestb()<=175) histos["MET_23j_htmod_lMlb_res10"]->Fill(METlvres10.Pt(),weight);
-	if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10> 10. && Mlb_closestb()> 175) histos["MET_23j_htmod_hMlb_res10"]->Fill(METlvres10.Pt(),weight);
-	if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20> 10. && Mlb_closestb()<=175) histos["MET_23j_htmod_lMlb_res20"]->Fill(METlvres20.Pt(),weight);
-	if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20> 10. && Mlb_closestb()> 175) histos["MET_23j_htmod_hMlb_res20"]->Fill(METlvres20.Pt(),weight);
-	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres> 10. && Mlb_closestb()<=175) histos["MET_23j_htmod_lMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);	 
-	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres> 10. && Mlb_closestb()> 175) histos["MET_23j_htmod_hMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);
+	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    > 10. && Mlb_closestb()<=175) histos["MET_4j_htmod_lMlb_res0"]->Fill(METlv.Pt()     ,weight);
+	if(MT     >150.&&minDPhi     >0.8&&METlv.Pt()     >250.&&topmod_    > 10. && Mlb_closestb()> 175) histos["MET_4j_htmod_hMlb_res0"]->Fill(METlv.Pt()     ,weight);
+	//if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10> 10. && Mlb_closestb()<=175) histos["MET_4j_htmod_lMlb_res10"]->Fill(METlvres10.Pt(),weight);
+	//if(MTres10>150.&&minDPhires10>0.8&&METlvres10.Pt()>250.&&topmodres10> 10. && Mlb_closestb()> 175) histos["MET_4j_htmod_hMlb_res10"]->Fill(METlvres10.Pt(),weight);
+	//if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20> 10. && Mlb_closestb()<=175) histos["MET_4j_htmod_lMlb_res20"]->Fill(METlvres20.Pt(),weight);
+	//if(MTres20>150.&&minDPhires20>0.8&&METlvres20.Pt()>250.&&topmodres20> 10. && Mlb_closestb()> 175) histos["MET_4j_htmod_hMlb_res20"]->Fill(METlvres20.Pt(),weight);
+	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres> 10. && Mlb_closestb()<=175) histos["MET_4j_htmod_lMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);	 
+	if(MTfloatres>150.&&minDPhifloatres>0.8&&METlvfloatres.Pt()>250.&&topmodfloatres> 10. && Mlb_closestb()> 175) histos["MET_4j_htmod_hMlb_floatres"]->Fill(METlvfloatres.Pt(),weight);
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.8&&METlvfloatworseres.Pt()>250.&&topmodfloatworseres> 10. && Mlb_closestb()<=175) histos["MET_4j_htmod_lMlb_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);	 
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.8&&METlvfloatworseres.Pt()>250.&&topmodfloatworseres> 10. && Mlb_closestb()> 175) histos["MET_4j_htmod_hMlb_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);
       }
       if(ngoodjets()>=5&&lep1_p4().Pt()<150.){
 	if(MT     >150.&&minDPhi     >0.5&&METlv.Pt()     >250.&&DPhiMETlep     <2.) histos["MET_5j_res0"]->Fill(METlv.Pt()     ,weight);
-	if(MTres10>150.&&minDPhires10>0.5&&METlvres10.Pt()>150.&&DPhiMETlepres10<2.) histos["MET_5j_res10"]->Fill(METlvres10.Pt(),weight);
-	if(MTres20>150.&&minDPhires20>0.5&&METlvres20.Pt()>150.&&DPhiMETlepres20<2.) histos["MET_5j_res20"]->Fill(METlvres20.Pt(),weight);
-	if(MTfloatres>150.&&minDPhifloatres>0.5&&METlvfloatres.Pt()>150.&& DPhiMETlepfloatres<2.) histos["MET_5j_floatres"]->Fill(METlvfloatres.Pt(),weight);
+	//if(MTres10>150.&&minDPhires10>0.5&&METlvres10.Pt()>150.&&DPhiMETlepres10<2.) histos["MET_5j_res10"]->Fill(METlvres10.Pt(),weight);
+	//if(MTres20>150.&&minDPhires20>0.5&&METlvres20.Pt()>150.&&DPhiMETlepres20<2.) histos["MET_5j_res20"]->Fill(METlvres20.Pt(),weight);
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.5&&METlvfloatworseres.Pt()>150.&& DPhiMETlepfloatworseres<2.) histos["MET_5j_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);
+	if(MTfloatworseres>150.&&minDPhifloatworseres>0.5&&METlvfloatworseres.Pt()>150.&& DPhiMETlepfloatworseres<2.) histos["MET_5j_floatworseres"]->Fill(METlvfloatworseres.Pt(),weight);
       }
 
     }
