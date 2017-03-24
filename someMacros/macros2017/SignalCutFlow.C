@@ -161,11 +161,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	double lepSFweight = weight_lepSF()*nevts/counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,27));
 	double lepFSweight = weight_lepSF_fastSim()*nevts/counterhistSig->GetBinContent(counterhistSig->FindBin(mStop,mLSP,33));
 	if(BSFweighttight<0) BSFweighttight = BSFweight;
-	weight = xsec()*36600/nevts;
+	weight = xsec()*35900/nevts;
 	if(BSFweight>=0) weight *= BSFweight;
 	if(lepSFweight>=0) weight *= lepSFweight;
 	if(lepFSweight>=0) weight *= lepFSweight;
 	//}
+	if(weight==0) cout << xsec() << " " << nevts << " " << BSFweight << " " << lepSFweight << " " << lepFSweight << endl;
 
       if(nvtxs()<0)               continue;
       if(ngoodleps()<1)          continue;
@@ -178,7 +179,6 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //if(mt_met_lep()<150)        continue;
       //if(mindphi_met_j1_j2()<0.5) continue;
       if(!filt_fastsimjets() )    continue;//THIS IS SO ON NEW BABIES
-
       int SR = -1;
       int cSR = -1;
       if(ngoodleps()==1&&nvetoleps()==1&&PassTrackVeto()&&PassTauVeto()&&ngoodbtags()>=1&&mindphi_met_j1_j2()>0.8&&pfmet()>=250&&mt_met_lep()>150) { //basis for SR 1l, >=1b
@@ -235,7 +235,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       }
       if(cSR>0) {cSR +=12; cSR +=27;}
       if(cSR>0) {/* cout << "cSR " << cSR << endl;*/ histos["SignalCutFlow_"+skimFilePrefix]->Fill(cSR,weight); }
-    
+
+      //cout << "pfmet " << pfmet() << " SR " << SR << " SignalCutFlow_"<<skimFilePrefix << " " << histos["SignalCutFlow_"+skimFilePrefix]->Integral() << " " << weight << endl;
       if(SR>0) SR += 12;
       histos["SignalCutFlow_"+skimFilePrefix]->Fill(1,weight);
       if(mt_met_lep()<150) continue;
@@ -273,8 +274,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     cout << Form( "ERROR: number of events from files (%d) is not equal to total number of events (%d)", nEventsChain, nEventsTotal ) << endl;
   }
 
-  //string filename = "rootfiles/SignalCutFlow_reco.root";
-  string filename = "rootfiles/SignalCutFlow_gen.root";
+  string filename = "rootfiles/SignalCutFlow_reco.root";
+  //string filename = "rootfiles/SignalCutFlow_gen.root";
   TFile *f = new TFile(filename.c_str(),"UPDATE");
   f->cd();
   for(map<string,TH1F*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();

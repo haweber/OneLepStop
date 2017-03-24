@@ -22,7 +22,8 @@
 // CMS3
 //#include "CMS3_old20150505.cc"
 //#include "CMS3_fuckingsync.cc"
-#include "CMS3_Moriond17.cc"
+//#include "CMS3_Moriond17.cc"
+#include "CMS3_reminiAOD.cc"
 #include "/home/users/haweber/CORE/Tools/dorky/dorky.h"
 #include "/home/users/haweber/CORE/Tools/dorky/dorky.cc"
 #include "/home/users/haweber/CORE/Tools/goodrun.h"
@@ -183,7 +184,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	double BSFweight = weight_btagsf()*nevts/counterhist->GetBinContent(counterhist->FindBin(14));
 	if(Mlb_closestb()>175.) BSFweight = weight_tightbtagsf()*nevts/counterhist->GetBinContent(counterhist->FindBin(37));
 	double lepSFweight = weight_lepSF()*nevts/counterhist->GetBinContent(counterhist->FindBin(28));
-	weight = cms3.scale1fb()*36.6;
+	weight = cms3.scale1fb()*36.8;
 	//cout << "weight " << weight << " BSF " << BSFweight << " lepSF " << lepSFweight << endl;
 	if(BSFweight>=0) weight *= BSFweight;
 	if(lepSFweight>=0) weight *= lepSFweight;
@@ -214,10 +215,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       
       if(currentfilename.Contains("ttbar_diLept_madgraph_pythia8_25ns")) weight *= 5.77109e+06/(5.77109e+06 + 2.34556e+07);
       if(currentfilename.Contains("ttbar_diLept_madgraph_pythia8_ext1_25ns")) weight *= 2.34556e+07/(5.77109e+06 + 2.34556e+07);
-      //if(currentfilename.Contains("ttbar_singleLeptFromT_madgraph_pythia8_25ns")) weight *= 1.16509e+07/(1.16509e+07 + 4.08199e+07);
-      //if(currentfilename.Contains("ttbar_singleLeptFromT_madgraph_pythia8_ext1_25ns")) weight *= 4.08199e+07/(1.16509e+07 + 4.08199e+07);
-      //if(currentfilename.Contains("ttbar_singleLeptFromTbar_madgraph_pythia8_25ns")) weight *= 1.13617e+07/(1.13617e+07 + 4.63189e+07);
-      //if(currentfilename.Contains("ttbar_singleLeptFromTbar_madgraph_pythia8_ext1_25ns")) weight *= 4.63189e+07/(1.13617e+07 + 4.63189e+07);
+      if(currentfilename.Contains("ttbar_singleLeptFromT_madgraph_pythia8_25ns")) weight *= 1.16509e+07/(1.16509e+07 + 4.08199e+07);
+      if(currentfilename.Contains("ttbar_singleLeptFromT_madgraph_pythia8_ext1_25ns")) weight *= 4.08199e+07/(1.16509e+07 + 4.08199e+07);
+      if(currentfilename.Contains("ttbar_singleLeptFromTbar_madgraph_pythia8_25ns")) weight *= 1.13617e+07/(1.13617e+07 + 4.63189e+07);
+      if(currentfilename.Contains("ttbar_singleLeptFromTbar_madgraph_pythia8_ext1_25ns")) weight *= 4.63189e+07/(1.13617e+07 + 4.63189e+07);
             
 
       if(skimFilePrefix.find(string("WJets")) != string::npos){
@@ -250,12 +251,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(is_data()){
 	//if(!(HLT_MET()||HLT_SingleEl()||HLT_SingleMu())) continue;
 	if(abs(lep1_pdgid())==11){
-	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_SingleEl())) continue;
-	  //if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleEl())) continue;
+	  //if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_SingleEl())) continue;
+	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleEl())) continue;
 	}
 	if(abs(lep1_pdgid())==13){
-	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_SingleMu())) continue;
-	  //if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleMu())) continue;
+	  //if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_SingleMu())) continue;
+	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleMu())) continue;
 	}
       }
       if( is_data() ) {
@@ -263,10 +264,13 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	if (is_duplicate(id) ) continue;
       }
       if(is_data()){
-	if(!filt_met()) continue;
-	if(!filt_badChargedCandidateFilter()) continue;
-	if(!filt_jetWithBadMuon()) continue;
-	if(!filt_pfovercalomet()) continue;
+	  if(!filt_met()) continue;
+	  if(!filt_badMuonFilter()) continue;
+	  if(!filt_badChargedCandidateFilter()) continue;
+	  if(!filt_jetWithBadMuon()) continue;
+	  if(!filt_pfovercalomet()) continue;
+	  if(filt_duplicatemuons()) continue;
+	  if(filt_badmuons()) continue;
       }
       i10 += weight;
       //cout << __LINE__ << endl;
@@ -363,7 +367,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     h->second->SetBinError(1, sqrt(pow(h->second->GetBinError(1),2)+pow(h->second->GetBinError(0),2) ) );
   }
   
-  string filename = "rootfiles/PublicPlotHistos.root";
+  string filename = "rootfiles/PublicPlotHistos_reminiAOD.root";
   TFile *f = new TFile(filename.c_str(),"UPDATE");
   f->cd();
   for(unsigned int i = 0; i<histonames.size(); ++i){

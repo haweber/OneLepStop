@@ -21,12 +21,7 @@
 // CMS3
 //#include "CMS3_old20150505.cc"
 //#include "CMS3_fuckingsync.cc"
-//#include "CMS3_Moriond17.cc"
-#include "CMS3_reminiAOD.cc"
-#include "/home/users/haweber/CORE/Tools/dorky/dorky.h"
-#include "/home/users/haweber/CORE/Tools/dorky/dorky.cc"
-#include "/home/users/haweber/CORE/Tools/goodrun.h"
-#include "/home/users/haweber/CORE/Tools/goodrun.cc"
+#include "CMS3_Moriond17.cc"
 
 //MT2 variants
 
@@ -56,6 +51,7 @@ float calculateMt(LorentzVector p4, LorentzVector met){
 
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
+  cout <<__LINE__<< endl;
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
@@ -69,48 +65,17 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   vector<int> hbins; hbins.clear();
   vector<float> hlow; hlow.clear();
   vector<float> hup; hup.clear();
+  cout <<__LINE__<< endl;
 
-  histonames.push_back("SR_Data");        hbins.push_back(27); hlow.push_back(  0.); hup.push_back(27);
-  histonames.push_back("cSR_Data");       hbins.push_back( 4); hlow.push_back(  0.); hup.push_back( 4);
+  histonames.push_back("SR_Top");        hbins.push_back(27); hlow.push_back(  0.); hup.push_back(27);
+  histonames.push_back("cSR_Top");       hbins.push_back( 4); hlow.push_back(  0.); hup.push_back( 4);
 
-  std::ostringstream* fLogStreamSR1     = 0;
-  fLogStreamSR1 = new std::ostringstream();
-  std::ostringstream* fLogStreamSR2     = 0;
-  fLogStreamSR2 = new std::ostringstream();
-  std::ostringstream* fLogStreamSR3     = 0;
-  fLogStreamSR3 = new std::ostringstream();
-
-  std::ostringstream* fLogStreamcSR1     = 0;
-  fLogStreamcSR1 = new std::ostringstream();
-  std::ostringstream* fLogStreamcSR2     = 0;
-  fLogStreamcSR2 = new std::ostringstream();
-  std::ostringstream* fLogStreamcSR3     = 0;
-  fLogStreamcSR3 = new std::ostringstream();
-
-  std::ostringstream* tfLogStreamSR1     = 0;
-  tfLogStreamSR1 = new std::ostringstream();
-  std::ostringstream* tfLogStreamSR2     = 0;
-  tfLogStreamSR2 = new std::ostringstream();
-  std::ostringstream* tfLogStreamSR3     = 0;
-  tfLogStreamSR3 = new std::ostringstream();
-
-  std::ostringstream* tfLogStreamcSR1     = 0;
-  tfLogStreamcSR1 = new std::ostringstream();
-  std::ostringstream* tfLogStreamcSR2     = 0;
-  tfLogStreamcSR2 = new std::ostringstream();
-  std::ostringstream* tfLogStreamcSR3     = 0;
-  tfLogStreamcSR3 = new std::ostringstream();
-
-  
   for(unsigned int i = 0; i<histonames.size(); ++i){
     string mapname = histonames[i];
     if(histos.count(mapname) == 0 ) histos[mapname] = new TH1F(mapname.c_str(), "", hbins[i], hlow[i], hup[i]);
     histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);
   }
-
-  const char* json_file = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
-  set_goodrun_file_json(json_file);
-
+  cout <<__LINE__<< endl;
 
   unsigned int nEventsRunning = 0;
   // Loop over events to Analyze
@@ -121,11 +86,17 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   TIter fileIter(listOfFiles);
   TFile *currentFile = 0;
 
+  cout << __LINE__ << endl;
   // File Loop
+  TH1D* counterhist;
   while ( (currentFile = (TFile*)fileIter.Next()) ) {
 
     // Get File Content
     TFile *file = new TFile( currentFile->GetTitle() );
+    file->cd();
+      counterhist = (TH1D*)file->Get("h_counter");
+      counterhist->SetDirectory(0); 
+  cout << __LINE__ << endl;
     TTree *tree = (TTree*)file->Get("t");
     if(fast) TTreeCache::SetLearnEntries(10);
     if(fast) tree->SetCacheSize(128*1024*1024);
@@ -144,10 +115,6 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     
       // Progress
       CMS3::progress( nEventsTotal, nEventsChain );
-
-      if( is_data() && !goodrun(run(), ls()) ) continue;
-      float weight = 1;
-
   
       if(nvtxs()<0)               continue;
       if(ngoodleps()!=1)          continue;
@@ -162,32 +129,29 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //if(lep1_is_mu())         ++something;
       //else                     ++somethingelse;
 
-      if(is_data()) weight = 1.;
-      if(is_data()){
-	//if(!(HLT_MET()||HLT_SingleEl()||HLT_SingleMu())) continue;
-	if(abs(lep1_pdgid())==11){
-	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleEl())) continue;
-	  //if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleEl())) continue;
-	}
-	if(abs(lep1_pdgid())==13){
-	  if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleMu())) continue;
-	  //if(!(HLT_MET()||HLT_MET100_MHT100()||HLT_MET110_MHT110()||HLT_MET120_MHT120()||HLT_SingleMu())) continue;
-	}
-      }
-      if( is_data() ) {
-	duplicate_removal::DorkyEventIdentifier id(run(), evt(), ls());
-	if (is_duplicate(id) ) continue;
-      }
-      if(is_data()){
-	//if(filt_met()&&filt_badChargedCandidateFilter()&&filt_jetWithBadMuon()&&filt_pfovercalomet()) continue;
-	  if(!filt_met()) continue;
-	  if(!filt_badMuonFilter()) continue;
-	  if(!filt_badChargedCandidateFilter()) continue;
-	  if(!filt_jetWithBadMuon()) continue;
-	  if(!filt_pfovercalomet()) continue;
-	  if(filt_duplicatemuons()) continue;
-	  if(filt_badmuons()) continue;
-      }
+      double nevts = counterhist->GetBinContent(22);
+      double PUweight     = weight_PU();
+      double ISRnorm = counterhist->GetBinContent(25);
+      double ISRweight = weight_ISRnjets();//updated
+      double BSFnorm = counterhist->GetBinContent(14);
+      double BSFweight = weight_btagsf();
+      double BSFtnorm = counterhist->GetBinContent(37);
+      double BSFtweight = weight_tightbtagsf();
+      double lepSFnorm = counterhist->GetBinContent(28);
+      double lepSFweight = weight_lepSF();
+      if(ISRnorm>0) ISRweight*=nevts/ISRnorm;
+      if(BSFnorm>0) BSFweight *=nevts/BSFnorm;
+      if(BSFtnorm>0) BSFtweight *=nevts/BSFtnorm;
+      if(lepSFnorm>0) lepSFweight *= nevts/lepSFnorm;
+      //double weight = xsection*mylumi/nevts*PUweight*ISRweight*BSFweight*lepSFweight*lepFSSFweight;//xsec given in pb
+      double rawweight = 35.9*scale1fb()*ISRweight*lepSFweight;//xsec given in pb
+
+      TString currentfilename = currentFile->GetTitle();
+      if(currentfilename.Contains("ttbar_singleLeptFromT_madgraph_pythia8_25ns")) rawweight *= 1.16509e+07/(1.16509e+07 + 4.08199e+07);
+      if(currentfilename.Contains("ttbar_singleLeptFromT_madgraph_pythia8_ext1_25ns")) rawweight *= 4.08199e+07/(1.16509e+07 + 4.08199e+07);
+      if(currentfilename.Contains("ttbar_singleLeptFromTbar_madgraph_pythia8_25ns")) rawweight *= 1.13617e+07/(1.13617e+07 + 4.63189e+07);
+      if(currentfilename.Contains("ttbar_singleLeptFromTbar_madgraph_pythia8_ext1_25ns")) rawweight *= 4.63189e+07/(1.13617e+07 + 4.63189e+07);
+
       
       int SR = -1;
       int cSR = -1;
@@ -244,9 +208,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	else if(pfmet()>250) cSR = 1;	
       }
 
-      
-      if( SR>0) histos[ "SR_Data"]->Fill( SR-1);
-      if(cSR>0) histos["cSR_Data"]->Fill(cSR-1);
+      double weight = rawweight * BSFweight;
+      if(cSR>0) histos["cSR_Top"]->Fill(cSR-1,weight);
+      if((SR>=5&&SR<=7)||(SR>=13&&SR<=16)||(SR>=20&&SR<=21)||(SR>=26&&SR<=27)) weight = rawweight*BSFtweight;
+      if( SR>0) histos[ "SR_Top"]->Fill( SR-1,weight);
 
 
       /*
@@ -275,51 +240,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     cout << Form( "ERROR: number of events from files (%d) is not equal to total number of events (%d)", nEventsChain, nEventsTotal ) << endl;
   }
   
-  string filename = "rootfiles/DataSR.root";
+  string filename = "rootfiles/TT1lSR.root";
   TFile *f = new TFile(filename.c_str(),"RECREATE");
   f->cd();
   for(map<string,TH1F*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
   f->Close();
   cout << "Saved histos in " << f->GetName() << endl;
-  /*
-  TString logname = "tempfiles/SRevts_MET250.txt";
-  ofstream f_log1 (logname.Data(), ios::trunc);
-  f_log1 << fLogStreamSR1->str();
-  logname = "tempfiles/detailedSRevts_MET250.txt";
-  ofstream f_log1t (logname.Data(), ios::trunc);
-  f_log1t << tfLogStreamSR1->str();
-  logname = "tempfiles/SRevts_MET350.txt";
-  ofstream f_log2 (logname.Data(), ios::trunc);
-  f_log2 << fLogStreamSR2->str();
-  logname = "tempfiles/detailedSRevts_MET350.txt";
-  ofstream f_log2t (logname.Data(), ios::trunc);
-  f_log2t << tfLogStreamSR2->str();
-  logname = "tempfiles/SRevts_MET450.txt";
-  ofstream f_log3 (logname.Data(), ios::trunc);
-  f_log3 << fLogStreamSR3->str();
-  logname = "tempfiles/detailedSRevts_MET450.txt";
-  ofstream f_log3t (logname.Data(), ios::trunc);
-  f_log3t << tfLogStreamSR3->str();
-  logname = "tempfiles/cSRevts_MET250.txt";
-  ofstream cf_log1 (logname.Data(), ios::trunc);
-  cf_log1 << fLogStreamcSR1->str();
-  logname = "tempfiles/detailedcSRevts_MET250.txt";
-  ofstream cf_log1t (logname.Data(), ios::trunc);
-  cf_log1t << tfLogStreamcSR1->str();
-  logname = "tempfiles/cSRevts_MET350.txt";
-  ofstream cf_log2 (logname.Data(), ios::trunc);
-  cf_log2 << fLogStreamcSR2->str();
-  logname = "tempfiles/detailedcSRevts_MET350.txt";
-  ofstream cf_log2t (logname.Data(), ios::trunc);
-  cf_log2t << tfLogStreamcSR2->str();
-  logname = "tempfiles/cSRevts_MET450.txt";
-  ofstream cf_log3 (logname.Data(), ios::trunc);
-  cf_log3 << fLogStreamcSR3->str();
-  logname = "tempfiles/detailedcSRevts_MET450.txt";
-  ofstream cf_log3t (logname.Data(), ios::trunc);
-  cf_log3t << tfLogStreamcSR3->str();
-  */
-  // return
   bmark->Stop("benchmark");
   cout << endl;
   cout << nEventsTotal << " Events Processed" << endl;

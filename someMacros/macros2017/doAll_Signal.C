@@ -1,8 +1,8 @@
 {
   int whichsignal = -1;//1 T2tt, 2 T2bW, 3 T2tb - if -1 all three
-  bool genMET = true;
+  bool genMET = false;
 
-  bool cutflow = true;
+  bool cutflow = false;
 
   if(!cutflow){
     const unsigned int chainsize = 3;
@@ -13,8 +13,11 @@
 
     //normal
     if(!genMET){
-      gROOT->ProcessLine(".L GetSignalHistos.C+");
-      babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v16_tempSignal_reco_oldJEC/output/";
+      //gROOT->ProcessLine(".L GetSignalHistos_get2lCReventlist.C+");
+      gROOT->ProcessLine(".L GetSignalHistos_copySFonfly.C+");
+      //gROOT->ProcessLine(".L GetSignalHistos.C+");
+      //babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v16_tempSignal_reco_oldJEC/output/";
+      babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v22/output/";
       dataset[0] = "Signal_T2tt";
       ch[0] = new TChain("t"); 
       myhelper = babylocation+"Signal_T2tt*.root"; ch[0]->Add(myhelper.c_str());
@@ -26,8 +29,10 @@
       myhelper = babylocation+"Signal_T2tb*.root"; ch[2]->Add(myhelper.c_str());
     }
     else {
-      gROOT->ProcessLine(".L GetSignalHistosGen.C+");
-      babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v16_tempSignal_gen_oldJEC/output/";
+      gROOT->ProcessLine(".L GetSignalHistosGen_copySFonfly.C+");
+      //gROOT->ProcessLine(".L GetSignalHistosGen.C+");
+      //babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v16_tempSignal_gen_oldJEC/output/";
+      babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v22_genv2/output/";
       dataset[0] = "Signal_T2tt";
       ch[0] = new TChain("t"); 
       myhelper = babylocation+"Signal_T2tt*.root"; ch[0]->Add(myhelper.c_str());
@@ -54,9 +59,11 @@
     string babylocation;
     gROOT->ProcessLine(".L SignalCutFlow.C+");
 
-    if(genMET) babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v16_tempSignal_gen_oldJEC/output/";
-    else       babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v16_tempSignal_reco_oldJEC/output/";
-
+    //if(genMET) babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v16_tempSignal_gen_oldJEC/output/";
+    //else       babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v16_tempSignal_reco_oldJEC/output/";
+    if(genMET) babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v22_genv2/output/";
+    else       babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v22/output/";
+    
     dataset[0] = "Signal_T2tt_1000_50";
     ch[0] = new TChain("t"); 
     myhelper = babylocation+"Signal_T2tt_mStop_400to1200*.root"; ch[0]->Add(myhelper.c_str());

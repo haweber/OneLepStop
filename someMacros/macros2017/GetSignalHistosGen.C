@@ -53,7 +53,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   TH1D *puWeightUp   = (TH1D*)fPU->Get("puWeightUp");
   TH1D *puWeightDown = (TH1D*)fPU->Get("puWeightDown");
   
-  TFile *fxsec = new TFile("/home/users/haweber/StopAnalysis/SignalAnalysisCode/xsec_stop_13TeV.root","READ");
+  TFile *fxsec = new TFile("xsec_stop_13TeV.root","READ");
   TH1D *hxsec     = (TH1D*)fxsec->Get("stop");
   
   // Benchmark
@@ -185,7 +185,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       double xsectionerr = hxsec->GetBinError(hxsec->FindBin(mStop));
       //double rawweight = xsec()*2260./nevts;
       //double weight = xsec()*2260./nevts*PUweight*ISRweight*BSFweight;//xsec given in pb
-      double mylumi = 36600.;
+      double mylumi = 35900.;
       double rawweight = xsection*mylumi/nevts;
       //double weight = xsection*mylumi/nevts*PUweight*ISRweight*BSFweight*lepSFweight*lepFSSFweight;//xsec given in pb
       double weight = xsection*mylumi/nevts*ISRweight*BSFweight*lepSFweight*lepFSSFweight;//xsec given in pb
@@ -325,37 +325,37 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       
       float SF_CR1l = 1.0;
       float SF_cCR1l = 1.0;
-      if(CR1l== 1) SF_CR1l = 0.1199;
-      if(CR1l== 2) SF_CR1l = 0.1065;
-      if(CR1l== 3) SF_CR1l = 0.1111;
-      if(CR1l== 4) SF_CR1l = 0.0664;
-      if(CR1l== 5) SF_CR1l = 0.0375;
-      if(CR1l== 6) SF_CR1l = 0.0494;
-      if(CR1l== 7) SF_CR1l = 0.0430;
-      if(CR1l== 8) SF_CR1l = 0.2275;
-      if(CR1l== 9) SF_CR1l = 0.2070;
-      if(CR1l==10) SF_CR1l = 0.2476;
-      if(CR1l==11) SF_CR1l = 0.2521;
-      if(CR1l==12) SF_CR1l = 0.2487;
-      if(CR1l==13) SF_CR1l = 0.1729;
-      if(CR1l==14) SF_CR1l = 0.1443;
-      if(CR1l==15) SF_CR1l = 0.1038;
-      if(CR1l==16) SF_CR1l = 0.0885;
-      if(CR1l==17) SF_CR1l = 0.2573;
-      if(CR1l==18) SF_CR1l = 0.1860;
-      if(CR1l==19) SF_CR1l = 0.1647;
-      if(CR1l==20) SF_CR1l = 0.1205;
-      if(CR1l==21) SF_CR1l = 0.1039;
-      if(CR1l==22) SF_CR1l = 0.2737;
-      if(CR1l==23) SF_CR1l = 0.4228;
-      if(CR1l==24) SF_CR1l = 0.3089;
-      if(CR1l==25) SF_CR1l = 0.1037;
-      if(CR1l==26) SF_CR1l = 0.1041;
-      if(CR1l==27) SF_CR1l = 0.1012;
-      if(cCR1l==1) SF_cCR1l = 0.141;
-      if(cCR1l==2) SF_cCR1l = 0.144;
-      if(cCR1l==3) SF_cCR1l = 0.167;
-      if(cCR1l==4) SF_cCR1l = 0.127;
+      if(CR1l== 1) SF_CR1l = 0.076*0.68;
+      if(CR1l== 2) SF_CR1l = 0.085*0.72;
+      if(CR1l== 3) SF_CR1l = 0.076*0.77;
+      if(CR1l== 4) SF_CR1l = 0.087*0.82;
+      if(CR1l== 5) SF_CR1l = 0.033*0.80;
+      if(CR1l== 6) SF_CR1l = 0.043*0.78;
+      if(CR1l== 7) SF_CR1l = 0.040*0.84;
+      if(CR1l== 8) SF_CR1l = 0.199*0.41;
+      if(CR1l== 9) SF_CR1l = 0.150*0.48;
+      if(CR1l==10) SF_CR1l = 0.210*0.41;
+      if(CR1l==11) SF_CR1l = 0.160*0.61;
+      if(CR1l==12) SF_CR1l = 0.272*0.59;
+      if(CR1l==13) SF_CR1l = 0.091*0.68;
+      if(CR1l==14) SF_CR1l = 0.094*0.70;
+      if(CR1l==15) SF_CR1l = 0.125*0.65;
+      if(CR1l==16) SF_CR1l = 0.075*0.65;
+      if(CR1l==17) SF_CR1l = 0.186*0.59;
+      if(CR1l==18) SF_CR1l = 0.169*0.68;
+      if(CR1l==19) SF_CR1l = 0.245*0.57;
+      if(CR1l==20) SF_CR1l = 0.073*0.74;
+      if(CR1l==21) SF_CR1l = 0.073*0.69;
+      if(CR1l==22) SF_CR1l = 0.306*0.45;
+      if(CR1l==23) SF_CR1l = 0.167*0.71;
+      if(CR1l==24) SF_CR1l = 0.253*0.64;
+      if(CR1l==25) SF_CR1l = 0.229*0.71;
+      if(CR1l==26) SF_CR1l = 0.181*0.82;
+      if(CR1l==27) SF_CR1l = 0.096*0.73;
+      if(cCR1l==1) SF_cCR1l = 0.207*0.506;
+      if(cCR1l==2) SF_cCR1l = 0.142*0.545;
+      if(cCR1l==3) SF_cCR1l = 0.199*0.424;
+      if(cCR1l==4) SF_cCR1l = 0.145*0.564;
       
       //CR2l = -1;
       int lepind = -1;
@@ -425,37 +425,37 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float SF_CR2l_3 = 1.;
       int hCR2 = -1;
       int hCR3 = -1;
-      if(CR2l== 1) SF_CR2l = 0.23;
+      if(CR2l== 1) SF_CR2l = 0.25;
       if(CR2l== 2) SF_CR2l = 0.19;
-      if(CR2l== 3) SF_CR2l = 0.15;
-      if(CR2l== 4) SF_CR2l = 0.08;
-      if(CR2l== 5) SF_CR2l = 0.13*0.92;
-      if(CR2l== 5) { SF_CR2l_2 = 0.13*0.01; hCR2 = 6; }
-      if(CR2l== 5) { SF_CR2l_3 = 0.13*0.07; hCR3 = 7; }
+      if(CR2l== 3) SF_CR2l = 0.12;
+      if(CR2l== 4) SF_CR2l = 0.18;
+      if(CR2l== 5) SF_CR2l = 0.15;
+      if(CR2l== 6) { SF_CR2l_2 = 0.01*0.67; /*hCR2 = 6;*/ }
+      if(CR2l== 6) { SF_CR2l_3 = 0.01*0.33; hCR2 = 7; }
       if(CR2l== 8) SF_CR2l = 0.50;
-      if(CR2l== 9) SF_CR2l = 0.41;
-      if(CR2l==10) SF_CR2l = 0.37;
-      if(CR2l==11) SF_CR2l = 0.40;
-      if(CR2l==12) SF_CR2l = 0.49;
-      if(CR2l==13) SF_CR2l = 0.37;
-      if(CR2l==14) SF_CR2l = 0.39;
-      if(CR2l==15) SF_CR2l = 0.47;
-      if(CR2l==16) SF_CR2l = 0.45;
-      if(CR2l==17) SF_CR2l = 0.37;
-      if(CR2l==18) SF_CR2l = 0.33*0.98;
-      if(CR2l==18) { SF_CR2l_2 = 0.33*0.02; hCR2 = 19; }
-      if(CR2l==20) SF_CR2l = 0.19*0.99;
-      if(CR2l==20) { SF_CR2l_2 = 0.19*0.01; hCR2 = 21; }
-      if(CR2l==22) SF_CR2l = 0.28;
+      if(CR2l== 9) SF_CR2l = 0.43;
+      if(CR2l==10) SF_CR2l = 0.44;
+      if(CR2l==11) SF_CR2l = 0.47;
+      if(CR2l==12) SF_CR2l = 0.70;
+      if(CR2l==13) SF_CR2l = 0.35;
+      if(CR2l==14) SF_CR2l = 0.42;
+      if(CR2l==15) SF_CR2l = 0.41;
+      if(CR2l==16) SF_CR2l = 0.52;
+      if(CR2l==17) SF_CR2l = 0.35;
+      if(CR2l==18) SF_CR2l = 0.29*0.91;
+      if(CR2l==18) { SF_CR2l_2 = 0.29*0.09; hCR2 = 19; }
+      if(CR2l==20) SF_CR2l = 0.26*0.96;
+      if(CR2l==20) { SF_CR2l_2 = 0.26*0.04; hCR2 = 21; }
+      if(CR2l==22) SF_CR2l = 0.32;
       if(CR2l==23) SF_CR2l = 0.26;
-      if(CR2l==24) SF_CR2l = 0.19;
-      if(CR2l==25) SF_CR2l = 0.36;
-      if(CR2l==26) SF_CR2l = 0.07*0.74;
-      if(CR2l==26) { SF_CR2l_2 = 0.07*26; hCR2 = 27; }
-      if(cCR2l==1) SF_cCR2l = 0.655;
-      if(cCR2l==2) SF_cCR2l = 0.454;
-      if(cCR2l==3) SF_cCR2l = 0.614;
-      if(cCR2l==4) SF_cCR2l = 0.460;
+      if(CR2l==24) SF_CR2l = 0.25;
+      if(CR2l==25) SF_CR2l = 0.34;
+      if(CR2l==26) SF_CR2l = 0.20*0.64;
+      if(CR2l==26) { SF_CR2l_2 = 0.20*0.36; hCR2 = 27; }
+      if(cCR2l==1) SF_cCR2l = 0.568;
+      if(cCR2l==2) SF_cCR2l = 0.534;
+      if(cCR2l==3) SF_cCR2l = 0.599;
+      if(cCR2l==4) SF_cCR2l = 0.705;
 
       if(SR==(-1)&&CR1l==(-1)&&CR2l==(-1)&&cSR==(-1)&&cCR1l==(-1)&&cCR2l==(-1)) continue;
 

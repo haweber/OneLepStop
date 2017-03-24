@@ -44,6 +44,13 @@ void MakeNuPtPhotPtRat(){
   TH1F *h23j_data = (TH1F*)fphdata->Get("PhotPt_MET150_23j_PhotonData");
   TH1F *h4j_data  = (TH1F*)fphdata->Get("PhotPt_MET150_4j_PhotonData");
   TH1F *h5j_data  = (TH1F*)fphdata->Get("PhotPt_MET150_5j_PhotonData");
+  
+  for(int i = 1; i<= h23j_sim->GetNbinsX()+1;++i)  h23j_sim->SetBinError(i,0);
+  for(int i = 1; i<=  h4j_sim->GetNbinsX()+1;++i)   h4j_sim->SetBinError(i,0);
+  for(int i = 1; i<=  h5j_sim->GetNbinsX()+1;++i)   h5j_sim->SetBinError(i,0);
+  for(int i = 1; i<=h23j_data->GetNbinsX()+1;++i) h23j_data->SetBinError(i,0);
+  for(int i = 1; i<= h4j_data->GetNbinsX()+1;++i)  h4j_data->SetBinError(i,0);
+  for(int i = 1; i<= h5j_data->GetNbinsX()+1;++i)  h5j_data->SetBinError(i,0);
   //rebin all by 2
   h23j_lMlb_1ltop->Rebin(2);
   h23j_hMlb_1ltop->Rebin(2);
@@ -96,7 +103,7 @@ void MakeNuPtPhotPtRat(){
   double xbins2[22] = {0, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460,1000};
   //23j/4j, 2top, 5j
   double xbins3[34] = {0, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300, 320, 340, 360, 380, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680,1000};
-  TFile *f = new TFile("rootfiles/PhotonMETResolution/NuOrNunuPtVsPhotPt.root","RECREATE");
+  TFile *f = new TFile("rootfiles/PhotonMETResolution/NuOrNunuPtVsPhotPt_noPhotStats.root","RECREATE");
   f->cd();
   TH1F* hrat_data_23j_lMlb_1ltop = (TH1F*)h23j_lMlb_1ltop->Rebin(16,"NuPtVsPhotPt_23j_lMlb_1ltopVsData",xbins1);
   TH1F* hrat_data_23j_hMlb_1ltop = (TH1F*)h23j_hMlb_1ltop->Rebin(16,"NuPtVsPhotPt_23j_hMlb_1ltopVsData",xbins1);

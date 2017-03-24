@@ -20,7 +20,7 @@ using namespace std;
 
 void MakePhotDataOverPhotMC(){
 
- TFile *fphsim  = TFile::Open("rootfiles/PhotonMETResolution/PhotMETDistribution_NuorNuNuPtweighted_PhotonMC.root");
+ TFile *fphsim  = TFile::Open("rootfiles/PhotonMETResolution/PhotMETDistribution2ndTry_NuorNuNuPtweighted_PhotonMC.root");
  //fphsim->ls();
   fphsim->cd();
   TH1F *h23j_1l_sim        = (TH1F*)fphsim ->Get("PhotMET_23j_1ltop_PhotonMC");
@@ -41,7 +41,7 @@ void MakePhotDataOverPhotMC(){
   TH1F *h5j_2l_sim         = (TH1F*)fphsim ->Get("PhotMET_5j_2l_PhotonMC");
   TH1F *h5j_sim            = (TH1F*)fphsim ->Get("PhotMET_5j_noweight_PhotonMC");
   
-  TFile *fphdata  = TFile::Open("rootfiles/PhotonMETResolution/PhotMETDistribution_NuorNuNuPtweighted_PhotonData.root");
+  TFile *fphdata  = TFile::Open("rootfiles/PhotonMETResolution/PhotMETDistribution2ndTry_NuorNuNuPtweighted_PhotonData.root");
   fphdata->cd();
   TH1F *h23j_1l_data       = (TH1F*)fphdata->Get("PhotMET_23j_1ltop_PhotonData");
   TH1F *h23j_2l_data       = (TH1F*)fphdata->Get("PhotMET_23j_2l_PhotonData");
@@ -121,7 +121,7 @@ TFile *f = new TFile("rootfiles/PhotonMETResolution/PhotMETDistribution_NuorNuNu
   TH1F *hH_2l_data = (TH1F* )h4j_2l_data->Rebin(2,"hH_2l_data", xH);
   TH1F *hI_2l_data = (TH1F* )h5j_2l_data      ->Rebin(4,"hI_2l_data", xI);
   */
-  TFile *f = new TFile("rootfiles/PhotonMETResolution/PhotMETDistribution_NuorNuNuPtweighted_SRbinned_forJohn.root","RECREATE");
+  TFile *f = new TFile("rootfiles/PhotonMETResolution/PhotMETDistribution_NuorNuNuPtweighted_SRbinned_2ndTry.root","RECREATE");
   f->cd();
   TH1F *hA_1ltop_sim  = (TH1F*)h23j_1l_hMlb_sim ->Rebin(4,"hA_1ltop_sim" , xA);
   TH1F *hB_1ltop_sim  = (TH1F*)h23j_1l_lMlb_sim ->Rebin(3,"hB_1ltop_sim" , xB);

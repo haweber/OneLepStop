@@ -1,8 +1,8 @@
 {
 
   bool getNuOrNunuPt = false;
-  bool getPhotPt = true;
-  bool getPhotMETshape = false;
+  bool getPhotPt = false;
+  bool getPhotMETshape = true;
   bool applyPhotMETresToTT = false;
 
   if(getNuOrNunuPt){
@@ -13,7 +13,8 @@
     float extraweight[chainsize];
 
     //string babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v9/output/";
-    string babylocation = "/nfs-7/userdata/isuarez/tupler_babies/merged/Stop_1l/v18/output/";
+    //string babylocation = "/nfs-7/userdata/isuarez/tupler_babies/merged/Stop_1l/v18/output/";
+    string babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v21/output/";
     string myhelper;
   
     dataset[0] = "all";
@@ -39,28 +40,44 @@
   }
   if(getPhotPt||getPhotMETshape){
     if(getPhotPt) gROOT->ProcessLine(".L PhotJetsPt.C+");
-    else if(getPhotMETshape) gROOT->ProcessLine(".L PhotMETDistributions.C+");
+    //else if(getPhotMETshape) gROOT->ProcessLine(".L PhotMETDistributions.C+");
+    else if(getPhotMETshape) gROOT->ProcessLine(".L PhotMETDistributions_tryhonestuncertainty.C+");
     const unsigned int chainsize = 2;
     TChain *ch[chainsize];
     string dataset[chainsize];
     float extraweight[chainsize];
-       string babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v16_photonstemp/output/";
+       string babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v21_photons/output/";
     string myhelper;
   
     dataset[0] = "PhotonMC";
     ch[0] = new TChain("t");
+    myhelper = babylocation + "GJets_DR0p4_HT40to100_25ns*.root";  ch[0]->Add(myhelper.c_str());
     myhelper = babylocation + "GJets_DR0p4_HT100to200_25ns*.root"; ch[0]->Add(myhelper.c_str());
     myhelper = babylocation + "GJets_DR0p4_HT200to400_25ns*.root"; ch[0]->Add(myhelper.c_str());
-    myhelper = babylocation + "GJets_DR0p4_HT40to100_25ns*.root";  ch[0]->Add(myhelper.c_str());
+    myhelper = babylocation + "GJets_DR0p4_HT400to600_25ns*.root"; ch[0]->Add(myhelper.c_str());
     myhelper = babylocation + "GJets_DR0p4_HT600toInf_25ns*.root"; ch[0]->Add(myhelper.c_str());
+    myhelper = babylocation + "GJets_HT40to100_25ns*.root";        ch[0]->Add(myhelper.c_str());
     myhelper = babylocation + "GJets_HT100to200_25ns*.root";       ch[0]->Add(myhelper.c_str());
     myhelper = babylocation + "GJets_HT200to400_25ns*.root";       ch[0]->Add(myhelper.c_str());
     myhelper = babylocation + "GJets_HT400to600_25ns*.root";       ch[0]->Add(myhelper.c_str());
-    myhelper = babylocation + "GJets_HT40to100_25ns*.root";        ch[0]->Add(myhelper.c_str());
     myhelper = babylocation + "GJets_HT600toInf_25ns*.root";       ch[0]->Add(myhelper.c_str());
     myhelper = babylocation + "GJets_HT600toInf_ext1_25ns*.root";  ch[0]->Add(myhelper.c_str());
     dataset[1] = "PhotonData";
     ch[1] = new TChain("t");
+    /*
+    babylocation = "/hadoop/cms/store/user/haweber/AutoTwopler_babies/Stop_1l_v24_photonunmerged/";
+    myhelper = babylocation + "SinglePhoton_Run2016B-03Feb2017_ver2-v2/output/*.root";  ch[1]->Add(myhelper.c_str());
+    myhelper = babylocation + "SinglePhoton_Run2016C-03Feb2017-v1/output/*.root";  ch[1]->Add(myhelper.c_str());
+    myhelper = babylocation + "SinglePhoton_Run2016D-03Feb2017-v1/output/*.root";  ch[1]->Add(myhelper.c_str());
+    myhelper = babylocation + "SinglePhoton_Run2016E-03Feb2017-v1/output/*.root";  ch[1]->Add(myhelper.c_str());
+    myhelper = babylocation + "SinglePhoton_Run2016F-03Feb2017-v1/output/*.root";  ch[1]->Add(myhelper.c_str());
+    myhelper = babylocation + "SinglePhoton_Run2016G-03Feb2017-v1/output/*.root";  ch[1]->Add(myhelper.c_str());
+    myhelper = babylocation + "SinglePhoton_Run2016H-03Feb2017_ver2-v1/output/*.root";  ch[1]->Add(myhelper.c_str());
+    myhelper = babylocation + "SinglePhoton_Run2016H-03Feb2017_ver3-v1/output/*.root";  ch[1]->Add(myhelper.c_str());
+    */
+    babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v24_photonunmerged/output/";
+    myhelper = babylocation + "data_single_photon_Run2016*.root";  ch[1]->Add(myhelper.c_str());
+    /*
     myhelper = babylocation + "data_singlephoton_Run2016B_23Sep2016_v3*.root";  ch[1]->Add(myhelper.c_str());
     myhelper = babylocation + "data_singlephoton_Run2016C_23Sep2016_v1*.root";  ch[1]->Add(myhelper.c_str());
     myhelper = babylocation + "data_singlephoton_Run2016D_23Sep2016_v1*.root";  ch[1]->Add(myhelper.c_str());
@@ -68,6 +85,8 @@
     myhelper = babylocation + "data_singlephoton_Run2016F_23Sep2016_v1*.root";  ch[1]->Add(myhelper.c_str());
     myhelper = babylocation + "data_singlephoton_Run2016G_23Sep2016_v1*.root";  ch[1]->Add(myhelper.c_str());
     myhelper = babylocation + "data_singlephoton_Run2016H_PromptReco_v2*.root"; ch[1]->Add(myhelper.c_str());//apparently v3 got merged into this
+    myhelper = babylocation + "data_singlephoton_Run2016H_PromptReco_v3*.root"; ch[1]->Add(myhelper.c_str());//apparently v3 got merged into this
+    */
 
       for(int i = 0; i<chainsize; ++i){
       //if(i!=0) continue;
@@ -88,7 +107,7 @@
     float extraweight[chainsize];
 
     //string babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v9/output/";
-    string babylocation = "/nfs-7/userdata/isuarez/tupler_babies/merged/Stop_1l/v18/output/";
+    string babylocation = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v21/output/";
     string myhelper;
   
     dataset[0] = "all";

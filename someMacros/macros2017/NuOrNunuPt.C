@@ -162,7 +162,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	 ++ngm;
       }
        // Analysis Code
-       float weight = cms3.scale1fb()*31;//actually doesn't matter really
+       float weight = cms3.scale1fb()*36.8;//actually doesn't matter really
        TString currentfilename = currentFile->GetTitle();
        if(currentfilename.Contains("ttbar_diLept_madgraph_pythia8_25ns")) weight *= 5.77109e+06/(5.77109e+06 + 2.34556e+07);
        if(currentfilename.Contains("ttbar_diLept_madgraph_pythia8_ext1_25ns")) weight *= 2.34556e+07/(5.77109e+06 + 2.34556e+07);

@@ -1,4 +1,4 @@
-#include "CMS3_Jan17.h"
+#include "CMS3_reminiAOD.h"
 CMS3 cms3;
 
 void CMS3::Init(TTree *tree) {
@@ -272,6 +272,56 @@ void CMS3::Init(TTree *tree) {
 	if (tree->GetBranch("pfmet_phi_rl_jdown") != 0) {
 		pfmet_phi_rl_jdown_branch = tree->GetBranch("pfmet_phi_rl_jdown");
 		if (pfmet_phi_rl_jdown_branch) {pfmet_phi_rl_jdown_branch->SetAddress(&pfmet_phi_rl_jdown_);}
+	}
+	pfmet_egclean_branch = 0;
+	if (tree->GetBranch("pfmet_egclean") != 0) {
+		pfmet_egclean_branch = tree->GetBranch("pfmet_egclean");
+		if (pfmet_egclean_branch) {pfmet_egclean_branch->SetAddress(&pfmet_egclean_);}
+	}
+	pfmet_egclean_phi_branch = 0;
+	if (tree->GetBranch("pfmet_egclean_phi") != 0) {
+		pfmet_egclean_phi_branch = tree->GetBranch("pfmet_egclean_phi");
+		if (pfmet_egclean_phi_branch) {pfmet_egclean_phi_branch->SetAddress(&pfmet_egclean_phi_);}
+	}
+	pfmet_muegclean_branch = 0;
+	if (tree->GetBranch("pfmet_muegclean") != 0) {
+		pfmet_muegclean_branch = tree->GetBranch("pfmet_muegclean");
+		if (pfmet_muegclean_branch) {pfmet_muegclean_branch->SetAddress(&pfmet_muegclean_);}
+	}
+	pfmet_muegclean_phi_branch = 0;
+	if (tree->GetBranch("pfmet_muegclean_phi") != 0) {
+		pfmet_muegclean_phi_branch = tree->GetBranch("pfmet_muegclean_phi");
+		if (pfmet_muegclean_phi_branch) {pfmet_muegclean_phi_branch->SetAddress(&pfmet_muegclean_phi_);}
+	}
+	pfmet_muegcleanfix_branch = 0;
+	if (tree->GetBranch("pfmet_muegcleanfix") != 0) {
+		pfmet_muegcleanfix_branch = tree->GetBranch("pfmet_muegcleanfix");
+		if (pfmet_muegcleanfix_branch) {pfmet_muegcleanfix_branch->SetAddress(&pfmet_muegcleanfix_);}
+	}
+	pfmet_muegcleanfix_phi_branch = 0;
+	if (tree->GetBranch("pfmet_muegcleanfix_phi") != 0) {
+		pfmet_muegcleanfix_phi_branch = tree->GetBranch("pfmet_muegcleanfix_phi");
+		if (pfmet_muegcleanfix_phi_branch) {pfmet_muegcleanfix_phi_branch->SetAddress(&pfmet_muegcleanfix_phi_);}
+	}
+	pfmet_uncorr_branch = 0;
+	if (tree->GetBranch("pfmet_uncorr") != 0) {
+		pfmet_uncorr_branch = tree->GetBranch("pfmet_uncorr");
+		if (pfmet_uncorr_branch) {pfmet_uncorr_branch->SetAddress(&pfmet_uncorr_);}
+	}
+	pfmet_uncorr_phi_branch = 0;
+	if (tree->GetBranch("pfmet_uncorr_phi") != 0) {
+		pfmet_uncorr_phi_branch = tree->GetBranch("pfmet_uncorr_phi");
+		if (pfmet_uncorr_phi_branch) {pfmet_uncorr_phi_branch->SetAddress(&pfmet_uncorr_phi_);}
+	}
+	pfmet_original_branch = 0;
+	if (tree->GetBranch("pfmet_original") != 0) {
+		pfmet_original_branch = tree->GetBranch("pfmet_original");
+		if (pfmet_original_branch) {pfmet_original_branch->SetAddress(&pfmet_original_);}
+	}
+	pfmet_original_phi_branch = 0;
+	if (tree->GetBranch("pfmet_original_phi") != 0) {
+		pfmet_original_phi_branch = tree->GetBranch("pfmet_original_phi");
+		if (pfmet_original_phi_branch) {pfmet_original_phi_branch->SetAddress(&pfmet_original_phi_);}
 	}
 	scale1fb_branch = 0;
 	if (tree->GetBranch("scale1fb") != 0) {
@@ -892,6 +942,11 @@ void CMS3::Init(TTree *tree) {
 	if (tree->GetBranch("HLT_MET") != 0) {
 		HLT_MET_branch = tree->GetBranch("HLT_MET");
 		if (HLT_MET_branch) {HLT_MET_branch->SetAddress(&HLT_MET_);}
+	}
+	HLT_MET_MHT_branch = 0;
+	if (tree->GetBranch("HLT_MET_MHT") != 0) {
+		HLT_MET_MHT_branch = tree->GetBranch("HLT_MET_MHT");
+		if (HLT_MET_MHT_branch) {HLT_MET_MHT_branch->SetAddress(&HLT_MET_MHT_);}
 	}
 	HLT_MET100_MHT100_branch = 0;
 	if (tree->GetBranch("HLT_MET100_MHT100") != 0) {
@@ -2028,6 +2083,21 @@ void CMS3::Init(TTree *tree) {
 		filt_pfovercalomet_branch = tree->GetBranch("filt_pfovercalomet");
 		if (filt_pfovercalomet_branch) {filt_pfovercalomet_branch->SetAddress(&filt_pfovercalomet_);}
 	}
+	filt_badmuons_branch = 0;
+	if (tree->GetBranch("filt_badmuons") != 0) {
+		filt_badmuons_branch = tree->GetBranch("filt_badmuons");
+		if (filt_badmuons_branch) {filt_badmuons_branch->SetAddress(&filt_badmuons_);}
+	}
+	filt_duplicatemuons_branch = 0;
+	if (tree->GetBranch("filt_duplicatemuons") != 0) {
+		filt_duplicatemuons_branch = tree->GetBranch("filt_duplicatemuons");
+		if (filt_duplicatemuons_branch) {filt_duplicatemuons_branch->SetAddress(&filt_duplicatemuons_);}
+	}
+	filt_nobadmuons_branch = 0;
+	if (tree->GetBranch("filt_nobadmuons") != 0) {
+		filt_nobadmuons_branch = tree->GetBranch("filt_nobadmuons");
+		if (filt_nobadmuons_branch) {filt_nobadmuons_branch->SetAddress(&filt_nobadmuons_);}
+	}
   tree->SetMakeClass(0);
 }
 void CMS3::GetEntry(unsigned int idx) 
@@ -2051,6 +2121,16 @@ void CMS3::GetEntry(unsigned int idx)
 		pfmet_phi_rl_jup_isLoaded = false;
 		pfmet_rl_jdown_isLoaded = false;
 		pfmet_phi_rl_jdown_isLoaded = false;
+		pfmet_egclean_isLoaded = false;
+		pfmet_egclean_phi_isLoaded = false;
+		pfmet_muegclean_isLoaded = false;
+		pfmet_muegclean_phi_isLoaded = false;
+		pfmet_muegcleanfix_isLoaded = false;
+		pfmet_muegcleanfix_phi_isLoaded = false;
+		pfmet_uncorr_isLoaded = false;
+		pfmet_uncorr_phi_isLoaded = false;
+		pfmet_original_isLoaded = false;
+		pfmet_original_phi_isLoaded = false;
 		scale1fb_isLoaded = false;
 		xsec_isLoaded = false;
 		xsec_uncert_isLoaded = false;
@@ -2175,6 +2255,7 @@ void CMS3::GetEntry(unsigned int idx)
 		HLT_SingleEl_isLoaded = false;
 		HLT_SingleMu_isLoaded = false;
 		HLT_MET_isLoaded = false;
+		HLT_MET_MHT_isLoaded = false;
 		HLT_MET100_MHT100_isLoaded = false;
 		HLT_MET110_MHT110_isLoaded = false;
 		HLT_MET120_MHT120_isLoaded = false;
@@ -2439,6 +2520,9 @@ void CMS3::GetEntry(unsigned int idx)
 		filt_jetWithBadMuon_jup_isLoaded = false;
 		filt_jetWithBadMuon_jdown_isLoaded = false;
 		filt_pfovercalomet_isLoaded = false;
+		filt_badmuons_isLoaded = false;
+		filt_duplicatemuons_isLoaded = false;
+		filt_nobadmuons_isLoaded = false;
 	}
 
 void CMS3::LoadAllBranches() 
@@ -2461,6 +2545,16 @@ void CMS3::LoadAllBranches()
 	if (pfmet_phi_rl_jup_branch != 0) pfmet_phi_rl_jup();
 	if (pfmet_rl_jdown_branch != 0) pfmet_rl_jdown();
 	if (pfmet_phi_rl_jdown_branch != 0) pfmet_phi_rl_jdown();
+	if (pfmet_egclean_branch != 0) pfmet_egclean();
+	if (pfmet_egclean_phi_branch != 0) pfmet_egclean_phi();
+	if (pfmet_muegclean_branch != 0) pfmet_muegclean();
+	if (pfmet_muegclean_phi_branch != 0) pfmet_muegclean_phi();
+	if (pfmet_muegcleanfix_branch != 0) pfmet_muegcleanfix();
+	if (pfmet_muegcleanfix_phi_branch != 0) pfmet_muegcleanfix_phi();
+	if (pfmet_uncorr_branch != 0) pfmet_uncorr();
+	if (pfmet_uncorr_phi_branch != 0) pfmet_uncorr_phi();
+	if (pfmet_original_branch != 0) pfmet_original();
+	if (pfmet_original_phi_branch != 0) pfmet_original_phi();
 	if (scale1fb_branch != 0) scale1fb();
 	if (xsec_branch != 0) xsec();
 	if (xsec_uncert_branch != 0) xsec_uncert();
@@ -2585,6 +2679,7 @@ void CMS3::LoadAllBranches()
 	if (HLT_SingleEl_branch != 0) HLT_SingleEl();
 	if (HLT_SingleMu_branch != 0) HLT_SingleMu();
 	if (HLT_MET_branch != 0) HLT_MET();
+	if (HLT_MET_MHT_branch != 0) HLT_MET_MHT();
 	if (HLT_MET100_MHT100_branch != 0) HLT_MET100_MHT100();
 	if (HLT_MET110_MHT110_branch != 0) HLT_MET110_MHT110();
 	if (HLT_MET120_MHT120_branch != 0) HLT_MET120_MHT120();
@@ -2849,6 +2944,9 @@ void CMS3::LoadAllBranches()
 	if (filt_jetWithBadMuon_jup_branch != 0) filt_jetWithBadMuon_jup();
 	if (filt_jetWithBadMuon_jdown_branch != 0) filt_jetWithBadMuon_jdown();
 	if (filt_pfovercalomet_branch != 0) filt_pfovercalomet();
+	if (filt_badmuons_branch != 0) filt_badmuons();
+	if (filt_duplicatemuons_branch != 0) filt_duplicatemuons();
+	if (filt_nobadmuons_branch != 0) filt_nobadmuons();
 }
 
 	const unsigned int &CMS3::run()
@@ -3071,6 +3169,136 @@ void CMS3::LoadAllBranches()
 			pfmet_phi_rl_jdown_isLoaded = true;
 		}
 		return pfmet_phi_rl_jdown_;
+	}
+	const float &CMS3::pfmet_egclean()
+	{
+		if (not pfmet_egclean_isLoaded) {
+			if (pfmet_egclean_branch != 0) {
+				pfmet_egclean_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_egclean_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_egclean_isLoaded = true;
+		}
+		return pfmet_egclean_;
+	}
+	const float &CMS3::pfmet_egclean_phi()
+	{
+		if (not pfmet_egclean_phi_isLoaded) {
+			if (pfmet_egclean_phi_branch != 0) {
+				pfmet_egclean_phi_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_egclean_phi_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_egclean_phi_isLoaded = true;
+		}
+		return pfmet_egclean_phi_;
+	}
+	const float &CMS3::pfmet_muegclean()
+	{
+		if (not pfmet_muegclean_isLoaded) {
+			if (pfmet_muegclean_branch != 0) {
+				pfmet_muegclean_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_muegclean_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_muegclean_isLoaded = true;
+		}
+		return pfmet_muegclean_;
+	}
+	const float &CMS3::pfmet_muegclean_phi()
+	{
+		if (not pfmet_muegclean_phi_isLoaded) {
+			if (pfmet_muegclean_phi_branch != 0) {
+				pfmet_muegclean_phi_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_muegclean_phi_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_muegclean_phi_isLoaded = true;
+		}
+		return pfmet_muegclean_phi_;
+	}
+	const float &CMS3::pfmet_muegcleanfix()
+	{
+		if (not pfmet_muegcleanfix_isLoaded) {
+			if (pfmet_muegcleanfix_branch != 0) {
+				pfmet_muegcleanfix_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_muegcleanfix_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_muegcleanfix_isLoaded = true;
+		}
+		return pfmet_muegcleanfix_;
+	}
+	const float &CMS3::pfmet_muegcleanfix_phi()
+	{
+		if (not pfmet_muegcleanfix_phi_isLoaded) {
+			if (pfmet_muegcleanfix_phi_branch != 0) {
+				pfmet_muegcleanfix_phi_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_muegcleanfix_phi_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_muegcleanfix_phi_isLoaded = true;
+		}
+		return pfmet_muegcleanfix_phi_;
+	}
+	const float &CMS3::pfmet_uncorr()
+	{
+		if (not pfmet_uncorr_isLoaded) {
+			if (pfmet_uncorr_branch != 0) {
+				pfmet_uncorr_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_uncorr_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_uncorr_isLoaded = true;
+		}
+		return pfmet_uncorr_;
+	}
+	const float &CMS3::pfmet_uncorr_phi()
+	{
+		if (not pfmet_uncorr_phi_isLoaded) {
+			if (pfmet_uncorr_phi_branch != 0) {
+				pfmet_uncorr_phi_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_uncorr_phi_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_uncorr_phi_isLoaded = true;
+		}
+		return pfmet_uncorr_phi_;
+	}
+	const float &CMS3::pfmet_original()
+	{
+		if (not pfmet_original_isLoaded) {
+			if (pfmet_original_branch != 0) {
+				pfmet_original_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_original_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_original_isLoaded = true;
+		}
+		return pfmet_original_;
+	}
+	const float &CMS3::pfmet_original_phi()
+	{
+		if (not pfmet_original_phi_isLoaded) {
+			if (pfmet_original_phi_branch != 0) {
+				pfmet_original_phi_branch->GetEntry(index);
+			} else { 
+				printf("branch pfmet_original_phi_branch does not exist!\n");
+				exit(1);
+			}
+			pfmet_original_phi_isLoaded = true;
+		}
+		return pfmet_original_phi_;
 	}
 	const float &CMS3::scale1fb()
 	{
@@ -4683,6 +4911,19 @@ void CMS3::LoadAllBranches()
 			HLT_MET_isLoaded = true;
 		}
 		return HLT_MET_;
+	}
+	const int &CMS3::HLT_MET_MHT()
+	{
+		if (not HLT_MET_MHT_isLoaded) {
+			if (HLT_MET_MHT_branch != 0) {
+				HLT_MET_MHT_branch->GetEntry(index);
+			} else { 
+				printf("branch HLT_MET_MHT_branch does not exist!\n");
+				exit(1);
+			}
+			HLT_MET_MHT_isLoaded = true;
+		}
+		return HLT_MET_MHT_;
 	}
 	const int &CMS3::HLT_MET100_MHT100()
 	{
@@ -8116,6 +8357,45 @@ void CMS3::LoadAllBranches()
 		}
 		return filt_pfovercalomet_;
 	}
+	const bool &	CMS3::filt_badmuons()
+	{
+		if (not filt_badmuons_isLoaded) {
+			if (filt_badmuons_branch != 0) {
+				filt_badmuons_branch->GetEntry(index);
+			} else { 
+				printf("branch filt_badmuons_branch does not exist!\n");
+				exit(1);
+			}
+			filt_badmuons_isLoaded = true;
+		}
+		return filt_badmuons_;
+	}
+	const bool &	CMS3::filt_duplicatemuons()
+	{
+		if (not filt_duplicatemuons_isLoaded) {
+			if (filt_duplicatemuons_branch != 0) {
+				filt_duplicatemuons_branch->GetEntry(index);
+			} else { 
+				printf("branch filt_duplicatemuons_branch does not exist!\n");
+				exit(1);
+			}
+			filt_duplicatemuons_isLoaded = true;
+		}
+		return filt_duplicatemuons_;
+	}
+	const bool &	CMS3::filt_nobadmuons()
+	{
+		if (not filt_nobadmuons_isLoaded) {
+			if (filt_nobadmuons_branch != 0) {
+				filt_nobadmuons_branch->GetEntry(index);
+			} else { 
+				printf("branch filt_nobadmuons_branch does not exist!\n");
+				exit(1);
+			}
+			filt_nobadmuons_isLoaded = true;
+		}
+		return filt_nobadmuons_;
+	}
 
   void CMS3::progress( int nEventsTotal, int nEventsChain ){
     int period = 1000;
@@ -8155,6 +8435,16 @@ namespace tas {
 	const float &pfmet_phi_rl_jup() { return cms3.pfmet_phi_rl_jup(); }
 	const float &pfmet_rl_jdown() { return cms3.pfmet_rl_jdown(); }
 	const float &pfmet_phi_rl_jdown() { return cms3.pfmet_phi_rl_jdown(); }
+	const float &pfmet_egclean() { return cms3.pfmet_egclean(); }
+	const float &pfmet_egclean_phi() { return cms3.pfmet_egclean_phi(); }
+	const float &pfmet_muegclean() { return cms3.pfmet_muegclean(); }
+	const float &pfmet_muegclean_phi() { return cms3.pfmet_muegclean_phi(); }
+	const float &pfmet_muegcleanfix() { return cms3.pfmet_muegcleanfix(); }
+	const float &pfmet_muegcleanfix_phi() { return cms3.pfmet_muegcleanfix_phi(); }
+	const float &pfmet_uncorr() { return cms3.pfmet_uncorr(); }
+	const float &pfmet_uncorr_phi() { return cms3.pfmet_uncorr_phi(); }
+	const float &pfmet_original() { return cms3.pfmet_original(); }
+	const float &pfmet_original_phi() { return cms3.pfmet_original_phi(); }
 	const float &scale1fb() { return cms3.scale1fb(); }
 	const float &xsec() { return cms3.xsec(); }
 	const float &xsec_uncert() { return cms3.xsec_uncert(); }
@@ -8279,6 +8569,7 @@ namespace tas {
 	const int &HLT_SingleEl() { return cms3.HLT_SingleEl(); }
 	const int &HLT_SingleMu() { return cms3.HLT_SingleMu(); }
 	const int &HLT_MET() { return cms3.HLT_MET(); }
+	const int &HLT_MET_MHT() { return cms3.HLT_MET_MHT(); }
 	const int &HLT_MET100_MHT100() { return cms3.HLT_MET100_MHT100(); }
 	const int &HLT_MET110_MHT110() { return cms3.HLT_MET110_MHT110(); }
 	const int &HLT_MET120_MHT120() { return cms3.HLT_MET120_MHT120(); }
@@ -8543,4 +8834,7 @@ namespace tas {
 	const bool &filt_jetWithBadMuon_jup() { return cms3.filt_jetWithBadMuon_jup(); }
 	const bool &filt_jetWithBadMuon_jdown() { return cms3.filt_jetWithBadMuon_jdown(); }
 	const bool &filt_pfovercalomet() { return cms3.filt_pfovercalomet(); }
+	const bool &filt_badmuons() { return cms3.filt_badmuons(); }
+	const bool &filt_duplicatemuons() { return cms3.filt_duplicatemuons(); }
+	const bool &filt_nobadmuons() { return cms3.filt_nobadmuons(); }
 }

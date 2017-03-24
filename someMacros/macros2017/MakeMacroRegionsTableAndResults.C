@@ -530,7 +530,8 @@ void MakeMacroRegionsTableAndResults(){
 
     //final CMS style
     //TLatex *tLumi = new TLatex(0.95,0.944,"18.1 fb^{-1} (13 TeV)");
-    TLatex *tLumi = new TLatex(0.95,0.944,"36.6 fb^{-1} (13 TeV)");
+    //TLatex *tLumi = new TLatex(0.95,0.944,"36.6 fb^{-1} (13 TeV)");
+    TLatex *tLumi = new TLatex(0.95,0.944,"35.9 fb^{-1} (13 TeV)");
     tLumi->SetNDC();
     tLumi->SetTextAlign(31);
     tLumi->SetTextFont(42);

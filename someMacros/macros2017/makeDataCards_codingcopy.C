@@ -409,6 +409,7 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
   if(osig==0) { sig = 0; genmetunc = -1; sig = -1; }
   //cout <<sig << " " << osig << endl;
   data = histData["SR_Data"]->GetBinContent(b);
+  //cout << "Bin " << b << " " << data << endl;
 
   bg2l = hist2l["CR2l_yield"]->GetBinContent(bLL);
   ++nbgs;
@@ -416,7 +417,8 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
   bg1l = hist1l["CR1lyield"]->GetBinContent(bW);
   ++nbgs;
   if(bg1l>0) { bg1lerr = 1.+(TMath::Max(bg1l-hist1l["dataStats_Up"]->GetBinContent(bW),hist1l["dataStats_Dn"]->GetBinContent(bW)-bg1l)/bg1l); }
-  bg1ltop = hist1ltop["ee1lep_fromTop_yield"]->GetBinContent(bW);
+  bg1ltop = hist1ltop["SR_Top"]->GetBinContent(bW);
+  //bg1ltop = hist1ltop["ee1lep_fromTop_yield"]->GetBinContent(bW);
   ++nbgs;
   if(bg1ltop>0) { bg1ltoperr = 2.; } //- no statistical uncertainty on 1ltop !!!
   bgznunu = histZnunu["yield"]->GetBinContent(bTTZ);
@@ -435,13 +437,13 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
     getSigUncertainty(vSig["SR_LepEffFSup"], vSig["SR_LepEffFSdown"], osig, histSig["SR_LepEffFSup"], histSig["SR_LepEffFSdown"], b3);
     //getSigUncertainty(vSig["SR_PUup"],       vSig["SR_PUdown"],       osig, histSig["SR_PUup"],       histSig["SR_PUdown"],       b3);
     vSig["SR_PUup"] = 1.05; vSig["SR_PUdown"] = 0.95;
-    if(analysis==1&&b>=3){ vSig["SR_PUup"] = 1.10; vSig["SR_PUup"] = 0.9; }
+    if(analysis==1&&b>=3){ vSig["SR_PUup"] = 1.10; vSig["SR_PUdown"] = 0.9; }
     if(analysis==0&&(b==4||b==7||b==1||b==12||b==16||b==19||b==21||b==25||b==27)){ vSig["SR_PUup"] = 1.10; vSig["SR_PUup"] = 0.9; }
     //vSig["SR_PUerr"]        = 1.05;// new now
     vSig["SR_LEffVetoerr"]  = 1.03;
   }
-  vSig["triggerrDn"]        = 0.98; if(b==1||b==4||b==8||b==11) vSig["triggerrDn"]        = 0.95; vSig["triggerrUp"]        = 1.01;//also on any other simulation
-  vSig["lumierr"]         = 1.062; //also on any other simulation
+  vSig["triggerrDn"]        = 0.98; if(b==1||b==4||b==8||b==11) vSig["triggerrDn"]        = 0.95; vSig["triggerrUp"]        = 1.00;//also on any other simulation
+  vSig["lumierr"]         = 1.026; //also on any other simulation
 
   //cout << __LINE__ << endl;
   if(!nobgsyst){
@@ -453,37 +455,42 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
     getBGUncertainty(v2l["CR2l_ISRUp"],        v2l["CR2l_ISRDn"],        bg2l, hist2l["CR2l_ISRUp"],        hist2l["CR2l_ISRDn"],        bLL);
     getBGUncertainty(v2l["CR2l_alphasUp"],     v2l["CR2l_alphasDn"],     bg2l, hist2l["CR2l_alphasUp"],     hist2l["CR2l_alphasDn"],     bLL);
     getBGUncertainty(v2l["CR2l_q2Up"],         v2l["CR2l_q2Dn"],         bg2l, hist2l["CR2l_q2Up"],         hist2l["CR2l_q2Dn"],         bLL);
-    //getBGUncertainty(v2l["CR2l_jesUp"],        v2l["CR2l_jesDn"],        bg2l, hist2l["CR2l_jesUp"],        hist2l["CR2l_jesDn"],        bLL);//XXX
+    getBGUncertainty(v2l["CR2l_jesUp"],        v2l["CR2l_jesDn"],        bg2l, hist2l["CR2l_jesUp"],        hist2l["CR2l_jesDn"],        bLL);//XXX
     getBGUncertainty(v2l["CR2l_cr2lTriggerSFUp"],v2l["CR2l_cr2lTriggerSFDn"],bg2l,hist2l["CR2l_cr2lTriggerSFUp"],hist2l["CR2l_cr2lTriggerSFDn"],bLL);
     getBGUncertainty(v2l["CR2l_metResUp"],     v2l["CR2l_metResDn"],     bg2l, hist2l["CR2l_metResUp"],     hist2l["CR2l_metResDn"],        bLL);
+    getBGUncertainty(v2l["CR2l_pileupUp"],     v2l["CR2l_pileupDn"],     bg2l, hist2l["CR2l_pileupUp"],     hist2l["CR2l_pileupDn"],        bLL);
+    getBGUncertainty(v2l["CR2l_tauSFUp"],     v2l["CR2l_tauSFDn"],     bg2l, hist2l["CR2l_tauSFUp"],     hist2l["CR2l_tauSFDn"],        bLL);
+    getBGUncertainty(v2l["CR2l_metTTbarUp"],     v2l["CR2l_metTTbarDn"],     bg2l, hist2l["CR2l_metTTbarUp"],     hist2l["CR2l_metTTbarDn"],        bLL);
     
     //cout << __LINE__ << endl;
-   getBGUncertainty(v1l["mcStats_Up"],      v1l["mcStats_Dn"],      bg1l, hist1l["mcStats_Up"],      hist1l["mcStats_Dn"],      bW);
-      getBGUncertainty(v1l["Wb_Up"],      v1l["Wb_Down"],      bg1l, hist1l["Wb_Up"],      hist1l["Wb_Down"],      bW);
-       getBGUncertainty(v1l["btag_HF_Up"], v1l["btag_HF_Down"], bg1l, hist1l["btag_HF_Up"], hist1l["btag_HF_Down"], bW);
-      getBGUncertainty(v1l["btag_LF_Up"], v1l["btag_LF_Down"], bg1l, hist1l["btag_LF_Up"], hist1l["btag_LF_Down"], bW);
-      getBGUncertainty(v1l["pdf_Up"],     v1l["pdf_Dn"],     bg1l, hist1l["pdf_Up"],     hist1l["pdf_Dn"],     bW);
-      getBGUncertainty(v1l["q2_Up"],      v1l["q2_Dn"],      bg1l, hist1l["q2_Up"],      hist1l["q2_Dn"],      bW);
-      getBGUncertainty(v1l["jes_Up"],     v1l["jes_Dn"],     bg1l, hist1l["jes_Up"],     hist1l["jes_Dn"],     bW);
-      getBGUncertainty(v1l["CRCont_Up"],  v1l["CRCont_Dn"],  bg1l, hist1l["CRCont_Up"],  hist1l["CRCont_Dn"],  bW);
-      //getBGUncertainty(v1l["metres_Up"],  v1l["metres_Down"],  bg1l, hist1l["metres_Up"],  hist1l["metres_Down"],  bW);
-      //getBGUncertainty(v1l["W_width_Up"], v1l["W_width_Down"], bg1l, hist1l["W_width_Up"], hist1l["W_width_Down"], bW);
-      //getBGUncertainty(v1l["nu_pT_Up"],   v1l["nu_pT_Down"],   bg1l, hist1l["nu_pT_Up"],   hist1l["nu_pT_Down"],   bW);
-   
+    getBGUncertainty(v1l["mcStats_Up"],      v1l["mcStats_Dn"],      bg1l, hist1l["mcStats_Up"],      hist1l["mcStats_Dn"],      bW);
+    getBGUncertainty(v1l["Wb_Up"],      v1l["Wb_Dn"],      bg1l, hist1l["Wb_Up"],      hist1l["Wb_Dn"],      bW);
+    getBGUncertainty(v1l["bTagEffHF_Up"], v1l["bTagEffHF_Dn"], bg1l, hist1l["bTagEffHF_Up"], hist1l["bTagEffHF_Dn"], bW);
+    getBGUncertainty(v1l["bTagEffLF_Up"], v1l["bTagEffLF_Dn"], bg1l, hist1l["bTagEffLF_Up"], hist1l["bTagEffLF_Dn"], bW);
+    getBGUncertainty(v1l["pdf_Up"],     v1l["pdf_Dn"],     bg1l, hist1l["pdf_Up"],     hist1l["pdf_Dn"],     bW);
+    getBGUncertainty(v1l["q2_Up"],      v1l["q2_Dn"],      bg1l, hist1l["q2_Up"],      hist1l["q2_Dn"],      bW);
+    getBGUncertainty(v1l["JES_Up"],     v1l["JES_Dn"],     bg1l, hist1l["JES_Up"],     hist1l["JES_Dn"],     bW);
+    getBGUncertainty(v1l["CRCont_Up"],  v1l["CRCont_Dn"],  bg1l, hist1l["CRCont_Up"],  hist1l["CRCont_Dn"],  bW);
+    //getBGUncertainty(v1l["metres_Up"],  v1l["metres_Down"],  bg1l, hist1l["metres_Up"],  hist1l["metres_Down"],  bW);
+    //getBGUncertainty(v1l["W_width_Up"], v1l["W_width_Down"], bg1l, hist1l["W_width_Up"], hist1l["W_width_Down"], bW);
+    //getBGUncertainty(v1l["nu_pT_Up"],   v1l["nu_pT_Down"],   bg1l, hist1l["nu_pT_Up"],   hist1l["nu_pT_Down"],   bW);
+    
     //cout << __LINE__ << endl;
-   if(bg1ltop>0) v1ltop["tt1lyielderr"] = 2.; else v1ltop["tt1lyielderr"] = 1.;
-
-   //cout << __LINE__ << endl;
-      getBGUncertainty(vZnunu["mcStatsUP"],   vZnunu["mcStatsDN"],   bgznunu, histZnunu["mcStatsUP"],   histZnunu["mcStatsDN"],   bTTZ);
-      getBGUncertainty(vZnunu["lepSFUP"],     vZnunu["lepSFDN"],     bgznunu, histZnunu["lepSFUP"],     histZnunu["lepSFDN"],     bTTZ);
-      getBGUncertainty(vZnunu["btagLightUP"], vZnunu["btagLightDN"], bgznunu, histZnunu["btagLightUP"], histZnunu["btagLightDN"], bTTZ);
-      getBGUncertainty(vZnunu["btagHeavyUP"], vZnunu["btagHeavyDN"], bgznunu, histZnunu["btagHeavyUP"], histZnunu["btagHeavyDN"], bTTZ);
-      getBGUncertainty(vZnunu["PUup"],        vZnunu["PUdown"],      bgznunu, histZnunu["PUup"],        histZnunu["PUdown"],      bTTZ);
-      getBGUncertainty(vZnunu["pdfUP"],       vZnunu["pdfDN"],       bgznunu, histZnunu["pdfUP"],       histZnunu["pdfDN"],       bTTZ);
-      getBGUncertainty(vZnunu["alphaSUP"],    vZnunu["alphaSDN"],    bgznunu, histZnunu["alphaSUP"],    histZnunu["alphaSDN"],    bTTZ);
-      getBGUncertainty(vZnunu["Q2UP"],        vZnunu["Q2DN"],        bgznunu, histZnunu["Q2UP"],        histZnunu["Q2DN"],        bTTZ);
-      getBGUncertainty(vZnunu["jesUP"],       vZnunu["jesDN"],       bgznunu, histZnunu["jesUP"],       histZnunu["jesDN"],       bTTZ);
-   }//if(!nobgsyst)
+    if(bg1ltop>0) v1ltop["tt1lyielderr"] = 2.; else v1ltop["tt1lyielderr"] = 1.;
+    //if(bg1ltop>0) v1ltop["SR_Top"] = 2.; else v1ltop["SR_Top"] = 1.;
+    
+    //cout << __LINE__ << endl;
+    getBGUncertainty(vZnunu["mcStatsUP"],   vZnunu["mcStatsDN"],   bgznunu, histZnunu["mcStatsUP"],   histZnunu["mcStatsDN"],   bTTZ);
+    getBGUncertainty(vZnunu["lepSFUP"],     vZnunu["lepSFDN"],     bgznunu, histZnunu["lepSFUP"],     histZnunu["lepSFDN"],     bTTZ);
+    getBGUncertainty(vZnunu["btagLightUP"], vZnunu["btagLightDN"], bgznunu, histZnunu["btagLightUP"], histZnunu["btagLightDN"], bTTZ);
+    getBGUncertainty(vZnunu["btagHeavyUP"], vZnunu["btagHeavyDN"], bgznunu, histZnunu["btagHeavyUP"], histZnunu["btagHeavyDN"], bTTZ);
+    getBGUncertainty(vZnunu["PUup"],        vZnunu["PUdown"],      bgznunu, histZnunu["PUup"],        histZnunu["PUdown"],      bTTZ);
+    getBGUncertainty(vZnunu["pdfUP"],       vZnunu["pdfDN"],       bgznunu, histZnunu["pdfUP"],       histZnunu["pdfDN"],       bTTZ);
+    getBGUncertainty(vZnunu["alphaSUP"],    vZnunu["alphaSDN"],    bgznunu, histZnunu["alphaSUP"],    histZnunu["alphaSDN"],    bTTZ);
+    getBGUncertainty(vZnunu["Q2UP"],        vZnunu["Q2DN"],        bgznunu, histZnunu["Q2UP"],        histZnunu["Q2DN"],        bTTZ);
+    getBGUncertainty(vZnunu["jesUP"],       vZnunu["jesDN"],       bgznunu, histZnunu["jesUP"],       histZnunu["jesDN"],       bTTZ);
+    getBGUncertainty(vZnunu["ISRnjetsUp"],  vZnunu["ISRnjetsDown"],bgznunu, histZnunu["ISRnjetsUp"],  histZnunu["ISRnjetsDown"],bTTZ);
+  }//if(!nobgsyst)
   //this needs to be checked, probably want also up/down errors for statistical uncertainties...
   //cout << __LINE__ << endl;
 
@@ -521,15 +528,15 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
   int bWst = Get0bCRBin(b);
   int btt2l = GetLLCRBin(b);
   //statistical uncertainties
-  if(genmetunc!=1&&genmetunc>0){
-    *fLogStream << "SigGenMETunc"<<b << "   lnU " << genmetunc << " -  -  -  -" << endl;//stupid genmet stuff
+  if(!nosigsyst && genmetunc!=1&&genmetunc>0){
+    *fLogStream << "SigGenMETunc"/*<<b*/ << "   lnU " << genmetunc << " -  -  -  -" << endl;//stupid genmet stuff
     ++numnuis;
   }
   if(!nosigsyst && sig   >0) numnuis += addOneUnc(fLogStream, "SigStat",     sigerr,     -1, 0, b,     "lnN");
   if(!nobgsyst && bg2l   >0) numnuis += addOneUnc(fLogStream, "Bg2lStat",    bg2lerr,    -1, 1, btt2l, "lnN");
   if(bW>7&&bW<11) bg1lerr = 2;
   if(!nobgsyst && bg1l   >0) numnuis += addOneUnc(fLogStream, "Bg1lStat",    bg1lerr,    -1, 2, bWst,  "lnN");
-  if(!nobgsyst && bgznunu>0) numnuis += addOneUnc(fLogStream, "BgZnunuStat", bgznunuerr, -1, 4, bTTZ,  "lnN");
+  if(!nobgsyst && bgznunu>0) numnuis += addOneUnc(fLogStream, "BgZnunuStat", bgznunuerr, -1, 4, -1,  "lnN");
   //if(!nobgsyst && bg1ltop>0) *fLogStream << "Bg1lTopStat" << b     << "     lnN -  -  -  "    << bg1ltoperr << "  -"          << endl;
   //general uncertainties
   if(!nobgsyst && bg1ltop>0) numnuis += addOneUnc(fLogStream, "Bg1lTopSyst", v1ltop["tt1lyielderr"], -1, 3, b, "lnN");
@@ -554,11 +561,11 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
   if(!nobgsyst){
     //correlated
     if(correlated){
-      dnerr[1] = v2l["CR2l_bTagEffHFDn"]; dnerr[2] = v1l["btag_HF_Down"]; dnerr[4] = vZnunu["btagHeavyDN"];
-      uperr[1] = v2l["CR2l_bTagEffHFUp"];   uperr[2] = v1l["btag_HF_Up"]; uperr[4] = vZnunu["btagHeavyUP"];
+      dnerr[1] = v2l["CR2l_bTagEffHFDn"]; dnerr[2] = v1l["bTagEffHF_Dn"]; dnerr[4] = vZnunu["btagHeavyDN"];
+      uperr[1] = v2l["CR2l_bTagEffHFUp"];   uperr[2] = v1l["bTagEffHF_Up"]; uperr[4] = vZnunu["btagHeavyUP"];
       numnuis += addCorrelatedUnc(fLogStream, "BHFSystBg", dnerr, uperr, -1, "lnN");
-      dnerr[1] = v2l["CR2l_bTagEffLFDn"]; dnerr[2] = v1l["btag_LF_Down"]; dnerr[4] = vZnunu["btagLightDN"];
-      uperr[1] = v2l["CR2l_bTagEffLFUp"];   uperr[2] = v1l["btag_LF_Up"]; uperr[4] = vZnunu["btagLightUP"];
+      dnerr[1] = v2l["CR2l_bTagEffLFDn"]; dnerr[2] = v1l["bTagEffLF_Dn"]; dnerr[4] = vZnunu["btagLightDN"];
+      uperr[1] = v2l["CR2l_bTagEffLFUp"];   uperr[2] = v1l["bTagEffLF_Up"]; uperr[4] = vZnunu["btagLightUP"];
       numnuis += addCorrelatedUnc(fLogStream, "BLFSystBg", dnerr, uperr, -1, "lnN");
       dnerr[1] = v2l["CR2l_lepSFDn"]; dnerr[4] = vZnunu["lepSFDN"];
       uperr[1] = v2l["CR2l_lepSFUp"]; uperr[4] = vZnunu["lepSFUP"];
@@ -569,16 +576,21 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
       dnerr[1] = v2l["CR2l_q2Dn"]; dnerr[2] = v1l["q2_Dn"]; dnerr[4] = vZnunu["Q2DN"];
       uperr[1] = v2l["CR2l_q2Up"];  uperr[2] = v1l["q2_Up"];  uperr[4] = vZnunu["Q2UP"];
       numnuis += addCorrelatedUnc(fLogStream, "QsqSystBg", dnerr, uperr, -1, "lnN");
-      //dnerr[1] = v2l["CR2l_jesDn"]; dnerr[2] = v1l["jes_Dn"]; dnerr[4] = vZnunu["jesDN"];   //XXX
-      //uperr[1] = v2l["CR2l_jesUp"];   uperr[2] = v1l["jes_Up"]; dnerr[4] = vZnunu["jesUP"];  //XXX
-      //numnuis += addCorrelatedUnc(fLogStream, "JESSystBg", dnerr, uperr, -1, "lnN"); //XXX
+      dnerr[1] = v2l["CR2l_jesDn"]; dnerr[2] = v1l["JES_Dn"]; dnerr[4] = vZnunu["jesDN"];   //XXX
+      uperr[1] = v2l["CR2l_jesUp"];   uperr[2] = v1l["JES_Up"]; dnerr[4] = vZnunu["jesUP"];  //XXX
+      numnuis += addCorrelatedUnc(fLogStream, "JESSystBg", dnerr, uperr, -1, "lnN"); //XXX
       //dnerr[1] = v2l["CR2l_metResdown"]; dnerr[2] = v1l["metres_Down"];
       //uperr[1] = v2l["CR2l_metResup"];   uperr[2] = v1l["metres_Up"];
       //numnuis += addCorrelatedUnc(fLogStream, "METSystBg", dnerr, uperr, -1, "lnN");
       dnerr[1] = v2l["CR2l_alphasDn"]; dnerr[4] = vZnunu["alphaSDN"];
       uperr[1] = v2l["CR2l_alphasUp"]; uperr[4] = vZnunu["alphaSUP"];
       numnuis += addCorrelatedUnc(fLogStream, "AsSystBg", dnerr, uperr, -1, "lnN");
-      
+      dnerr[1] = v2l["CR2l_ISRDn"]; dnerr[4] = vZnunu["ISRnjetsDown"];
+      uperr[1] = v2l["CR2l_ISRUp"]; uperr[4] = vZnunu["ISRnjetsUp"];
+      numnuis += addCorrelatedUnc(fLogStream, "ISRSystBG", dnerr, uperr, -1, "lnN");
+      dnerr[1] = v2l["CR2l_pileupDn"]; dnerr[4] = vZnunu["PUdown"];
+      uperr[1] = v2l["CR2l_pileupUp"]; uperr[4] = vZnunu["PUup"];
+      numnuis += addCorrelatedUnc(fLogStream, "PUSystBG", dnerr, uperr, -1, "lnN"); 
     }
     else {//uncorrelated
       //bg2l
@@ -587,34 +599,39 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
       numnuis += addOneUnc(fLogStream, "LEffSyst2l", v2l["CR2l_lepSFDn"],     v2l["CR2l_lepSFUp"],     1, -1, "lnN");
       ////numnuis += addOneUnc(fLogStream, "PDFSyst2l",  v2l["CR2l_PDFdown"],    v2l["CR2l_PDFup"],    1, -1, "lnN");
       numnuis += addOneUnc(fLogStream, "muRFSyst2l", v2l["CR2l_q2Dn"],        v2l["CR2l_q2Up"],        1, -1, "lnN");
-      //numnuis += addOneUnc(fLogStream, "JESSyst2l",  v2l["CR2l_jesDn"],       v2l["CR2l_jesUp"],       1, -1, "lnN");//XXX
-      //numnuis += addOneUnc(fLogStream, "METSyst2l",  v2l["CR2l_metResdown"], v2l["CR2l_metResup"], 1, -1, "lnN");
+      numnuis += addOneUnc(fLogStream, "JESSyst2l",  v2l["CR2l_jesDn"],       v2l["CR2l_jesUp"],       1, -1, "lnN");//XXX
       numnuis += addOneUnc(fLogStream, "AsSyst2l",  v2l["CR2l_alphasDn"],     v2l["CR2l_alphasUp"],     1, -1, "lnN");
+      numnuis += addOneUnc(fLogStream, "ISRSyst2l", v2l["CR2l_ISRDn"],        v2l["CR2l_ISRUp"],     1, -1, "lnN");
+      numnuis += addOneUnc(fLogStream, "PU2l", v2l["CR2l_pileupDn"],        v2l["CR2l_pileupUp"],     1, -1, "lnN");
       //bg1l
       numnuis += addOneUnc(fLogStream, "BHFSyst1l",  v1l["btag_HF_Down"], v1l["btag_HF_Up"], 2, -1, "lnN");
       numnuis += addOneUnc(fLogStream, "BLFSyst1l",  v1l["btag_LF_Down"], v1l["btag_LF_Up"], 2, -1, "lnN");
       numnuis += addOneUnc(fLogStream, "PDFSyst1l",  v1l["pdf_Dn"],     v1l["pdf_Up"],     2, -1, "lnN");
       numnuis += addOneUnc(fLogStream, "muRFSyst1l", v1l["q2_Dn"],      v1l["q2_Up"],      2, -1, "lnN");
-      //numnuis += addOneUnc(fLogStream, "JESSysy1l",  v1l["JES_Down"],     v1l["JES_Up"],     2, -1, "lnN");//XXX
+      numnuis += addOneUnc(fLogStream, "JESSysy1l",  v1l["JES_Down"],     v1l["JES_Up"],     2, -1, "lnN");//XXX
       //numnuis += addOneUnc(fLogStream, "METSyst1l",  v1l["metres_Down"],  v1l["metres_Up"],  2, -1, "lnN");
       //bgznunu
       numnuis += addOneUnc(fLogStream, "BHFSFSystZ",vZnunu["btagHeavyDN"], vZnunu["btagHeavyUP"], 4, -1, "lnN");
       numnuis += addOneUnc(fLogStream, "BLFSFSystZ",vZnunu["btagLightDN"], vZnunu["btagLightUP"], 4, -1, "lnN");
       numnuis += addOneUnc(fLogStream, "LEffSystZ", vZnunu["lepSFDN"],     vZnunu["lepSFUP"],     4, -1, "lnN");
-      //numnuis += addOneUnc(fLogStream, "JESSystZ",  vZnunu["jesDN"],   vZnunu["jesUP"],       4, -1, "lnN");//XXX
+      numnuis += addOneUnc(fLogStream, "JESSystZ",  vZnunu["jesDN"],   vZnunu["jesUP"],       4, -1, "lnN");//XXX
       numnuis += addOneUnc(fLogStream, "PDFSystZ",  vZnunu["pdfDN"],       vZnunu["pdfUP"],       4, -1, "lnN");
       numnuis += addOneUnc(fLogStream, "QsqSystZ",  vZnunu["Q2DN"],        vZnunu["Q2UP"],        4, -1, "lnN");
       numnuis += addOneUnc(fLogStream, "AsSystZ",   vZnunu["alphaSDN"],    vZnunu["alphaSUP"],    4, -1, "lnN");
+      numnuis += addOneUnc(fLogStream, "ISRSystZ",  vZnunu["ISRnjetsDown"], vZnunu["ISRnjetsUp"], 4, -1, "lnN");
+      numnuis += addOneUnc(fLogStream, "PUSystZ",  vZnunu["PUdown"],    vZnunu["PUup"],      4, -1, "lnN");
     }
     //bg2l
     //numnuis += addOneUnc(fLogStream, "TPtSyst2l", v2l["CR2l_ttbarSysPtDn"], v2l["CR2l_ttbarSysPtUp"], 1, -1, "lnN");
-    numnuis += addOneUnc(fLogStream, "ISR2l",     v2l["CR2l_ISRDn"],        v2l["CR2l_ISRUp"],     1, -1, "lnN");
     numnuis += addOneUnc(fLogStream, "MCSyst2l",  v2l["CR2l_mcStatsUp"],    v2l["CR2l_mcStatsDn"],    1, b, "lnN");
       numnuis += addOneUnc(fLogStream, "METSyst2l",  v2l["CR2l_metResdown"], v2l["CR2l_metResup"], 1, -1, "lnN");
+      numnuis += addOneUnc(fLogStream, "TauSF2l", v2l["CR2l_tauSFDn"],        v2l["CR2l_tauSFUp"],     1, -1, "lnN");
+      numnuis += addOneUnc(fLogStream, "TTPt2l", v2l["CR2l_metTTbarDn"],        v2l["CR2l_metTTbarUp"],     1, -1, "lnN");
+      //cout << v2l["CR2l_metTTbarDn"] << " " << v2l["CR2l_metTTbarUp"] << endl;
     //bg1l
     
     numnuis += addOneUnc(fLogStream, "MCSyst1l",     v1l["mcStats_Dn"],      v1l["mcStats_Up"],      2,  b, "lnN");
-    numnuis += addOneUnc(fLogStream, "WbxsSyst1l",   v1l["Wb_Down"],      v1l["Wb_Up"],      2, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "WbxsSyst1l",   v1l["Wb_Dn"],      v1l["Wb_Up"],      2, -1, "lnN");
     //numnuis += addOneUnc(fLogStream, "WwidthSyst1l", v1l["W_width_Down"], v1l["W_width_Up"], 2, -1, "lnN");
     numnuis += addOneUnc(fLogStream, "ContSyst1l",   v1l["CRCont_Dn"],  v1l["CRCont_Up"],  2, -1, "lnN");
     //numnuis += addOneUnc(fLogStream, "NuPtSyst1l",   v1l["nu_pT_Down"],   v1l["nu_pT_Up"],   2, -1, "lnN");
@@ -622,7 +639,6 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
 
     //bgznunu
     numnuis += addOneUnc(fLogStream, "MCstatsZ", vZnunu["mcStatsDN"], vZnunu["mcStatsUP"], 4,  b, "lnN");
-    numnuis += addOneUnc(fLogStream, "PUSystZ",  vZnunu["PUdown"],    vZnunu["PUup"],      4, -1, "lnN");
   }
   *fLogStream << endl;
   //now correctly counted nuisances
@@ -832,7 +848,7 @@ bool loadDataBGFiles(bool fakedata, int analysis){
   if(f1l->IsOpen()){
     cout << "Not opening 1l file - is already opened with name " << f1l->GetName() << endl;
   } else {
-    filename = inputdir + "resultfiles/Wjets_std.root";
+    filename = inputdir + "resultfiles/Wjets.root";
     if(analysis==1) filename = inputdir + "resultfiles/WJets_BkgEst_compressed.root";
     //cout << __LINE__ << endl;
   ifstream infile0b(filename.Data());
@@ -849,7 +865,8 @@ bool loadDataBGFiles(bool fakedata, int analysis){
   if(f1ltop->IsOpen()){
     cout << "Not opening 1ltop file - is already opened with name " << f1ltop->GetName() << endl;
   } else {
-    filename = inputdir + "resultfiles/bkgEst_1lepFromTop__mlb_v2_bins__histos.root";
+    //filename = inputdir + "resultfiles/bkgEst_1lepFromTop__mlb_v2_bins__histos.root";
+    filename = inputdir + "resultfiles/TT1lSR.root";
     if(analysis==1) filename = inputdir + "resultfiles/TT1l_BkgEst_compressed.root";
     //cout << __LINE__ << endl;
    ifstream infile1lt(filename.Data());
@@ -949,7 +966,7 @@ bool loadSignalFile(TString signaltype, int analysis){
 
 //clear - returns false if loading of at least one histograms failed (i.e. histogram non existing)
 bool loadDataBGHistos(bool fakedata, int analysis){
-  //cout << __LINE__ << endl;
+  cout << __LINE__ << endl;
 
   hist2l["CR2l_yield"];
   hist2l["CR2l_bTagEffHFUp"];
@@ -958,6 +975,10 @@ bool loadDataBGHistos(bool fakedata, int analysis){
   hist2l["CR2l_bTagEffLFDn"];
   hist2l["CR2l_lepSFUp"];
   hist2l["CR2l_lepSFDn"];
+  hist2l["CR2l_tauSFUp"];
+  hist2l["CR2l_tauSFDn"];
+  hist2l["CR2l_pileupUp"];
+  hist2l["CR2l_pileupDn"];
   //hist2l["CR2l_ttbarSysPtUp"];
   //hist2l["CR2l_ttbarSysPtDn"];
   hist2l["CR2l_ISRUp"];
@@ -972,13 +993,15 @@ bool loadDataBGHistos(bool fakedata, int analysis){
   hist2l["CR2l_alphasDn"];
   hist2l["CR2l_q2Dn"];
   hist2l["CR2l_q2Up"];
-  //hist2l["CR2l_jesUp"];//XXX
-  //hist2l["CR2l_jesDn"];//XXX
+  hist2l["CR2l_jesUp"];//XXX
+  hist2l["CR2l_jesDn"];//XXX
   hist2l["CR2l_cr2lTriggerSFUp"];
   hist2l["CR2l_cr2lTriggerSFDn"];
   hist2l["CR2l_metResUp"];
   hist2l["CR2l_metResDn"];
-  //cout << __LINE__ << " " << f2l->GetName() << endl;
+  hist2l["CR2l_metTTbarUp"];
+  hist2l["CR2l_metTTbarDn"];
+  cout << __LINE__ << " " << f2l->GetName() << endl;
   //XAX - change file name based on analysis
   //XBX - change histogram name based on analysis
   for(map<string,TH1D*>::iterator h=hist2l.begin(); h!=hist2l.end();++h){
@@ -994,17 +1017,17 @@ bool loadDataBGHistos(bool fakedata, int analysis){
   hist1l["mcStats_Up"];
   hist1l["mcStats_Dn"];
   hist1l["Wb_Up"];
-  hist1l["Wb_Down"];
-  hist1l["btag_HF_Up"];
-  hist1l["btag_HF_Down"];
-  hist1l["btag_LF_Up"];
-  hist1l["btag_LF_Down"];
+  hist1l["Wb_Dn"];
+  hist1l["bTagEffHF_Up"];
+  hist1l["bTagEffHF_Dn"];
+  hist1l["bTagEffLF_Up"];
+  hist1l["bTagEffLF_Dn"];
   hist1l["pdf_Up"];
   hist1l["pdf_Dn"];
   hist1l["q2_Up"];
   hist1l["q2_Dn"];
-  hist1l["jes_Up"];
-  hist1l["jes_Dn"];
+  hist1l["JES_Up"];
+  hist1l["JES_Dn"];
   hist1l["CRCont_Up"];
   hist1l["CRCont_Dn"];
   //hist1l["metres_Up"];
@@ -1018,7 +1041,7 @@ bool loadDataBGHistos(bool fakedata, int analysis){
   
   //XAX - change file name based on analysis
   //XBX - change histogram name based on analysis
-  //cout << __LINE__ << " " << f1l->GetName() << endl;
+  cout << __LINE__ << " " << f1l->GetName() << endl;
   for(map<string,TH1D*>::iterator h=hist1l.begin(); h!=hist1l.end();++h){
     if(f1l->GetListOfKeys()->Contains(h->first.c_str())) {
       h->second = (TH1D*)f1l->Get(h->first.c_str());
@@ -1027,8 +1050,9 @@ bool loadDataBGHistos(bool fakedata, int analysis){
       return false;
     }
   }
-  //cout << __LINE__ << " " << f1ltop->GetName() << endl;
-  hist1ltop["ee1lep_fromTop_yield"];
+  cout << __LINE__ << " " << f1ltop->GetName() << endl;
+  //hist1ltop["ee1lep_fromTop_yield"];
+  hist1ltop["SR_Top"];
   //XAX - change file name based on analysis
   //XBX - change histogram name based on analysis
   for(map<string,TH1D*>::iterator h=hist1ltop.begin(); h!=hist1ltop.end();++h){
@@ -1060,7 +1084,9 @@ bool loadDataBGHistos(bool fakedata, int analysis){
   histZnunu["normalizationUP"];
   histZnunu["lepSFDN"];
   histZnunu["lepSFUP"];
-  //cout << __LINE__ << " " << fznunu->GetName() << endl;
+  histZnunu["ISRnjetsDown"];
+  histZnunu["ISRnjetsUp"];
+  cout << __LINE__ << " " << fznunu->GetName() << endl;
   //XAX - change file name based on analysis
   //XBX - change histogram name based on analysis
   for(map<string,TH1D*>::iterator h=histZnunu.begin(); h!=histZnunu.end();++h){
@@ -1149,12 +1175,20 @@ void resetArray(double *a){
 //helper function to make one line in datacard for correlated uncertainties
 //please note, that the arrays d,u get reset with default values of -1
 int addCorrelatedUnc(std::ostringstream *fLogStream, string name, double *d, double *u, int bin, string unctype){
- if(unctype.find(string("gmN")) != string::npos){
-	for(unsigned int i = 0; i<maxnprocess; ++i){
- 		if(u[i]<0) return 0;//all defined u's have to be >=0
-	}
- }
- if(!checkIfPos(d)) return 0;
+  if(unctype.find(string("gmN")) != string::npos){
+    for(unsigned int i = 0; i<maxnprocess; ++i){
+      if(u[i]<0) {
+	resetArray(d);
+	resetArray(u);
+	return 0;//all defined u's have to be >=0
+      }
+    }
+  }
+  if(!checkIfPos(d)) {
+    resetArray(d);
+    resetArray(u);
+    return 0;
+  }
   bool allfalse = true;
   for(int i = 0; i<maxnprocess; ++i){
     if(unctype.find(string("gmN")) != string::npos) allfalse = false;
@@ -1163,7 +1197,11 @@ int addCorrelatedUnc(std::ostringstream *fLogStream, string name, double *d, dou
     else if(fabs(d[i]-1.)<10e-10&&fabs(u[i]-1.)<10e-10) ;
     else if(d[i]>=0&&u[i]>=0) allfalse = false;
   }
-  if(allfalse) return 0;
+  if(allfalse) {
+    resetArray(d);
+    resetArray(u);
+    return 0;
+  }
  *fLogStream << " " << setw(15) << name;
  if(bin>0) *fLogStream << bin;
  *fLogStream << "    " << unctype << " ";
@@ -1178,7 +1216,8 @@ int addCorrelatedUnc(std::ostringstream *fLogStream, string name, double *d, dou
    else if(d[i]>=0&&u[i] <0) *fLogStream << d[i] << " ";
    else if(fabs(d[i])<10e-10&&fabs(u[i])<10e-10) *fLogStream << "- ";
    else if(fabs(d[i]-1.)<10e-10&&fabs(u[i]-1.)<10e-10) *fLogStream << "- ";
-   else if(d[i]>=0&&u[i]>=0) *fLogStream << d[i] << "/" << u[i] << " ";
+   else if(u[i]>=0&&u[i]==d[i]) *fLogStream << u[i] << " ";
+   else if(d[i]>=0&&u[i]>=0) *fLogStream << TMath::Max(0.001,d[i]) << "/" << TMath::Min(1.999,u[i]) << " ";
    else                      *fLogStream << "- ";
  }
  *fLogStream << endl;
@@ -1206,7 +1245,8 @@ int addOneUnc(std::ostringstream *fLogStream, string name, double d, double u, i
   if(d==0){ d = 0.001; }
   if(d<0)      *fLogStream << u << " ";//gmN
   else if(u<0) *fLogStream << d << " ";//only one uncertainty
-  else         *fLogStream << d << "/" << u << " ";
+  else if(u==d)*fLogStream << d << " ";
+  else         *fLogStream << TMath::Max(0.001,d) << "/" << TMath::Min(1.999,u) << " ";
   for(int i = process + 1; i<maxnprocess; ++i) *fLogStream << "- ";
   *fLogStream << endl;
   return 1;
@@ -1298,7 +1338,7 @@ int minstopmass(TString signaltype){
 }
 int maxstopmass(TString signaltype){
   if(signaltype.Contains("T2tt")) return 1200;
-  if(signaltype.Contains("T2tb")) return 1000;
+  if(signaltype.Contains("T2tb")) return 1200;
   if(signaltype.Contains("T2bW")) return 1200;
   return -1;
 }
@@ -1310,7 +1350,7 @@ int minlspmass(TString signaltype){
 }
 int maxlspmass(TString signaltype){
   if(signaltype.Contains("T2tt")) return 650;
-  if(signaltype.Contains("T2tb")) return 450;
+  if(signaltype.Contains("T2tb")) return 650;
   if(signaltype.Contains("T2bW")) return 650;
   return -1;
 }
@@ -1359,7 +1399,8 @@ int checkbin(int analysis, int bin, double stop, double lsp, bool dropsigcont){
   //cout << bLL << " " << bTTZ << " " << bW << endl;
   if(bLL>hist2l["CR2l_yield"]->GetNbinsX()) return -1;
   if(bW>hist1l["CR1lyield"]->GetNbinsX()) return -1;
-  if(bW>hist1ltop["ee1lep_fromTop_yield"]->GetNbinsX()) return -1;
+  //if(bW>hist1ltop["ee1lep_fromTop_yield"]->GetNbinsX()) return -1;
+  if(bW>hist1ltop["SR_Top"]->GetNbinsX()) return -1;
   if(bTTZ>histZnunu["yield"]->GetNbinsX()) return -1;
   if(b>histData["SR_Data"]->GetNbinsX()) return -1;
   //get all yields and statistical uncertainties - also signal contamination
@@ -1379,7 +1420,7 @@ int checkbin(int analysis, int bin, double stop, double lsp, bool dropsigcont){
   //cout << sig << " " << sig2 << endl;
   if((sig+sig2)/2.<0) return -1;
   bool signalexists = false;
-  for(unsigned int z = 1; z<=histSig["SRyield"]->GetNbinsZ();++z){
+  for(int z = 1; z<=histSig["SRyield"]->GetNbinsZ();++z){
     if(histSig["SRyield"]->GetBinContent(histSig["SRyield"]->FindBin(stop,lsp,z))>0){
       signalexists = true;
       break;
@@ -1388,7 +1429,8 @@ int checkbin(int analysis, int bin, double stop, double lsp, bool dropsigcont){
   if(!signalexists) return -1;//make sure to run on actual signal points
   if(hist2l["CR2l_yield"]->GetBinContent(bLL)<0) return -1;
   if(hist1l["CR1lyield"]->GetBinContent(bW)<0) return -1;
-  if(hist1ltop["ee1lep_fromTop_yield"]->GetBinContent(bW)<0) return -1;
+  //if(hist1ltop["ee1lep_fromTop_yield"]->GetBinContent(bW)<0) return -1;
+  if(hist1ltop["SR_Top"]->GetBinContent(bW)<0) return -1;
   if(histZnunu["yield"]->GetBinContent(bTTZ)<0) return -1;
   if(histData["SR_Data"]->GetBinContent(b)<0) return -1;
 

@@ -38,17 +38,29 @@ using namespace std;
 
 TString inputdir = "/hadoop/cms/store/user/haweber/condor/limits2017_36p6fbinv_SUS16051/";
 TString outputdir = "rootfiles2017_36p6fbinv_SUS16051/";
+//TString inputdir = "/hadoop/cms/store/user/haweber/condor/limitsstupid/factor2/";
 //TString outputdir = "BSForFrank/";
 
-void Combine2DLimitHistos(TString signaltype, TString combine1, TString combine2, float DM2choice, bool prefit=false, bool fakedata=false, bool nosigunc=false, bool nobkgunc=false, bool dropsigcont=false, bool correlated=true);
+void Make2DLimitHistos(TString signaltype, bool prefit=false, bool fakedata=false, bool nosigunc=false, bool nobkgunc=false, int xsecupdown=0, int compressed=0, bool dropsigcont=false, bool correlated=true);
 TH2F* InterpolateThisHistogram(TH2F *hold);
 TGraph2D* GetInterpolatingGraph(TH2F *hold);
 TH2F* PassThisHistogram(TH2F *hold);
 TH2F* XsecThisHistogram(TH2F *hold, TH1D *hxsec);
 TGraph* GetContour(TGraph2D *g, TString name, TGraph *gempty);
 TGraph* GetContour2(TGraph2D *g, TString name, TGraph *gempty);
+inline TString MakeOutputDir(TString dir);
 
-void Combine2DLimitHistos(TString signaltype, TString combine1, TString combine2, float DM2choice, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, bool dropsigcont, bool correlated){
+inline TString MakeOutputDir(TString dir){
+  if(!dir.EndsWith("/")) dir += "/";
+  // Create directory if needed
+  char cmd[100];
+  sprintf(cmd,"mkdir -p %s", dir.Data());
+  system(cmd);
+  return dir;
+}
+
+
+void Make2DLimitHistos(TString signaltype, bool prefit, bool fakedata, bool nosigunc, bool nobkgunc, int xsecupdown, int compressed, bool dropsigcont, bool correlated){
 
   TH1D *hxsec;
   TFile *fxsec = new TFile("xsec_stop_13TeV.root","READ");
@@ -69,59 +81,28 @@ void Combine2DLimitHistos(TString signaltype, TString combine1, TString combine2
   
   TString myoutputdir = outputdir;
   if(correlated) myoutputdir = myoutputdir + "correlated/";
+  if(compressed==1) myoutputdir = myoutputdir + "compressed/";
   if(nosigunc&&nobkgunc) myoutputdir = myoutputdir + "nounc/";
   else if(nosigunc) myoutputdir = myoutputdir + "nosigunc/";
   else if(nobkgunc) myoutputdir = myoutputdir + "nobkgunc/";
   if(dropsigcont) myoutputdir = myoutputdir + "dropsigcont/";
   if(fakedata)   myoutputdir = myoutputdir + "fakedata/";
-  //cout << "make directory " << myoutputdir << endl;//already exists
-  //MakeOutputDir(myoutputdir);
+  cout << "make directory " << myoutputdir << endl;
+  MakeOutputDir(myoutputdir);
+  TString myinputdir = inputdir;
+  if(correlated) myinputdir = myinputdir + "correlated/";
+  if(compressed==1) myinputdir = myinputdir + "compressed/";
+  if(nosigunc&&nobkgunc) myinputdir = myinputdir + "nounc/";
+  else if(nosigunc) myinputdir = myinputdir + "nosigunc/";
+  else if(nobkgunc) myinputdir = myinputdir + "nobkgunc/";
+  if(dropsigcont) myinputdir = myinputdir + "dropsigcont/";
+  if(fakedata)   myinputdir = myinputdir + "fakedata/";
+  cout << "inputs from " << myinputdir << endl;
 
-  TString inputfile1 = myoutputdir + "Limits2DHistograms_"+combine1+"_"+signaltype+"_prefit.root";
-  TString inputfile2 = myoutputdir + "Limits2DHistograms_"+combine2+"_"+signaltype+"_prefit.root";
-  if(!prefit){
-    inputfile1 = myoutputdir + "Limits2DHistograms_"+combine1+"_"+signaltype+"_postfit.root";
-    inputfile2 = myoutputdir + "Limits2DHistograms_"+combine2+"_"+signaltype+"_postfit.root";    
-  }
-  TFile *f1 = TFile::Open(inputfile1);
-  TH2F *hExpOrg_t1   = (TH2F*)f1->Get("hExpOrg");   hExpOrg_t1  ->SetName("hExpOrg_t1");
-  TH2F *hObsOrg_t1   = (TH2F*)f1->Get("hObsOrg");   hObsOrg_t1  ->SetName("hObsOrg_t1");
-  TH2F *hObs1pOrg_t1 = (TH2F*)f1->Get("hObs1pOrg"); hObs1pOrg_t1->SetName("hObs1pOrg_t1");
-  TH2F *hObs1mOrg_t1 = (TH2F*)f1->Get("hObs1mOrg"); hObs1mOrg_t1->SetName("hObs1mOrg_t1");
-  TH2F *hExp1mOrg_t1 = (TH2F*)f1->Get("hExp1mOrg"); hExp1mOrg_t1->SetName("hExp1mOrg_t1");
-  TH2F *hExp2mOrg_t1 = (TH2F*)f1->Get("hExp2mOrg"); hExp2mOrg_t1->SetName("hExp2mOrg_t1");
-  TH2F *hExp1pOrg_t1 = (TH2F*)f1->Get("hExp1pOrg"); hExp1pOrg_t1->SetName("hExp1pOrg_t1");
-  TH2F *hExp2pOrg_t1 = (TH2F*)f1->Get("hExp2pOrg"); hExp2pOrg_t1->SetName("hExp2pOrg_t1");
-  TFile *f2 = TFile::Open(inputfile2);
-  TH2F *hExpOrg_t2   = (TH2F*)f2->Get("hExpOrg");   hExpOrg_t2  ->SetName("hExpOrg_t2");
-  TH2F *hObsOrg_t2   = (TH2F*)f2->Get("hObsOrg");   hObsOrg_t2  ->SetName("hObsOrg_t2");
-  TH2F *hObs1pOrg_t2 = (TH2F*)f2->Get("hObs1pOrg"); hObs1pOrg_t2->SetName("hObs1pOrg_t2");
-  TH2F *hObs1mOrg_t2 = (TH2F*)f2->Get("hObs1mOrg"); hObs1mOrg_t2->SetName("hObs1mOrg_t2");
-  TH2F *hExp1mOrg_t2 = (TH2F*)f2->Get("hExp1mOrg"); hExp1mOrg_t2->SetName("hExp1mOrg_t2");
-  TH2F *hExp2mOrg_t2 = (TH2F*)f2->Get("hExp2mOrg"); hExp2mOrg_t2->SetName("hExp2mOrg_t2");
-  TH2F *hExp1pOrg_t2 = (TH2F*)f2->Get("hExp1pOrg"); hExp1pOrg_t2->SetName("hExp1pOrg_t2");
-  TH2F *hExp2pOrg_t2 = (TH2F*)f2->Get("hExp2pOrg"); hExp2pOrg_t2->SetName("hExp2pOrg_t2");
-  cout << f1->GetName() << " " << f2->GetName() << endl;
-  //establish that histos can be combined easily
-  if(hExpOrg_t1->GetNbinsX()!=nbinsx){ cout << "nbinsX different for input1 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if(hExpOrg_t2->GetNbinsX()!=nbinsx){ cout << "nbinsX different for input2 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if(hExpOrg_t1->GetNbinsY()!=nbinsy){ cout << "nbinsY different for input1 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if(hExpOrg_t2->GetNbinsY()!=nbinsy){ cout << "nbinsY different for input2 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if((int)hExpOrg_t1->GetXaxis()->GetBinLowEdge(1)!=mStopLow){ cout << "starting bin X different for input1 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if((int)hExpOrg_t2->GetXaxis()->GetBinLowEdge(1)!=mStopLow){ cout << "starting bin X different for input2 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if((int)hExpOrg_t1->GetYaxis()->GetBinLowEdge(1)!=mLSPLow){ cout << "starting bin Y different for input1 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if((int)hExpOrg_t2->GetYaxis()->GetBinLowEdge(1)!=mLSPLow){ cout << "starting bin Y different for input2 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if((int)hExpOrg_t1->GetXaxis()->GetBinWidth(1)!=mStopStep){ cout << "bin width X different for input1 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if((int)hExpOrg_t2->GetXaxis()->GetBinWidth(1)!=mStopStep){ cout << "bin width X different for input2 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if((int)hExpOrg_t1->GetYaxis()->GetBinWidth(1)!=mLSPStep){ cout << "bin width Y different for input1 - exit"; f1->Close(); f2->Close(); exit(0); }
-  if((int)hExpOrg_t2->GetYaxis()->GetBinWidth(1)!=mLSPStep){ cout << "bin width Y different for input2 - exit"; f1->Close(); f2->Close(); exit(0); }
-
-  
-  TString outfilename = myoutputdir + "Limits2DHistograms_combined_"+signaltype+"_prefit.root";
-  if(!prefit) outfilename = myoutputdir + "Limits2DHistograms_combined_"+signaltype+"_postfit.root";
+  TString outfilename = myoutputdir + "Limits2DHistograms_"+signaltype+"_prefit.root";
+  if(!prefit) outfilename = myoutputdir + "Limits2DHistograms_"+signaltype+"_postfit.root";
   TFile *file = new TFile(outfilename, "recreate");
   file->cd();
-  TH2F *hBestAnalysis   = new TH2F("hBestAnalysis",   "hBestAnalysis"  , nbinsx, mStopLow, mStopHigh, nbinsy, mLSPLow, mLSPHigh);
   TH2F *hExpOrg   = new TH2F("hExpOrg",   "hExp"  , nbinsx, mStopLow, mStopHigh, nbinsy, mLSPLow, mLSPHigh);
   TH2F *hObsOrg   = new TH2F("hObsOrg",   "hObs"  , nbinsx, mStopLow, mStopHigh, nbinsy, mLSPLow, mLSPHigh);
   TH2F *hObs1pOrg = new TH2F("hObs1pOrg", "hObs1p", nbinsx, mStopLow, mStopHigh, nbinsy, mLSPLow, mLSPHigh);
@@ -173,44 +154,91 @@ void Combine2DLimitHistos(TString signaltype, TString combine1, TString combine2
   
 
   cout << "First create 2d limit histograms" << endl;
-  for(int x = 1; x<=nbinsx; ++x){
-    for(int y = 1; y<=nbinsx; ++y){
-      if(hExpOrg->GetXaxis()->GetBinLowEdge(x)<hExpOrg->GetYaxis()->GetBinLowEdge(y)) continue;
-      int whichanalysis = -1;
-      if(DM2choice<0){//choose on better expected limit
-	if(hExpOrg_t1->GetBinContent(x,y)<hExpOrg_t2->GetBinContent(x,y)) whichanalysis = 1;
-	else whichanalysis = 2;
-      } else {
-	float stop = hExpOrg->GetXaxis()->GetBinLowEdge(x);//should I use low edge or bin center?
-	float lsp = hExpOrg->GetYaxis()->GetBinLowEdge(y);//should I use low edge or bin center?
-	if((stop-lsp)>DM2choice) whichanalysis = 1;
-	else whichanalysis = 2;
+  for(int stop = mStopLow; stop<=mStopHigh; stop += mStopStep){
+    string tarfile = "tar_Limits_Asymptotic_PostFit" + (string)signaltype.Data() + "_" + to_string(stop) + ".tar.gz";
+    if(prefit) tarfile = "tar_Limits_Asymptotic_PreFit" + (string)signaltype.Data() + "_" + to_string(stop) + ".tar.gz";
+    TString tempfilename = myinputdir + tarfile;
+    ifstream infiletemp(tempfilename.Data());
+    if(!(infiletemp.good() ) ) continue;
+    else cout << tempfilename << " exists." << endl;
+    string cpcommand = "cp " + (string)myinputdir.Data() + tarfile + " temp/.";
+    string tarcommand = "tar --directory temp -xzvf temp/" + tarfile;
+    string rmcommand1 = "rm temp/" + tarfile;
+    string rmcommand2 = "rm temp/*.root";
+    system(cpcommand.c_str());
+    //system("ls");
+    system(tarcommand.c_str());
+    //system ("cd ..");
+    system(rmcommand1.c_str());
+    for(int lsp = mLSPLow; lsp<=mLSPHigh; lsp += mLSPStep){
+      //if(signaltype.Contains("T2bW")&&stop==350&&lsp==100) continue;
+      TString limitfilebase = "Limits_Asymptotic_";
+      if(prefit) limitfilebase = limitfilebase + "PreFit_";
+      if(!prefit) limitfilebase = limitfilebase + "PostFit_";
+      TString signalname = signaltype + "_" + std::to_string(stop) + "_" + std::to_string(lsp);
+      TString limitfile = "temp/" + limitfilebase + signalname + ".root";
+      //cout << limitfile << endl;
+      ifstream infile(limitfile.Data());
+      bool exists = infile.good();
+      if(!exists) {
+	cout << "No limit name for " << signalname << " - exit" << endl;
+	continue;
       }
-      cout << hExpOrg->GetXaxis()->GetBinLowEdge(x) << "-" << hExpOrg->GetYaxis()->GetBinLowEdge(y) << " uses analysis " << whichanalysis << endl;
-      if(whichanalysis==1){
-	hObsOrg      ->SetBinContent(x,y,hObsOrg_t1  ->GetBinContent(x,y));
-	hObs1pOrg    ->SetBinContent(x,y,hObs1pOrg_t1->GetBinContent(x,y));
-	hObs1mOrg    ->SetBinContent(x,y,hObs1mOrg_t1->GetBinContent(x,y));
-	hExpOrg      ->SetBinContent(x,y,hExpOrg_t1  ->GetBinContent(x,y));
-	hExp1mOrg    ->SetBinContent(x,y,hExp1mOrg_t1->GetBinContent(x,y));
-	hExp2mOrg    ->SetBinContent(x,y,hExp2mOrg_t1->GetBinContent(x,y));
-	hExp1pOrg    ->SetBinContent(x,y,hExp1pOrg_t1->GetBinContent(x,y));
-	hExp2pOrg    ->SetBinContent(x,y,hExp2pOrg_t1->GetBinContent(x,y));
-	hBestAnalysis->SetBinContent(x,y,1);
-      } else if(whichanalysis==2){
-	hObsOrg      ->SetBinContent(x,y,hObsOrg_t2  ->GetBinContent(x,y));
-	hObs1pOrg    ->SetBinContent(x,y,hObs1pOrg_t2->GetBinContent(x,y));
-	hObs1mOrg    ->SetBinContent(x,y,hObs1mOrg_t2->GetBinContent(x,y));
-	hExpOrg      ->SetBinContent(x,y,hExpOrg_t2  ->GetBinContent(x,y));
-	hExp1mOrg    ->SetBinContent(x,y,hExp1mOrg_t2->GetBinContent(x,y));
-	hExp2mOrg    ->SetBinContent(x,y,hExp2mOrg_t2->GetBinContent(x,y));
-	hExp1pOrg    ->SetBinContent(x,y,hExp1pOrg_t2->GetBinContent(x,y));
-	hExp2pOrg    ->SetBinContent(x,y,hExp2pOrg_t2->GetBinContent(x,y));
-	hBestAnalysis->SetBinContent(x,y,2);
+      cout << "Limit file exists for " << signalname << endl;
+      double obs    = -1.0; //observed limit
+      double obsm1s  = -1.0; //observed limit - 1 sigma theory
+      double obsp1s = -1.0; //observed limit + 1 sigma theory
+      double expm2s = -1.0; //expected - 2 sigma
+      double expm1s = -1.0; //expected - 1 sigma
+      double exp    = -1.0; //expected limit
+      double expp1s = -1.0; //expected + 1 sigma
+      double expp2s = -1.0; //expected + 2 sigma
+      
+      double xsec = hxsec->GetBinContent(hxsec->FindBin(stop));
+      double xsecunc = hxsec->GetBinError(hxsec->FindBin(stop));
+      TFile *flimit;
+      flimit = new TFile(limitfile,"READ");
+      if(flimit->IsZombie()) {
+	flimit->Close();
+	delete flimit;
+	cout << "No limit file for " << signalname << " - exit" << endl;
+	continue;
       }
-    }//y
-  }//x
+      //so flimit exists
+      flimit->cd();
+      TTree *tlimit = (TTree*)flimit->Get("limit");
+      double value = -1.0;
+      tlimit->SetBranchAddress("limit", &value);
+      
+      for(int i=0; i< 6; i++){
+	tlimit->GetEntry(i);
+	//cout << "stop " << stop << " lsp " << lsp << " i " << i << " value " << value << endl;
+	if(i==0)      expm2s = value;
+	else if(i==1) expm1s = value;
+	else if(i==2) exp    = value;
+	else if(i==3) expp1s = value;
+	else if(i==4) expp2s = value;
+	else if(i==5) obs    = value;
+      }
+      delete tlimit;
+      flimit->Close();
+      delete flimit;
+      if(exp>1000) continue;
+      //if(obs>1000) continue;
 
+      file->cd();
+      hExpOrg  ->Fill(stop,lsp,exp   );
+      hExp2mOrg->Fill(stop,lsp,expm2s);
+      hExp1mOrg->Fill(stop,lsp,expm1s);
+      hExp1pOrg->Fill(stop,lsp,expp1s);
+      hExp2pOrg->Fill(stop,lsp,expp2s);
+      hObsOrg  ->Fill(stop,lsp,obs   );
+      //xsecupdown
+      hObs1pOrg->Fill(stop,lsp,obs*xsec/(xsec+xsecunc)   );
+      hObs1mOrg->Fill(stop,lsp,obs*xsec/(xsec-xsecunc)   );
+    }//lsp
+    system(rmcommand2.c_str());
+  }//stop
   cout << "Now interpolate these histograms" << endl;  
   hExp   = (TH2F*)InterpolateThisHistogram(hExpOrg);
   hExp2m = (TH2F*)InterpolateThisHistogram(hExp2mOrg);
@@ -296,7 +324,6 @@ void Combine2DLimitHistos(TString signaltype, TString combine1, TString combine2
 
   
   file->cd();
-  hBestAnalysis->Write();
   hExpOrg   ->Write();
   hObsOrg   ->Write();
   hObs1mOrg ->Write();
@@ -374,8 +401,6 @@ void Combine2DLimitHistos(TString signaltype, TString combine1, TString combine2
   file->Close();
   cout << "Saved all histos in  " << file->GetName() << endl;
 
-  f1->Close();
-  f2->Close();
   fxsec->Close();
   delete fxsec;
   

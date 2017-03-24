@@ -142,7 +142,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       CMS3::progress( nEventsTotal, nEventsChain );
 
       // Analysis Code
-      float weight = cms3.scale1fb()*36.6;
+      float weight = cms3.scale1fb()*35.9;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
 
       if(!is1lepFromTop()) continue;
@@ -201,6 +201,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       float gMETx = genmet()*TMath::Cos(genmet_phi());
       float gMETy = genmet()*TMath::Sin(genmet_phi());
 
+      /*
       float floatresX, floatresY;
       if(pfmet()<250){
 	floatresX = rndm->Gaus(0.925,0.075);
@@ -240,6 +241,47 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       } else {
 	floatresXX = rndm2->Gaus(2.-1.25,0.25);
 	floatresYY = rndm->Gaus(2.-1.25,0.25);
+      }
+      */
+      float floatresX, floatresY;
+      if(pfmet()<250){
+	floatresX = rndm->Gaus(0.915,0.085);
+	floatresY = rndm2->Gaus(0.915,0.085);
+      } else if(pfmet()<350){
+	floatresX = rndm2->Gaus(0.945,0.055);
+	floatresY = rndm->Gaus(0.945,0.055);
+      } else if(pfmet()<450){
+	floatresX = rndm->Gaus(1.075,0.075);
+	floatresY = rndm2->Gaus(1.075,0.075);
+      } else if(pfmet()<550){
+	floatresX = rndm->Gaus(1.135,0.135);
+	floatresY = rndm2->Gaus(1.135,0.135);
+      } else if(pfmet()<650){
+	floatresX = rndm->Gaus(1.215,0.215);
+	floatresY = rndm2->Gaus(1.215,0.215);
+      } else {
+	floatresX = rndm2->Gaus(1.275,0.275);
+	floatresY = rndm->Gaus(1.275,0.275);
+      }
+      float floatresXX, floatresYY;
+      if(pfmet()<250){
+	floatresXX = rndm->Gaus(2.-0.915,0.085);
+	floatresYY = rndm2->Gaus(2.-0.915,0.085);
+      } else if(pfmet()<350){
+	floatresXX = rndm2->Gaus(2.-0.945,0.055);
+	floatresYY = rndm->Gaus(2.-0.945,0.055);
+      } else if(pfmet()<450){
+	floatresXX = rndm->Gaus(2.-1.075,0.075);
+	floatresYY = rndm2->Gaus(2.-1.075,0.075);
+      } else if(pfmet()<550){
+	floatresXX = rndm->Gaus(2.-1.135,0.135);
+	floatresYY = rndm2->Gaus(2.-1.135,0.135);
+      } else if(pfmet()<650){
+	floatresXX = rndm->Gaus(2.-1.215,0.215);
+	floatresYY = rndm2->Gaus(2.-1.215,0.215);
+      } else {
+	floatresXX = rndm2->Gaus(2.-1.275,0.275);
+	floatresYY = rndm->Gaus(2.-1.275,0.275);
       }
 
       float METresX = METx - gMETx;
@@ -391,9 +433,6 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   for(map<string,TH1F*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
   f->Close();
   cout << "Saved histos in " << f->GetName() << endl;
-
-  //cout << endl << "Cutflow" << endl;
-  //cout << "Events " << cevtcf << endl << "NVtx>0 " << cvtxcf << endl << "MET>30 " << cmetcf << endl << "NLeps>0 " << cnlepcf << endl << "NJets>1 " << cnjetcf << endl;
 
   // return
   bmark->Stop("benchmark");

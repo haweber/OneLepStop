@@ -239,7 +239,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       //cout <<  " filename " << currentFile->GetTitle() << endl;
 
       // Analysis Code
-      float weight = cms3.scale1fb()*31;
+      float weight = cms3.scale1fb()*36.8;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
   
       if(nvtxs()<0)                  continue;
@@ -253,6 +253,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(ph_mindphi_met_j1_j2()<0.8) continue;
       if(ph_selectedidx()<0)         continue;
       if(is_data()&&filt_badMuonFilter()!=1) continue;
+      if(is_data()&&filt_badChargedCandidateFilter()!=1) continue;
       if(is_data()&&filt_met()!=1) continue;
       if(is_data()&&filt_hcallaser()!=1) continue;
       if(is_data()&&filt_jetWithBadMuon()!=1) continue;
@@ -266,8 +267,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
       TString currentfilename = currentFile->GetTitle();
       if(currentfilename.Contains("GJets_DR0p4_HT")) { if(ph_drMinParton()[ph_selectedidx()]< 0.4) continue; }
-      //if(currentfilename.Contains("GJets_HT"))       { if(ph_drMinParton()[ph_selectedidx()]>=0.4) continue; }
-      if(currentfilename.Contains("GJets_HT")&&!currentfilename.Contains("GJets_HT400to600_25ns"))       { if(ph_drMinParton()[ph_selectedidx()]>=0.4) continue; }
+      if(currentfilename.Contains("GJets_HT"))       { if(ph_drMinParton()[ph_selectedidx()]>=0.4) continue; }
+      //if(currentfilename.Contains("GJets_HT")&&!currentfilename.Contains("GJets_HT400to600_25ns"))       { if(ph_drMinParton()[ph_selectedidx()]>=0.4) continue; }
+      if(currentfilename.Contains("GJets_HT600toInf_ext1_25ns")) weight *= 2280002./(2280002.+2382062.);
+      if(currentfilename.Contains("GJets_HT600toInf_25ns")     ) weight *= 2382062./(2280002.+2382062.);
 
       if(is_data()) weight = 1.;
       int trigscal = 0;
@@ -281,10 +284,13 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       else if(PhotPt>80 &&HLT_Photon75_R9Id90_HE10_IsoM()>0 ) trigscal = HLT_Photon75_R9Id90_HE10_IsoM();
       else if(PhotPt>55 &&HLT_Photon50_R9Id90_HE10_IsoM()>0 ) trigscal = HLT_Photon50_R9Id90_HE10_IsoM();
       else if(PhotPt>125 &&HLT_Photon120()>0 )                trigscal = HLT_Photon120();
+      //if(is_data()) cout << "photpt " << PhotPt << " trigger " << trigscal << endl;
       if(is_data()&&trigscal<=0) continue;
       if(is_data()) weight = weight * (float)trigscal;
+      //if(run()==283933&&ls()==139&&evt()==112841398) cout << currentFile->GetTitle() << endl;
       if( is_data() ) {
 	duplicate_removal::DorkyEventIdentifier id(run(), evt(), ls());
+	//if (is_duplicate(id) ) cout << "Event gets removed " << run() << ":" << ls() << ":" << evt() << endl;
 	if (is_duplicate(id) ) continue;
       }
       if(weight>500) cout << "R:L:E " << run() << ":" << ls() << ":" << evt() << " " << weight << endl;
@@ -294,6 +300,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       histos["PhotNJetsP_MET150_" +samplename]->Fill(ngoodjets(),weight);
       histos["PhotHT_MET150_" +samplename]->Fill(ph_HT(),weight);
 
+      //if(is_data()) cout << run() << ":" << ls() << ":" << evt() << ph_ngoodjets() << " " << PhotPt << " " << weight << endl;
+      
       if(ph_ngoodjets()<=3) histos["PhotPt_MET150_23j_" +samplename]->Fill(PhotPt,weight);
       else                  histos["PhotPt_MET150_4j_"  +samplename]->Fill(PhotPt,weight);
       if(ph_ngoodjets()>=5) histos["PhotPt_MET150_5j_"  +samplename]->Fill(PhotPt,weight);
@@ -346,6 +354,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     h->second->SetBinError(1, sqrt(pow(h->second->GetBinError(1),2)+pow(h->second->GetBinError(0),2) ) );
   }
   string filename = "rootfiles/PhotonMETResolution/PhotPt_"+skimFilePrefix+".root";
+  //string filename = "rootfiles/PhotonMETResolution_reminiAOD/PhotPt_"+skimFilePrefix+".root";
   TFile *f = new TFile(filename.c_str(),"RECREATE");
   f->cd();
   for(map<string,TH1F*>::iterator h=    histos.begin(); h!=    histos.end();++h) h->second->Write();
