@@ -1213,13 +1213,33 @@ int addCorrelatedUnc(std::ostringstream *fLogStream, string name, double *d, dou
 
  for(int i = 0; i<maxnprocess; ++i){
    if(isgmN)                 *fLogStream << u[i] << " ";
-   else if(d[i]>=0&&u[i] <0) *fLogStream << d[i] << " ";
    else if(fabs(d[i])<10e-10&&fabs(u[i])<10e-10) *fLogStream << "- ";
    else if(fabs(d[i]-1.)<10e-10&&fabs(u[i]-1.)<10e-10) *fLogStream << "- ";
-   else if(u[i]>=0&&u[i]==d[i]) *fLogStream << u[i] << " ";
-   else if(d[i]>=0&&u[i]>=0) *fLogStream << TMath::Max(0.001,d[i]) << "/" << TMath::Min(1.999,u[i]) << " ";
+   else if(d[i]>=0&&u[i] <0) {
+     if(d[i]>=1) *fLogStream << d[i] << " ";
+     else        *fLogStream << 2.-d[i] << " ";
+   }
+   else if(u[i]>=0&&u[i]==d[i]) {
+     if(u[i]>=1) *fLogStream << u[i] << " ";
+     else        *fLogStream << 2.-u[i] << " ";
+   }
+   else if(d[i]>=0&&u[i]>=0) {
+     if(d[i]>=1&&u[i]>=1)     *fLogStream << TMath::Min(1.999,d[i]) << "/" << TMath::Min(1.999,u[i]) << " ";
+     else if(d[i]>=1&&u[i]<1) *fLogStream << TMath::Min(1.999,d[i]) << "/" << TMath::Max(0.001,1./(2.-u[i])) << " ";
+     else if(d[i]<1&&u[i]>=1) *fLogStream << TMath::Max(0.001,1./(2.-d[i])) << "/" << TMath::Min(1.999,u[i]) << " ";
+     else                     *fLogStream << TMath::Max(0.001,1./(2.-d[i])) << "/" << TMath::Max(0.001,1./(2.-u[i])) << " ";
+   }
    else                      *fLogStream << "- ";
  }
+ //for(int i = 0; i<maxnprocess; ++i){
+ //  if(isgmN)                 *fLogStream << u[i] << " ";
+ //  else if(d[i]>=0&&u[i] <0) *fLogStream << d[i] << " ";
+ //  else if(fabs(d[i])<10e-10&&fabs(u[i])<10e-10) *fLogStream << "- ";
+ //  else if(fabs(d[i]-1.)<10e-10&&fabs(u[i]-1.)<10e-10) *fLogStream << "- ";
+ //  else if(u[i]>=0&&u[i]==d[i]) *fLogStream << u[i] << " ";
+ //  else if(d[i]>=0&&u[i]>=0) *fLogStream << TMath::Max(0.001,d[i]) << "/" << TMath::Min(1.999,u[i]) << " ";
+ //  else                      *fLogStream << "- ";
+ //}
  *fLogStream << endl;
  resetArray(d);
  resetArray(u);
@@ -1242,11 +1262,27 @@ int addOneUnc(std::ostringstream *fLogStream, string name, double d, double u, i
     d = -1;
   }
   for(int i = 0; i<process; ++i) *fLogStream << "- ";
-  if(d==0){ d = 0.001; }
+  //if(d==0){ d = 0.001; }
+  //if(d<0)      *fLogStream << u << " ";//gmN
+  //else if(u<0) *fLogStream << d << " ";//only one uncertainty
+  //else if(u==d)*fLogStream << d << " ";
+  //else         *fLogStream << TMath::Max(0.001,d) << "/" << TMath::Min(1.999,u) << " ";
+  if(d==0){ d = 2.0; }
   if(d<0)      *fLogStream << u << " ";//gmN
-  else if(u<0) *fLogStream << d << " ";//only one uncertainty
-  else if(u==d)*fLogStream << d << " ";
-  else         *fLogStream << TMath::Max(0.001,d) << "/" << TMath::Min(1.999,u) << " ";
+  else if(u<0){
+    if(d>=1) *fLogStream << d << " ";//only one uncertainty
+    else     *fLogStream << 2.-d << " ";//only one uncertainty
+  }
+  else if(u==d){
+    if(d>=1) *fLogStream << d << " ";//only one uncertainty
+    else     *fLogStream << 2.-d << " ";//only one uncertainty 
+  }
+  else {
+    if(d>=1&&u>=1)     *fLogStream << TMath::Min(1.999,d) << "/" << TMath::Min(1.999,u) << " ";
+    else if(d>=1&&u<1) *fLogStream << TMath::Min(1.999,d) << "/" << TMath::Max(0.001,1./(2.-u)) << " ";
+    else if(d<1&&u>=1) *fLogStream << TMath::Max(0.001,1./(2.-d)) << "/" << TMath::Min(1.999,u) << " ";
+    else               *fLogStream << TMath::Max(0.001,1./(2.-d)) << "/" << TMath::Max(0.001,1./(2.-u)) << " ";
+  }
   for(int i = process + 1; i<maxnprocess; ++i) *fLogStream << "- ";
   *fLogStream << endl;
   return 1;
