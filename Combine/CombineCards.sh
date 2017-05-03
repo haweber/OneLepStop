@@ -12,51 +12,19 @@ if [ ! -d "$DIRECTORY" ]; then
     exit 0;
 fi
 
-#thedir='/home/users/haweber/StopAnalysis/CombineCode/datacards/fakedata/dataisbgsig/'
-#thedir='datacards2p3fbinv/'
-#thedir='datacards2p3fbinv/dropsigcont/'
-#thedir='datacards2p3fbinv/correlated/'
+
 thedir='datacards2p3fbinv/correlated/dropsigcont/'
-fakedata=false
-dataisbg=true
+#should make this dir configurable
 
 if [ $# -eq 0 ]
 then
-    echo You should provide at least the signal.
+    echo You should provide  the signal.
     exit 0
 fi
     
-
-#signal='T2tt_425_325'
 signal=$1
 
-if [ $# -gt 1 ]
-then
-    fakedata=$2
-fi
-
-if [ $# -gt 2 ]
-then
-    dataisbg=$3
-fi
-    
-
-if [ "$fakedata" = true ]
-then
-    thedir=`echo ${thedir}fakedata/`
-    #if [ "$dataisbg" = true ]
-    #then
-	#thedir=`echo ${thedir}dataisbg/`
-    #else
-	#thedir=`echo ${thedir}dataisbgsig/`
-    #fi
-else
-    thedir=`echo ${thedir}`
-fi
-
 #echo ${thedir}
-
-
 
 Name=`echo datacard_${signal}`
 
@@ -65,38 +33,33 @@ Name=`echo datacard_${signal}`
 combinestring=combineCards.py
 validcommand=false
 
-counter=9
-maxbins=9
-#BinArray=("met250_mt2w0" "met250_mt2w200" "met300_mt2w0" "met300_mt2w200" "met350_mt2w0" "met350_mt2w200" "met400_mt2w0" "met400_mt2w200" "met500_mt2w200")
-#for i in "${!BinArray[@]}"
+maxbins=27
 for i in `seq 1 ${maxbins}`;
 do
-    #echo $i
-    #echo "${thedir}${Name}_${i}.txt"
     if [ ! -e "${thedir}${Name}_b${i}.txt" ] && [ ! -f "${thedir}${Name}_b${i}.txt" ] && [ ! -s "${thedir}${Name}_b${i}.txt" ]
-    #if [ ! -e "${thedir}${Name}_${BinArray[$i]}.txt" ] && [ ! -f "${thedir}${Name}_${BinArray[$i]}.txt" ] && [ ! -s "${thedir}${Name}_${BinArray[$i]}.txt" ]
     then
 	validcommand=false
 	nonvalidfile=`echo ${thedir}${Name}_b${i}.txt`
-	#nonvalidfile=`echo ${thedir}${Name}_${BinArray[$i]}.txt`
-	#echo "file ${thedir}${Name}_${BinArray[$i]}.txt does not exist. dont combine"
 	#break
 	continue
     fi
-    counter=$((counter+1))
     validcommand=true
-    chnum=$(($i + 1))
-    combinestring=`echo ${combinestring} ch${i}=${thedir}${Name}_b${i}.txt`
-    #combinestring=`echo ${combinestring} ch${chnum}=${thedir}${Name}_${BinArray[$i]}.txt`
+    if [ ${i} -lt 10 ]
+    then
+	combinestring=`echo ${combinestring} ch00${i}=${thedir}${Name}_b${i}.txt`
+    elif [ ${i} -lt 100 ]
+    then
+	combinestring=`echo ${combinestring} ch0${i}=${thedir}${Name}_b${i}.txt`
+    else
+	combinestring=`echo ${combinestring} ch${i}=${thedir}${Name}_b${i}.txt`
+    fi
     #echo ${combinestring}
 done
 
 if [ "$validcommand" = true ]
 then
     eval ${combinestring} > ${thedir}combinedcards/${Name}.txt
-
     #echo ${combinestring}
-
     echo "Combined cards for ${Name} into ${thedir}combinedcards/${Name}.txt"
 #else
 #    echo "Some input file did not exist. Didnt combine"
