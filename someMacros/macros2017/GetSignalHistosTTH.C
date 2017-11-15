@@ -5,6 +5,8 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <string>
+#include <sstream>
 
 // ROOT
 #include "TBenchmark.h"
@@ -19,6 +21,7 @@
 
 // CMS3
 #include "CMS3_reminiAOD.cc"
+#include "HinvCrossSections.h"
 
 using namespace std;
 using namespace tas;
@@ -31,11 +34,66 @@ float dRbetweenVectors(LorentzVector& vec1,LorentzVector& vec2 ){
   return sqrt(dphi*dphi + deta*deta);
 }
 
+int first_numberstring(std::string const & str)
+{
+  std::size_t const n = str.find_first_of("0123456789");
+  if (n != std::string::npos)
+  {
+    std::size_t const m = str.find_first_not_of("0123456789", n);
+    string numberstring = str.substr(n, m != std::string::npos ? m-n : m);
+    istringstream ss(numberstring);
+    int result;
+    ss >> result;
+    return result;
+  }
+  return -1;
+}
+
+
+
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
-   
-  //load PUweights
+  int production = -1;
+  //0 ttH, 1: ggH, 2: VBFH, 3: WH, 4: ZH, 5: bbH, 6: tH(t), 7: tH(s); 10: W+H, 11: W-H, 12: ZeeH, 13: ZmmH, 14: ZttH, 15: ZqqH, 16: ZnnH, 17: tH(t), 18: tbarH(s), 19: tH(t), 20: tbarH(t)
+  if(     skimFilePrefix.find("ttH")    !=string::npos) production =  0;
+  else if(skimFilePrefix.find("ggH")    !=string::npos) production =  1;//1 is NNNLO, 99 is NNLO+NNLL
+  else if(skimFilePrefix.find("VBFH")   !=string::npos) production =  2;
+  else if(skimFilePrefix.find("WH")     !=string::npos) production =  3;
+  else if(skimFilePrefix.find("WplusH") !=string::npos) production = 10;
+  else if(skimFilePrefix.find("WminusH")!=string::npos) production = 11;
+  else if(skimFilePrefix.find("ZH")     !=string::npos) production =  4;
+  else if(skimFilePrefix.find("ZeeH")   !=string::npos) production = 12;
+  else if(skimFilePrefix.find("ZmmH")   !=string::npos) production = 13;
+  else if(skimFilePrefix.find("ZttH")   !=string::npos) production = 14;
+  else if(skimFilePrefix.find("ZqqH")   !=string::npos) production = 15;
+  else if(skimFilePrefix.find("ZnnH")   !=string::npos) production = 16;
+  else if(skimFilePrefix.find("bbH")    !=string::npos) production =  5;
+  else if(skimFilePrefix.find("tH_t")   !=string::npos) production =  6;
+  else if(skimFilePrefix.find("topH_t") !=string::npos) production = 17;
+  else if(skimFilePrefix.find("tbarH_t")!=string::npos) production = 18;
+  else if(skimFilePrefix.find("tH_s")   !=string::npos) production =  7;
+  else if(skimFilePrefix.find("topH_s") !=string::npos) production = 19;
+  else if(skimFilePrefix.find("tbarH_s")!=string::npos) production = 20;
+  else {
+    cout << "You did not specify correctly the type of H(inv) production - exit." << endl;
+    return -1;
+  }
+  int signalmass = first_numberstring(skimFilePrefix);
+  if(signalmass<0){
+    cout << "I could not extract the signal mass - you need to put the sample name like ttH_125 for this code to work - you used " << skimFilePrefix << endl;
+    return -1;
+  };
+  float crosssection = Hxsec(production, signalmass, true);
+  float Qsqxsuprel = 1.+HxsecUnc(production, signalmass, true, 1,true);
+  float Qsqxsdnrel = 1.-HxsecUnc(production, signalmass, true,-1,true);
+  float PDFxsuprel = 1.+HxsecUnc(production, signalmass, true, 0,true);
+  float PDFxsdnrel = 1.-HxsecUnc(production, signalmass, true, 0,true);
+  if(production==1){
+    Qsqxsuprel     = 1.+HxsecUnc(production, signalmass, true, 4,true);
+    Qsqxsdnrel     = 1.-HxsecUnc(production, signalmass, true, 4,true);
+  }
   
+  //load PUweights  
   TFile *fPU = new TFile("rootfiles/puWeights_2016data_36p6fbinv.root","READ");
   TH1D *puWeight     = (TH1D*)fPU->Get("puWeight");
   TH1D *puWeightUp   = (TH1D*)fPU->Get("puWeightUp");
@@ -55,6 +113,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 
   //lumi, trigger, stats done
   histonames.push_back("SRyield");
+  histonames.push_back("SR_Qsqxsup");
+  histonames.push_back("SR_Qsqxsdown");
+  histonames.push_back("SR_PDFxsup");
+  histonames.push_back("SR_PDFxsdown");
+  histonames.push_back("SR_PDFup");
+  histonames.push_back("SR_PDFdown");
+  histonames.push_back("SR_aSup");
+  histonames.push_back("SR_aSdown");
   histonames.push_back("SR_Bup_HF");
   histonames.push_back("SR_Bdown_HF");
   histonames.push_back("SR_Bup_LF");
@@ -69,12 +135,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   histonames.push_back("SR_PUdown");
   histonames.push_back("SR_LepEffup");
   histonames.push_back("SR_LepEffdown");
-  histonames.push_back("SR_Xsecup");
-  histonames.push_back("SR_Xsecdown");
+  //histonames.push_back("SR_Xsecup");
+  //histonames.push_back("SR_Xsecdown");
   histonames.push_back("CR1l_sigcontamination");
   histonames.push_back("CR2l_sigcontamination");
-  histonames.push_back("CR1l_sigcontamination_gen");
-  histonames.push_back("CR2l_sigcontamination_gen");
+  //histonames.push_back("CR1l_sigcontamination_gen");
+  //histonames.push_back("CR2l_sigcontamination_gen");
 
   for(unsigned int i = 0; i<histonames.size(); ++i){
     string mapname = histonames[i];
@@ -97,6 +163,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   bool thisisfirst = true;
   // File Loop
   while ( (currentFile = (TFile*)fileIter.Next()) ) {
+    if((string(currentFile->GetTitle())).find("tth_Private80X")!=string::npos) crosssection *=0.547;
 
     // Get File Content
     TFile *file = new TFile( currentFile->GetTitle() );
@@ -127,30 +194,34 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       CMS3::progress( nEventsTotal, nEventsChain );
 
       // Analysis Code
-      int Nevts = counterhistSig->GetBinContent(counterhistSig->FindBin(22));//i got lucky
-      double nevts = double(Nevts);
+      int Nevts           = counterhistSig->GetBinContent(counterhistSig->FindBin(22));//i got lucky
+      double nevts        = double(Nevts);
       //float weight = cms3.scale1fb()*2.11;
       double PUweight     = puWeight    ->GetBinContent(puWeight    ->FindBin(pu_ntrue() ) );
       double PUweightUp   = puWeightUp  ->GetBinContent(puWeightUp  ->FindBin(pu_ntrue() ) );
       double PUweightDown = puWeightDown->GetBinContent(puWeightDown->FindBin(pu_ntrue() ) );
       //PUweightUp = 1; PUweightDown = PUweight; PUweight = 1; //now PU syst is applying vs not applying
-      double ISRnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(25));
-      double ISRnormup = counterhistSig->GetBinContent(counterhistSig->FindBin(26));
-      double ISRnormdown = counterhistSig->GetBinContent(counterhistSig->FindBin(27));
-      double ISRweight = weight_ISRnjets();//updated
-      double BSFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(14));
-      double BSFnormHup = counterhistSig->GetBinContent(counterhistSig->FindBin(15));
-      double BSFnormLup = counterhistSig->GetBinContent(counterhistSig->FindBin(16));
-      double BSFnormHdown = counterhistSig->GetBinContent(counterhistSig->FindBin(17));
-      double BSFnormLdown = counterhistSig->GetBinContent(counterhistSig->FindBin(18));
-      double BSFweight = weight_btagsf();
-      double muRFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(1));
-      double muRFnormup = counterhistSig->GetBinContent(counterhistSig->FindBin(5));
-      double muRFnormdown = counterhistSig->GetBinContent(counterhistSig->FindBin(9));
-      double lepSFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(28));
-      double lepSFnormup = counterhistSig->GetBinContent(counterhistSig->FindBin(29));
+      double ISRnorm       = counterhistSig->GetBinContent(counterhistSig->FindBin(25));
+      double ISRnormup     = counterhistSig->GetBinContent(counterhistSig->FindBin(26));
+      double ISRnormdown   = counterhistSig->GetBinContent(counterhistSig->FindBin(27));
+      double ISRweight     = weight_ISRnjets();//updated
+      double BSFnorm       = counterhistSig->GetBinContent(counterhistSig->FindBin(14));
+      double BSFnormHup    = counterhistSig->GetBinContent(counterhistSig->FindBin(15));
+      double BSFnormLup    = counterhistSig->GetBinContent(counterhistSig->FindBin(16));
+      double BSFnormHdown  = counterhistSig->GetBinContent(counterhistSig->FindBin(17));
+      double BSFnormLdown  = counterhistSig->GetBinContent(counterhistSig->FindBin(18));
+      double BSFweight     = weight_btagsf();
+      double muRFnorm      = counterhistSig->GetBinContent(counterhistSig->FindBin(1));
+      double muRFnormup    = counterhistSig->GetBinContent(counterhistSig->FindBin(5));
+      double muRFnormdown  = counterhistSig->GetBinContent(counterhistSig->FindBin(9));
+      double PDFnormup     = counterhistSig->GetBinContent(counterhistSig->FindBin(10));
+      double PDFnormdown   = counterhistSig->GetBinContent(counterhistSig->FindBin(11));
+      double aSnormup      = counterhistSig->GetBinContent(counterhistSig->FindBin(12));
+      double aSnormdown    = counterhistSig->GetBinContent(counterhistSig->FindBin(13));
+      double lepSFnorm     = counterhistSig->GetBinContent(counterhistSig->FindBin(28));
+      double lepSFnormup   = counterhistSig->GetBinContent(counterhistSig->FindBin(29));
       double lepSFnormdown = counterhistSig->GetBinContent(counterhistSig->FindBin(30));
-      double lepSFweight = weight_lepSF();
+      double lepSFweight   = weight_lepSF();
       if(ISRnorm>0) ISRweight*=nevts/ISRnorm;
       if(ISRnorm<=0||ISRnormup<=0||ISRnormdown<=0){ ISRnormdown=1.; ISRnormup=1.; ISRnorm=1.;}
       if(BSFnorm>0) BSFweight *=nevts/BSFnorm;
@@ -159,14 +230,17 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(lepSFnorm>0) lepSFweight *= nevts/lepSFnorm;
       if(lepSFnorm<=0||lepSFnormup<=0||lepSFnormdown<=0){lepSFnorm=1; lepSFnormup=1; lepSFnormdown=1;}
       //lepSF is done below
-      double xsection = 0.5071*0.574;
-      double xsectionerr = 0.0452;
+      double xsection = 0.5071*0.547;
+      //double xsectionerr = 0.0452;
       double mylumi = 35900.;
-      double rawweight = xsection*mylumi/nevts;
-      double weight = xsection*mylumi/nevts*ISRweight*BSFweight*lepSFweight;//xsec given in pb
+      //double rawweight = xsection*mylumi/nevts;
+      double rawweight = crosssection*mylumi/nevts;
+      //double weight = rawweight*ISRweight*BSFweight*lepSFweight;//xsec given in pb
+      double weight = rawweight*BSFweight*lepSFweight;//xsec given in pb
       if(event==0) cout << " " <<xsection << " " << weight << " " << nevts << " " << counterhistSig->GetBinContent(counterhistSig->FindBin(22)) << " " << PUweight << " " << ISRweight << " " << BSFweight << " " << lepSFweight << endl;
       if(event==0) cout << "weight " << weight << " nEvents " << nEventsTree << " filename " << currentFile->GetTitle() << endl;
-      
+
+      if(event==0) cout << "xsec " << xsection/0.5071*4.987E-01 << " cross section " << crosssection << " scale1fb " << scale1fb() << " xsec1fb " << xsection/nevts << " crosssection1fb " << crosssection/nevts << endl;
       
       if(nvtxs()<0)               continue;
       if(ngoodleps()<1)           continue;//accomodate 2l-CR
@@ -541,20 +615,26 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       if(SR==(-1)&&CR1l==(-1)&&CR2l==(-1)&&SRu==(-1)&&SRd==(-1)&&cSR==(-1)&&cCR1l==(-1)&&cCR2l==(-1)&&cSRu==(-1)&&cSRd==(-1)) continue;
 
       //ISR reweighting, get stop pair using last copy:
-      double ISRup = weight_ISRnjets_UP()/weight_ISRnjets()*ISRnorm/ISRnormup;
-      double ISRdown = weight_ISRnjets_DN()/weight_ISRnjets()*ISRnorm/ISRnormdown;
-      double XSup = (xsection+xsectionerr)/xsection;
-      double XSdown = (xsection-xsectionerr)/xsection;
-      double PUup = PUweightUp/PUweight;//THESE ARE WRONG RIGHT NOW
-      double PUdown = PUweightDown/PUweight;//THESE ARE WRONG RIGHT NOW
-      double lEffup = weight_lepSF_up()/weight_lepSF()*lepSFnorm/lepSFnormup;
-      double lEffdown = weight_lepSF_down()/weight_lepSF()*lepSFnorm/lepSFnormdown;
-      double muRFup   = 1; if(genweights().size()>=9) muRFup   = genweights().at(5)/genweights().at(1)*muRFnorm/muRFnormup;
-      double muRFdown = 1; if(genweights().size()>=9) muRFdown = genweights().at(9)/genweights().at(1)*muRFnorm/muRFnormdown;
-      double BSFHup = weight_btagsf_heavy_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
-      double BSFLup = weight_btagsf_light_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
-      double BSFHdown = weight_btagsf_heavy_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
-      double BSFLdown = weight_btagsf_light_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
+      double ISRup     = weight_ISRnjets_UP()/weight_ISRnjets()*ISRnorm/ISRnormup;
+      double ISRdown   = weight_ISRnjets_DN()/weight_ISRnjets()*ISRnorm/ISRnormdown;
+      //double XSup = (xsection+xsectionerr)/xsection;
+      //double XSdown = (xsection-xsectionerr)/xsection;
+      double PUup      = PUweightUp/PUweight;
+      double PUdown    = PUweightDown/PUweight;
+      double lEffup    = weight_lepSF_up()/weight_lepSF()*lepSFnorm/lepSFnormup;
+      double lEffdown  = weight_lepSF_down()/weight_lepSF()*lepSFnorm/lepSFnormdown;
+      double muRFup    = 1; if(genweights().size()>  9) muRFup   = genweights().at(4)  /genweights().at(0)*muRFnorm/muRFnormup;
+      double muRFdown  = 1; if(genweights().size()>  9) muRFdown = genweights().at(8)  /genweights().at(0)*muRFnorm/muRFnormdown;
+      double PDFup     = 1; if(genweights().size()>  0) PDFup    = pdf_up_weight()     /genweights().at(0)*muRFnorm/muRFnormup;
+      double PDFdown   = 1; if(genweights().size()>  0) PDFdown  = pdf_down_weight()   /genweights().at(0)*muRFnorm/muRFnormdown;
+      double aSup      = 1; if(genweights().size()>111) aSup     = genweights().at(109)/genweights().at(0)*muRFnorm/muRFnormup;
+      double aSdown    = 1; if(genweights().size()>111) aSdown   = genweights().at(110)/genweights().at(0)*muRFnorm/muRFnormdown;
+      //cout << "weight central " << genweights().at(1) << " or " << genweights().at(0) << " PDFup/down " << pdf_up_weight() << "/" << pdf_down_weight();
+      //cout << " alphaSup/down " << genweights().at(109) << "/" << genweights().at(110) << endl;
+      double BSFHup    = weight_btagsf_heavy_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
+      double BSFLup    = weight_btagsf_light_UP()/weight_btagsf()*BSFnorm/BSFnormHup;
+      double BSFHdown  = weight_btagsf_heavy_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
+      double BSFLdown  = weight_btagsf_light_DN()/weight_btagsf()*BSFnorm/BSFnormHup;
       if((SR>=5&&SR<=7)||(SR>=13&&SR<=16)||(SR>=20&&SR<=21)||(SR>=26&&SR<=27)||CR2l==5||(CR2l>=13&&CR2l<=16)||CR2l==20||CR2l==26/*||(CR1l>=5&&CR1l<=7)||(CR1l>=26&&CR1l<=27)*/){
 	if(BSFweight>0) weight /= BSFweight;
 	BSFnorm = counterhistSig->GetBinContent(counterhistSig->FindBin(37));
@@ -590,10 +670,18 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	
 	//finally - do signal regions!
 	histos["SRyield"        ]->Fill(SR,weight);
+	histos["SR_Qsqxsup"     ]->Fill(SR,weight*Qsqxsuprel);
+	histos["SR_Qsqxsdown"   ]->Fill(SR,weight*Qsqxsdnrel);
+	histos["SR_PDFxsup"     ]->Fill(SR,weight*PDFxsuprel);
+	histos["SR_PDFxsdown"   ]->Fill(SR,weight*PDFxsdnrel);
+	histos["SR_PDFup"       ]->Fill(SR,weight*PDFup);
+	histos["SR_PDFdown"     ]->Fill(SR,weight*PDFdown);
+	histos["SR_aSup"        ]->Fill(SR,weight*aSup);
+	histos["SR_aSdown"      ]->Fill(SR,weight*aSdown);
 	histos["SR_ISRup"       ]->Fill(SR,weight*ISRup);
 	histos["SR_ISRdown"     ]->Fill(SR,weight*ISRdown);
-	histos["SR_Xsecup"      ]->Fill(SR,weight*XSup);
-	histos["SR_Xsecdown"    ]->Fill(SR,weight*XSdown);
+	//histos["SR_Xsecup"      ]->Fill(SR,weight*XSup);
+	//histos["SR_Xsecdown"    ]->Fill(SR,weight*XSdown);
 	histos["SR_PUup"        ]->Fill(SR,weight*PUup);
 	histos["SR_PUdown"      ]->Fill(SR,weight*PUdown);
 	histos["SR_Bup_HF"      ]->Fill(SR,weight*BSFHup);
@@ -620,8 +708,16 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
 	histos["cSRyield"        ]->Fill(cSR,weight);
 	histos["cSR_ISRup"       ]->Fill(cSR,weight*ISRup);
 	histos["cSR_ISRdown"     ]->Fill(cSR,weight*ISRdown);
-	histos["cSR_Xsecup"      ]->Fill(cSR,weight*XSup);
-	histos["cSR_Xsecdown"    ]->Fill(cSR,weight*XSdown);
+	histos["cSR_Qsqxsup"     ]->Fill(SR,weight*Qsqxsuprel);
+	histos["cSR_Qsqxsdown"   ]->Fill(SR,weight*Qsqxsdnrel);
+	histos["cSR_PDFxsup"     ]->Fill(SR,weight*PDFxsuprel);
+	histos["cSR_PDFxsdown"   ]->Fill(SR,weight*PDFxsdnrel);
+	histos["cSR_PDFup"       ]->Fill(SR,weight*PDFup);
+	histos["cSR_PDFdown"     ]->Fill(SR,weight*PDFdown);
+	histos["cSR_aSup"        ]->Fill(SR,weight*aSup);
+	histos["cSR_aSdown"      ]->Fill(SR,weight*aSdown);
+	//histos["cSR_Xsecup"      ]->Fill(cSR,weight*XSup);
+	//histos["cSR_Xsecdown"    ]->Fill(cSR,weight*XSdown);
 	histos["cSR_PUup"        ]->Fill(cSR,weight*PUup);
 	histos["cSR_PUdown"      ]->Fill(cSR,weight*PUdown);
 	histos["cSR_Bup_HF"      ]->Fill(cSR,weight*BSFHup);
@@ -663,7 +759,8 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       }
       
     }//event loop
-  
+    if((string(currentFile->GetTitle())).find("tth_Private80X")!=string::npos) crosssection /=0.547;
+
     // Clean Up
     delete tree;
     file->Close();

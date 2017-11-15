@@ -13,6 +13,9 @@
 
 using namespace std;
 
+float Hxsec(int production=0, float mass=125, bool EW=true);
+float HxsecUnc(int production=0, float mass=125, bool EW=true, int type=0, bool relative=true);
+
 float ttHxsec(float mass=125, bool EW=true);
 float ttHEW(float mass=125);
 //type: 0: PDF+aS, -1: QCD down, 1: QCD up, 2: PDF, 3: aS
@@ -50,6 +53,60 @@ float tHEW(float mass=125, int channel=0, int process=0);
 float tHxsec(float mass=125, int channel=0, int process=0, bool EW=true);
 //type: 0: PDF+aS, -1: QCD down, 1: QCD up, 2: PDF, 3: aS
 float tHxsecUnc(float mass=125, int channel=0, int process=0, bool EW=true, int type=0, bool relative=true);
+
+float Hxsec(int production, float mass, bool EW){
+  //0 ttH, 1: ggH, 2: VBFH, 3: WH, 4: ZH, 5: bbH, 6: tH(t), 7: tH(s); 10: W+H, 11: W-H, 12: ZeeH, 13: ZmmH, 14: ZttH, 15: ZqqH, 16: ZnnH, 17: tH(t), 18: tbarH(s), 19: tH(t), 20: tbarH(t)
+  if(production== 0) return  ttHxsec(mass,       EW);
+  if(production== 1) return  ggHxsec(mass,       EW);
+  if(production==99) return  ggHxsec_NNLO(mass,       EW);
+  if(production== 2) return VBFHxsec(mass,       EW);
+  if(production== 3) return   WHxsec(mass, 0,    EW);
+  if(production==10) return   WHxsec(mass, 1,    EW);
+  if(production==11) return   WHxsec(mass,-1,    EW);
+  if(production== 4) return   ZHxsec(mass,       EW);
+  if(production==12) return   ZHxsec(mass,       EW)*0.0336;
+  if(production==13) return   ZHxsec(mass,       EW)*0.0336;
+  if(production==14) return   ZHxsec(mass,       EW)*0.0337;
+  if(production==15) return   ZHxsec(mass,       EW)*0.6991;
+  if(production==16) return   ZHxsec(mass,       EW)*0.2000;
+  if(production== 5) return  bbHxsec(mass,       EW);
+  if(production== 6) return   tHxsec(mass, 0, 0, EW);
+  if(production==17) return   tHxsec(mass, 0, 1, EW);
+  if(production==18) return   tHxsec(mass, 0,-1, EW);
+  if(production== 7) return   tHxsec(mass, 1, 0, EW);
+  if(production==19) return   tHxsec(mass, 1, 1, EW);
+  if(production==20) return   tHxsec(mass, 1,-1, EW);
+  return 0;
+}
+float HxsecUnc(int production, float mass, bool EW, int type, bool relative){
+  if(production== 0) return  ttHxsecUnc(mass,       EW, type, relative);
+  if(production== 1) return  ggHxsecUnc(mass,       EW, type, relative);
+  if(production==99) return  ggHxsecUnc_NNLO(mass,  EW, type, relative);
+  if(production== 2) return VBFHxsecUnc(mass,       EW, type, relative);
+  if(production== 3) return   WHxsecUnc(mass, 0,    EW, type, relative);
+  if(production==10) return   WHxsecUnc(mass, 1,    EW, type, relative);
+  if(production==11) return   WHxsecUnc(mass,-1,    EW, type, relative);
+  if(production== 4) return   ZHxsecUnc(mass,       EW, type, relative);
+  if(production== 5) return  bbHxsecUnc(mass,       EW, type, relative);
+  if(production== 6) return   tHxsecUnc(mass, 0, 0, EW, type, relative);
+  if(production==17) return   tHxsecUnc(mass, 0, 1, EW, type, relative);
+  if(production==18) return   tHxsecUnc(mass, 0,-1, EW, type, relative);
+  if(production== 7) return   tHxsecUnc(mass, 1, 0, EW, type, relative);
+  if(production==19) return   tHxsecUnc(mass, 1, 1, EW, type, relative);
+  if(production==20) return   tHxsecUnc(mass, 1,-1, EW, type, relative);
+  if(production>=12&&production<=16){
+    float f = 1.;
+    if(!relative){
+      if(production==12) f = 0.0336;
+      if(production==13) f = 0.0336;
+      if(production==14) f = 0.0337;
+      if(production==15) f = 0.6991;
+      if(production==16) f = 0.2000;
+    }
+    return   ZHxsecUnc(mass,       EW, type, relative)*f;
+  }    
+  return 0;
+}
 
 float ttHxsec(float mass, bool EW){
   float f = 1.;
@@ -2658,7 +2715,7 @@ float WHxsec(float mass,int process, bool EW){
   if(M<=2000) return 5.706E-06*f;
   return 5.706E-06*f;
 }
-float WHEW(float mass, int process=0){
+float WHEW(float mass, int process){
   return 1;
 }
 float WHxsecUnc(float mass, int process, bool EW, int type, bool relative){
@@ -3649,7 +3706,7 @@ float ZHxsec(float mass, bool EW){
   return 7.639E-06*f;
 }//ZHxsec
 float ZHEW(float mass){
-  return 1.
+  return 1.;
 }//ZHEW
 float ZHxsecUnc(float mass, bool EW, int type, bool relative){
   float f = 1;
@@ -4069,11 +4126,11 @@ float bbHxsec(float mass, bool EW){
   if(M<=3000) return 4.467E-08*f;
   return 4.467E-08*f;
 }//bbHxsec
-float bbHEW(float mass=125){
+float bbHEW(float mass){
   return 1.;
 }//bbHEW
 //type: -1: QCD down, 1: QCD up
-float bbHxsecUnc(float mass=125, bool EW=true, int type=0, bool relative=true){
+float bbHxsecUnc(float mass, bool EW, int type, bool relative){
   float f = 1;
   if(!relative) f = bbHxsec(mass,EW);
   float M = mass -1.;
@@ -4436,7 +4493,7 @@ float tHxsec(float mass, int channel, int process, bool EW){
 float tHEW(float mass, int channel, int process){
   return 1.;
 }//tHEW
-float tHxsecUnc(float mass=125, int channel=0, int process=0, bool EW=true, int type=0, bool relative=true){
+float tHxsecUnc(float mass, int channel, int process, bool EW, int type, bool relative){
   float f = 1;
   if(!relative) f = tHxsec(mass,channel,process,EW);
   float M = mass -1.;

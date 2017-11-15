@@ -435,7 +435,7 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
     //getSigUncertainty(vSig["SR_Bup_FS"],     vSig["SR_Bdown_FS"],     osig, histSig["SR_Bup_FS"],     histSig["SR_Bdown_FS"],     b3);
     getSigUncertainty(vSig["SR_JESup"],      vSig["SR_JESdown"],      osig, histSig["SR_JESup"],      histSig["SR_JESdown"],      b3);
     getSigUncertainty(vSig["SR_muRFup"],     vSig["SR_muRFdown"],     osig, histSig["SR_muRFup"],     histSig["SR_muRFdown"],     b3);
-    getSigUncertainty(vSig["SR_ISRup"],      vSig["SR_ISRdown"],      osig, histSig["SR_ISRup"],      histSig["SR_ISRdown"],      b3);
+    //getSigUncertainty(vSig["SR_ISRup"],      vSig["SR_ISRdown"],      osig, histSig["SR_ISRup"],      histSig["SR_ISRdown"],      b3);
     getSigUncertainty(vSig["SR_LepEffup"],   vSig["SR_LepEffdown"],   osig, histSig["SR_LepEffup"],   histSig["SR_LepEffdown"],   b3);
     //getSigUncertainty(vSig["SR_LepEffFSup"], vSig["SR_LepEffFSdown"], osig, histSig["SR_LepEffFSup"], histSig["SR_LepEffFSdown"], b3);
     //getSigUncertainty(vSig["SR_PUup"],       vSig["SR_PUdown"],       osig, histSig["SR_PUup"],       histSig["SR_PUdown"],       b3);
@@ -444,6 +444,11 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
     if(analysis==0&&(b==4||b==7||b==1||b==12||b==16||b==19||b==21||b==25||b==27)){ vSig["SR_PUup"] = 1.10; vSig["SR_PUup"] = 0.9; }
     //vSig["SR_PUerr"]        = 1.05;// new now
     vSig["SR_LEffVetoerr"]  = 1.03;
+    getSigUncertainty(vSig["SR_Qsqxsup"],    vSig["SR_Qsqxsdown"],    osig, histSig["SR_Qsqxsup"],    histSig["SR_Qsqxsdown"],    b3);
+    getSigUncertainty(vSig["SR_PDFxsup"],    vSig["SR_PDFxsdown"],    osig, histSig["SR_PDFxsup"],    histSig["SR_PDFxsdown"],    b3);
+    getSigUncertainty(vSig["SR_PDFup"],      vSig["SR_PDFdown"],      osig, histSig["SR_PDFup"],      histSig["SR_PDFdown"],      b3);
+    getSigUncertainty(vSig["SR_aSup"],       vSig["SR_aSdown"],       osig, histSig["SR_aSup"],       histSig["SR_aSdown"],       b3);
+
   }
   vSig["triggerrDn"]        = 0.98; if(b==1||b==4||b==8||b==11) vSig["triggerrDn"]        = 0.95; vSig["triggerrUp"]        = 1.00;//also on any other simulation
   vSig["lumierr"]         = 1.026; //also on any other simulation
@@ -550,16 +555,21 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
   numnuis += addCorrelatedUnc(fLogStream, "LumiSyst", dnerr, uperr, -1, "lnN");
   if(!nosigsyst&& sig    >0){
     //signal systematic uncertainties (or general - therefore add no "Sig" prefix)
-    numnuis += addOneUnc(fLogStream, "PUSyst",     vSig["SR_PUdown"],       vSig["SR_PUup"],       0, -1, "lnN");
-    numnuis += addOneUnc(fLogStream, "BLFSyst",    vSig["SR_Bdown_LF"],     vSig["SR_Bup_LF"],     0, -1, "lnN");
-    numnuis += addOneUnc(fLogStream, "BHFSyst",    vSig["SR_Bdown_HF"],     vSig["SR_Bup_HF"],     0, -1, "lnN");
-    //numnuis += addOneUnc(fLogStream, "BFSSyst",    vSig["SR_Bdown_FS"],     vSig["SR_Bup_FS"],     0, -1, "lnN");
-    numnuis += addOneUnc(fLogStream, "JESSyst",    vSig["SR_JESdown"],      vSig["SR_JESup"],      0, -1, "lnN");
-    numnuis += addOneUnc(fLogStream, "ISRSyst",    vSig["SR_ISRdown"],      vSig["SR_ISRup"],      0, -1, "lnN");
-    numnuis += addOneUnc(fLogStream, "MuRFSyst",   vSig["SR_muRFdown"],     vSig["SR_muRFup"],     0, -1, "lnN");
-    numnuis += addOneUnc(fLogStream, "LEffSyst",   vSig["SR_LepEffdown"],   vSig["SR_LepEffup"],   0, -1, "lnN");
-    //numnuis += addOneUnc(fLogStream, "LEffFSSyst", vSig["SR_LepEffFSdown"], vSig["SR_LepEffFSup"], 0, -1, "lnN");
-    numnuis += addOneUnc(fLogStream, "LVetoSyst",  vSig["SR_LEffVetoerr"],  -1,                    0,  b, "lnN");
+    numnuis += addOneUnc(fLogStream, "PUSyst",      vSig["SR_PUdown"],       vSig["SR_PUup"],       0, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "BLFSyst",     vSig["SR_Bdown_LF"],     vSig["SR_Bup_LF"],     0, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "BHFSyst",     vSig["SR_Bdown_HF"],     vSig["SR_Bup_HF"],     0, -1, "lnN");
+    //numnuis += addOneUnc(fLogStream, "BFSSyst",     vSig["SR_Bdown_FS"],     vSig["SR_Bup_FS"],     0, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "JESSyst",     vSig["SR_JESdown"],      vSig["SR_JESup"],      0, -1, "lnN");
+    //numnuis += addOneUnc(fLogStream, "ISRSyst",     vSig["SR_ISRdown"],      vSig["SR_ISRup"],      0, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "MuRFSyst",    vSig["SR_muRFdown"],     vSig["SR_muRFup"],     0, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "LEffSyst",    vSig["SR_LepEffdown"],   vSig["SR_LepEffup"],   0, -1, "lnN");
+    //numnuis += addOneUnc(fLogStream, "LEffFSSyst",  vSig["SR_LepEffFSdown"], vSig["SR_LepEffFSup"], 0, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "LVetoSyst",   vSig["SR_LEffVetoerr"],  -1,                    0,  b, "lnN");
+    numnuis += addOneUnc(fLogStream, "PDFSyst",     vSig["SR_PDFdown"],      vSig["SR_PDFup"],      0, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "AlphaSSyst",  vSig["SR_aSdown"],       vSig["SR_aSup"],       0, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "MuRFXSecSig", vSig["SR_Qsqxsdown"],    vSig["SR_Qsqxsup"],    0, -1, "lnN");
+    numnuis += addOneUnc(fLogStream, "PDFAsXSecSig",vSig["SR_PDFxsdown"],    vSig["SR_PDFxsup"],    0, -1, "lnN");
+
   }
   if(!nobgsyst){
     //correlated
@@ -662,7 +672,7 @@ void makeDataCardsOneBinBasis(int bin, TString signaltype, int analysis, bool dr
   */
   MakeOutputDir(myoutputdir);
   TString anName = (TString)analysisname(analysis);
-  TString logname = myoutputdir + "datacard_" + anName + "_ttH_" + binstring + ".txt";
+  TString logname = myoutputdir + "datacard_" + anName + "_"+signaltype+"_" + binstring + ".txt";
   ofstream f_log (logname.Data(), ios::trunc);
   f_log << fLogStreamHeader->str();
   f_log << fLogStream->str();
@@ -1126,8 +1136,8 @@ bool loadSignalHistos(int analysis){
   //cout << __LINE__ << endl;
 
   histSig["SRyield"];
-  histSig["SR_Xsecup"];
-  histSig["SR_Xsecdown"];
+  //histSig["SR_Xsecup"];
+  //histSig["SR_Xsecdown"];
   histSig["CR1l_sigcontamination"];
   histSig["CR2l_sigcontamination"];
   histSig["SR_Bup_HF"];
@@ -1144,6 +1154,15 @@ bool loadSignalHistos(int analysis){
   histSig["SR_PUdown"];
   histSig["SR_LepEffup"];
   histSig["SR_LepEffdown"];
+  histSig["SR_Qsqxsup"];
+  histSig["SR_Qsqxsdown"];
+  histSig["SR_PDFxsup"];
+  histSig["SR_PDFxsdown"];
+  histSig["SR_PDFup"];
+  histSig["SR_PDFdown"];
+  histSig["SR_aSup"];
+  histSig["SR_aSdown"];
+
    //XAX - change file name based on analysis
   //XBX - change histogram name based on analysis
   for(map<string,TH1D*>::iterator h=histSig.begin(); h!=histSig.end();++h){
@@ -1394,10 +1413,10 @@ int maxlspmass(TString signaltype){
 int checkbin(int analysis, int bin, double stop, double lsp, bool dropsigcont){
 
   //cout << analysis << " " << bin << " " << stop << " " << lsp << " " << endl;
-  if(stop<lsp) return -1;
+  //if(stop<lsp) return -1;
   if(bin<=0) return -1;
-  if(stop<0) return -1;
-  if(lsp<0)  return -1;
+  //if(stop<0) return -1;
+  //if(lsp<0)  return -1;
   if(analysis==0){
     if(bin>27) return -1;
   }
