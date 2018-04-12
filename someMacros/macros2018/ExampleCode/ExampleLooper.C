@@ -34,7 +34,7 @@
 using namespace std;
 using namespace tas;
 
-
+//calculates Delta R between two vectors
 float dRbetweenVectors(LorentzVector vec1,LorentzVector vec2 ){                                                                                                              
   float dphi = std::min(::fabs(vec1.Phi() - vec2.Phi()), 2 * M_PI - fabs(vec1.Phi() - vec2.Phi()));
   float deta = vec1.Eta() - vec2.Eta();
@@ -42,10 +42,12 @@ float dRbetweenVectors(LorentzVector vec1,LorentzVector vec2 ){
   return sqrt(dphi*dphi + deta*deta);
 }
 
+//calculates Delta Phi between two vectors
 float dPhibetweenVectors(float phi1,float phi2 ){                                                                                                              
   return fabs(std::min(float(fabs(phi1-phi2)),float(2*M_PI-fabs(phi1-phi2))));
 }
 
+//calculates MT between two vectors
 float calculateMt(LorentzVector p4, LorentzVector met){
   float phi1 = p4.Phi();
   float phi2 = met.Phi();
@@ -56,13 +58,14 @@ float calculateMt(LorentzVector p4, LorentzVector met){
 }
 
 //this is the looper function that checks all events in the chain (samples) of its properties
+//this function is called in runMacro.C
 int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFilePrefix = "test") {
 
   // Benchmark
   TBenchmark *bmark = new TBenchmark();
   bmark->Start("benchmark");
 
-  // Example Histograms
+  //start booking histograms - in those we store kinematic distribution
   TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
 
   map<string, TH1F*> histos;
@@ -72,13 +75,13 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
   vector<float> hup; hup.clear();
   map<string, set<int> > Nsignalpoints;
 
-  //define histograms of distributions we want to check (as well as the hinning of the gistograms)
+  //define histograms of distributions we want to check (as well as the binning of the histograms)
   histonames.push_back("MT_NJge2");              hbins.push_back(20); hlow.push_back( 0. ); hup.push_back(500);//histogram for 0 <= MT < 500, with bin size 25 GeV = 500/20, cut is NJ>=2
   histonames.push_back("MT_NJge4_METge250");     hbins.push_back(20); hlow.push_back( 0. ); hup.push_back(500);//same as above with cuts NJ>=4, MET>=250
   histonames.push_back("MinDeltaRLepJet_NJge2"); hbins.push_back(20); hlow.push_back( 0. ); hup.push_back(5.0);//minimal Delta R(lep-p4,any jet-p4)
   histonames.push_back("SignalRegionYields");    hbins.push_back( 4); hlow.push_back( 0.5); hup.push_back(4.5);//yields per (dummy) signal region
 
-  //now let's book the histogram - not that some samples like signal are splitted into categories here
+  //now let's actually book the histogram - note that some samples like signal are splitted into categories here
   for(unsigned int i = 0; i<histonames.size(); ++i){
     for(unsigned int b = 0; b<4; ++b){
       string samplename = skimFilePrefix;
@@ -93,9 +96,17 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
         if(b==2) samplename = "Signal_T2tt_betweencorridor";//DeltaM(stop,LSP) = 100-150 GeV
         if(b==3) samplename = "Signal_T2tt_highDM";         //DeltaM(stop,LSP) = 200-250 GeV //we don't care about higher DeltaM for this study
         set<int> dummy;
-        Nsignalpoints[samplename] = dummy;//initially with an empty set;
+        Nsignalpoints[samplename] = dummy;//initialize with an empty set;
       }
-      else if(b>=1) continue;
+      else if(samplename.find(string("SignalGen_T2tt")) != string::npos){//for genMET histograms
+        if(b==0) samplename = "SignalGen_T2tt_Wcorridor";      
+        if(b==1) samplename = "SignalGen_T2tt_topcorridor";    
+        if(b==2) samplename = "SignalGen_T2tt_betweencorridor";
+        if(b==3) samplename = "SignalGen_T2tt_highDM";         
+        set<int> dummy;
+        Nsignalpoints[samplename] = dummy;
+      }
+      else if(b>=1) continue;//for all other samples, we don't need splitting
       string mapname = histonames[i] + "_"+samplename;
       if(histos.count(mapname) == 0 ) histos[mapname] = new TH1F(mapname.c_str(), "", hbins[i], hlow[i], hup[i]);
       histos[mapname]->Sumw2(); histos[mapname]->SetDirectory(rootdir);
@@ -107,9 +118,10 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     const char* json_file = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt";
     set_goodrun_file_json(json_file);
   }
+  
 
   unsigned int nEventsRunning = 0;
-  // Loop over events to Analyze
+  //Goal: Loop over events to Analyze
   unsigned int nEventsTotal = 0;
   unsigned int nEventsChain = chain->GetEntries();
   if( nEvents >= 0 ) nEventsChain = nEvents;
@@ -137,7 +149,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     if(fast) tree->SetCacheSize(128*1024*1024);
     cms3.Init(tree);
     
-    // Loop over Events in current file
+    // Loop over Events from the tree of the current file
     if( nEventsTotal >= nEventsChain ) continue;
     unsigned int nEventsTree = tree->GetEntriesFast();
     for( unsigned int event = 0; event < nEventsTree; ++event) {
@@ -145,7 +157,7 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
       // Get Event Content
       if( nEventsTotal >= nEventsChain ) continue;
       if(fast) tree->LoadTree(event);
-      cms3.GetEntry(event);
+      cms3.GetEntry(event);//load branches (needed in C++)
       ++nEventsTotal;
       //if(nEventsTotal>=10000) break;
     
@@ -161,13 +173,21 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
         if(is1lepFromTop()) samplename = "TT1l";
         else                samplename = "LostLepton";
       }
-      else if(samplename.find(string("Signal")) != string::npos){
+      else if(samplename.find(string("Signal_T2tt")) != string::npos){
         if(mass_lsp()<100.) continue;//don't trust these signals for fastsim only
         if(     (mass_stop()-mass_lsp())<  98.)                                 samplename = "Signal_T2tt_Wcorridor";
         else if((mass_stop()-mass_lsp())> 165.&&(mass_stop()-mass_lsp())< 185.) samplename = "Signal_T2tt_topcorridor";
         else if((mass_stop()-mass_lsp())>= 99.&&(mass_stop()-mass_lsp())<=150.) samplename = "Signal_T2tt_betweencorridor";
         else if((mass_stop()-mass_lsp())>=199.&&(mass_stop()-mass_lsp())<=250.) samplename = "Signal_T2tt_highDM";
-        else continue;
+        else continue; //not of interest for our study
+      }
+      else if(samplename.find(string("SignalGen_T2tt")) != string::npos){
+        if(mass_lsp()<100.) continue;//don't trust these signals for fastsim only
+        if(     (mass_stop()-mass_lsp())<  98.)                                 samplename = "SignalGen_T2tt_Wcorridor";
+        else if((mass_stop()-mass_lsp())> 165.&&(mass_stop()-mass_lsp())< 185.) samplename = "SignalGen_T2tt_topcorridor";
+        else if((mass_stop()-mass_lsp())>= 99.&&(mass_stop()-mass_lsp())<=150.) samplename = "SignalGen_T2tt_betweencorridor";
+        else if((mass_stop()-mass_lsp())>=199.&&(mass_stop()-mass_lsp())<=250.) samplename = "SignalGen_T2tt_highDM";
+        else continue; //not of interest for our study
       }
 
       //get correct event weight!
@@ -298,10 +318,14 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
     h->second->SetBinContent(1, h->second->GetBinContent(1)+ h->second->GetBinContent(0) );
     h->second->SetBinError(1, sqrt(pow(h->second->GetBinError(1),2)+pow(h->second->GetBinError(0),2) ) );
     //for signal only - normalize the signal yield to what we expect from a single event point (i.e. get averaged yield per point)
-    if(h->first.find("Signal_T2tt_Wcorridor")!=string::npos) h->second->Scale(1./Nsignalpoints["Signal_T2tt_Wcorridor"].size());
-    if(h->first.find("Signal_T2tt_topcorridor")!=string::npos) h->second->Scale(1./Nsignalpoints["Signal_T2tt_topcorridor"].size());
+    if(h->first.find("Signal_T2tt_Wcorridor")      !=string::npos) h->second->Scale(1./Nsignalpoints["Signal_T2tt_Wcorridor"]      .size());
+    if(h->first.find("Signal_T2tt_topcorridor")    !=string::npos) h->second->Scale(1./Nsignalpoints["Signal_T2tt_topcorridor"]    .size());
     if(h->first.find("Signal_T2tt_betweencorridor")!=string::npos) h->second->Scale(1./Nsignalpoints["Signal_T2tt_betweencorridor"].size());
-    if(h->first.find("Signal_T2tt_highDM")!=string::npos) h->second->Scale(1./Nsignalpoints["Signal_T2tt_highDM"].size());
+    if(h->first.find("Signal_T2tt_highDM")         !=string::npos) h->second->Scale(1./Nsignalpoints["Signal_T2tt_highDM"]         .size());
+    if(h->first.find("SignalGen_T2tt_Wcorridor")      !=string::npos) h->second->Scale(1./Nsignalpoints["SignalGen_T2tt_Wcorridor"]      .size());
+    if(h->first.find("SignalGen_T2tt_topcorridor")    !=string::npos) h->second->Scale(1./Nsignalpoints["SignalGen_T2tt_topcorridor"]    .size());
+    if(h->first.find("SignalGen_T2tt_betweencorridor")!=string::npos) h->second->Scale(1./Nsignalpoints["SignalGen_T2tt_betweencorridor"].size());
+    if(h->first.find("SignalGen_T2tt_highDM")         !=string::npos) h->second->Scale(1./Nsignalpoints["SignalGen_T2tt_highDM"]         .size());
   }
 
   string filename = "rootfiles/Examplefile.root";//note this will fail saving if directory rootfiles does not exist
@@ -322,6 +346,12 @@ int ScanChain( TChain* chain, bool fast = true, int nEvents = -1, string skimFil
         if(b==1) samplename = "Signal_T2tt_topcorridor";
         if(b==2) samplename = "Signal_T2tt_betweencorridor";
         if(b==3) samplename = "Signal_T2tt_highDM";
+      }
+      else if(samplename.find(string("SignalGen_T2tt")) != string::npos){
+        if(b==0) samplename = "SignalGen_T2tt_Wcorridor";
+        if(b==1) samplename = "SignalGen_T2tt_topcorridor";
+        if(b==2) samplename = "SignalGen_T2tt_betweencorridor";
+        if(b==3) samplename = "SignalGen_T2tt_highDM";
       }
       else if(b==1) continue;
       string mapname = histonames[i] + "_"+samplename;

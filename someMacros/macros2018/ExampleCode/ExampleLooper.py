@@ -39,7 +39,7 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
 
     rootdir = ROOT.gDirectory.GetDirectory("Rint:")
 
-    #define histograms here
+    #define histograms here - we store kinematic distribution in those
     histos     = dict()
     nsigpoints = dict()
     histograms = []
@@ -49,18 +49,20 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
     histograms.append(("MinDeltaRLepJet_NJge2",20, 0. , 5.0 ))
     histograms.append(("SignalRegionYields",    4, 0.5, 4.5 ))
     samples = [skimFilePrefix]
-    if "LostLeptonAndTop" in skimFilePrefix:
-        samples = ["LostLepton", "Top1l"]
+    if "LostLeptonAndTop" in skimFilePrefix: 
+        samples = ["LostLepton", "Top1l"] #split lost lepton (tt2l) and top1l (tt1l)
     elif "Signal_T2tt" in skimFilePrefix:
-        samples = ["Signal_T2tt_Wcorridor", "Signal_T2tt_topcorridor", "Signal_T2tt_betweencorridor", "Signal_T2tt_highDM"]
+        samples = ["Signal_T2tt_Wcorridor", "Signal_T2tt_topcorridor", "Signal_T2tt_betweencorridor", "Signal_T2tt_highDM"] # split signal depending on mass splitting Delta M (Mstop, MLSP)
+    elif "SignalGen_T2tt" in skimFilePrefix:
+        samples = ["SignalGen_T2tt_Wcorridor", "SignalGen_T2tt_topcorridor", "SignalGen_T2tt_betweencorridor", "SignalGen_T2tt_highDM"] #for genMET signal
     for s in samples:
-        for hg in histograms:
-            histos[hg[0]+"_"+s] = ROOT.TH1D(hg[0]+"_"+s,"",hg[1],hg[2],hg[3])
+        for hg in histograms: 
+            histos[hg[0]+"_"+s] = ROOT.TH1D(hg[0]+"_"+s,"",hg[1],hg[2],hg[3]) #actually booking stuff
             histos[hg[0]+"_"+s].Sumw2()
             histos[hg[0]+"_"+s].SetDirectory(rootdir)
         nsigpoints[s] = set()
 
-    if "Data" in skimFilePrefix:
+    if "Data" in skimFilePrefix: #Data need to be good - JSON file stores good run periods
         json_file = "Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt"
         tas.set_goodrun_file_json(json_file)
 
@@ -70,19 +72,19 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
     if nEvents >= 0:
         nEventsChain = nEvents
     listOfFiles = chain.GetListOfFiles()
-    for chfile in listOfFiles:
+    for chfile in listOfFiles: #loop over all files in TChain
         counterhist = None
         tfile = ROOT.TFile(chfile.GetTitle())
         print "Running over ", tfile.GetName()
         #now load the normalization histograms
         if "Signal" in skimFilePrefix:
-            counterhist = ROOT.TH3D(tfile.Get("h_counterSMS"))
+            counterhist = ROOT.TH3D(tfile.Get("h_counterSMS")) #counter histogram (needed for normalization) for signal
             counterhist.SetDirectory(0)
         else:
-            counterhist = ROOT.TH1D(tfile.Get("h_counter"))
+            counterhist = ROOT.TH1D(tfile.Get("h_counter")) #counter histogram (needed for normalization of systematic effects)
             counterhist.SetDirectory(0)
 
-        tree = tfile.Get("t")
+        tree = tfile.Get("t") #get the tree in the TFile that has all event quantities
         if nEventsTotal >= nEventsChain:
             continue
         #now loop over all events e in a tree
@@ -93,9 +95,9 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
             #if nEventsTotal >=10000:
             #    break
 
-            tas.progress( nEventsTotal, nEventsChain )
+            tas.progress( nEventsTotal, nEventsChain )#what is the progress within the chain
 
-            weight = 1.
+            weight = 1. #event weight
 
             #define what type of sample the event is
             samplename = skimFilePrefix
@@ -104,7 +106,9 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
                     samplename = "TT1l"
                 else:
                     samplename = "LostLepton"
-            elif "Signal" in samplename:
+            elif "Signal_T2tt" in samplename:
+                if e.mass_lsp < 100.:#fastsim doesn't work well in that regime
+                    continue
                 if   (e.mass_stop-e.mass_lsp) < 98.:
                     samplename = "Signal_T2tt_Wcorridor"
                 elif (e.mass_stop-e.mass_lsp) > 165. and (e.mass_stop-e.mass_lsp) < 185.:
@@ -113,7 +117,20 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
                      samplename = "Signal_T2tt_betweencorridor"
                 elif (e.mass_stop-e.mass_lsp) >=199. and (e.mass_stop-e.mass_lsp) <=250.:
                     samplename = "Signal_T2tt_highDM"
-                else:
+                else: #this region is not of interest for us
+                    continue
+            elif "SignalGen_T2tt" in samplename:
+                if e.mass_lsp < 100.:#fastsim doesn't work well in that regime
+                    continue
+                if   (e.mass_stop-e.mass_lsp) < 98.:
+                    samplename = "SignalGen_T2tt_Wcorridor"
+                elif (e.mass_stop-e.mass_lsp) > 165. and (e.mass_stop-e.mass_lsp) < 185.:
+                    samplename = "SignalGen_T2tt_topcorridor"
+                elif (e.mass_stop-e.mass_lsp) >= 99. and (e.mass_stop-e.mass_lsp) <=150.:
+                     samplename = "SignalGen_T2tt_betweencorridor"
+                elif (e.mass_stop-e.mass_lsp) >=199. and (e.mass_stop-e.mass_lsp) <=250.:
+                    samplename = "SignalGen_T2tt_highDM"
+                else: #this region is not of interest for us
                     continue
 
             #now we get the correct event weight
@@ -195,6 +212,11 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
                 if tas.is_duplicate(id):
                     continue
 
+            #reject run periods where detector was in bad state
+            if e.is_data:
+                if not tas.goodrun(e.run, e.ls):
+                    continue
+
             #sometimes unexpected noise (from wrongly recorded detector pulses) happen - filter those out
             if e.is_data:
                 if not e.filt_met                       : continue
@@ -268,6 +290,14 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
             histos[key].Scale(1./len(nsigpoints["Signal_T2tt_betweencorridor"]))
         if "Signal_T2tt_highDM"          in key:
             histos[key].Scale(1./len(nsigpoints["Signal_T2tt_highDM"]))
+        if "SignalGen_T2tt_Wcorridor"       in key:
+            histos[key].Scale(1./len(nsigpoints["SignalGen_T2tt_Wcorridor"]))
+        if "SignalGen_T2tt_topcorridor"     in key:
+            histos[key].Scale(1./len(nsigpoints["SignalGen_T2tt_topcorridor"]))
+        if "SignalGen_T2tt_betweencorridor" in key:
+            histos[key].Scale(1./len(nsigpoints["SignalGen_T2tt_betweencorridor"]))
+        if "SignalGen_T2tt_highDM"          in key:
+            histos[key].Scale(1./len(nsigpoints["SignalGen_T2tt_highDM"]))
     
         #now we want to store all histograms
         filename = "rootfiles/Examplefilepy.root" #note this will fail saving if directory rootfiles does not exist
@@ -279,6 +309,7 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
         f.Close()
         print "Saved histos in ",f.GetName()
 
+    #show final performance
     bmark.Stop("benchmark")
     print ""
     print nEventsTotal, " Events Processed"
@@ -289,7 +320,8 @@ def ScanChain(chain,fast,nEvents,skimFilePrefix):
     return True
 
 def main():
-    
+
+    #here we book all TChains to loop over all events - we already split samples as good as we can into processes
     ch = dict()
     sample = []
 
@@ -338,6 +370,7 @@ def main():
     #ch["Data"].Add(babylocation+"data_single_electron_*.root")
     #ch["Data"].Add(babylocation+"data_single_muon_*.root")
 
+    #do the runnning
     for key in ch:
         ScanChain(ch[key],True,-1,key)
 

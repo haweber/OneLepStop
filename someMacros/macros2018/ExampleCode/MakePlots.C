@@ -40,11 +40,12 @@
 
 using namespace std;
 
+//this function uses the histograms created with ExampleLooper.C and puts them into pretty plots
 void MakePlots(){
     
-  bool logy = true;
-  bool data = false;//set this to false
-  float lumi = 150.;
+  bool logy = true; //should the y axis being plotted in logarithmic scale (true) or linear scale (false)
+  bool data = false;//set this to false - we don't look at data
+  float lumi = 150.;//check what luminosity was put into the weight in ExampleLooper
  
   gStyle->SetOptFit(1);
   gStyle->SetOptStat(0);
@@ -61,27 +62,32 @@ void MakePlots(){
   vector<string> sigleg;
   vector<Color_t> bgcol;
   vector<Color_t> sigcol;
+  //get all the histograms and how to display the axis label  - to do: display selection
   histonames.push_back("MT_NJge2");               histox.push_back("M_{T} [GeV]");          selecttitle.push_back("#geq2 jets");
   histonames.push_back("MT_NJge4_METge250");      histox.push_back("M_{T} [GeV]");          selecttitle.push_back("#geq4 jets, p_{T}^{miss} #geq 250 GeV");
   histonames.push_back("MinDeltaRLepJet_NJge2");  histox.push_back("min#DeltaR(jet,lep)");  selecttitle.push_back("#geq2 jets");
   histonames.push_back("SignalRegionYields");     histox.push_back("signal region");        selecttitle.push_back("");
 
+  //define background samples and its style color
   bgnames.push_back("LostLepton"); bgleg.push_back("Lost lepton");                bgcol.push_back(kCyan-3);
   bgnames.push_back("TT1l");       bgleg.push_back("1#font[12]{l} from top");     bgcol.push_back(kRed-7);
   bgnames.push_back("WJets");      bgleg.push_back("1#font[12]{l} not from top"); bgcol.push_back(kOrange-2);
   bgnames.push_back("Znunu");      bgleg.push_back("Z#rightarrow#nu#bar{#nu}");   bgcol.push_back(kMagenta-5);
 
+  //define signal samples (to be coded - how to average SignalGen into them) and its style color
   signames.push_back("Signal_T2tt_Wcorridor");       sigleg.push_back("#tilde{t}#rightarrowt#tilde{#chi}^{0}_{1} (W corridor)");       sigcol.push_back(kGreen+2);
   signames.push_back("Signal_T2tt_topcorridor");     sigleg.push_back("#tilde{t}#rightarrowt#tilde{#chi}^{0}_{1} (t corridor)");       sigcol.push_back(kBlue+1);
   signames.push_back("Signal_T2tt_betweencorridor"); sigleg.push_back("#tilde{t}#rightarrowt#tilde{#chi}^{0}_{1} (between corridor)"); sigcol.push_back(kYellow+1);
   signames.push_back("Signal_T2tt_highDM");          sigleg.push_back("#tilde{t}#rightarrowt#tilde{#chi}^{0}_{1} (above corridor)");   sigcol.push_back(kMagenta+1);
-    
+
+  //this is the rootfile containing the histograms
   TFile *f = new TFile("rootfiles/Examplefile.root","READ");
 
   for(unsigned int i = 0; i<histonames.size(); ++i) {
+    //first get histogram and set still for plotting (like color for each background sample)
     if(data){
       string mapname = histonames[i] + "_Data";
-      hist[mapname] = (TH1F*)f->Get(mapname.c_str());
+      hist[mapname] = (TH1F*)f->Get(mapname.c_str());//get histogram
       hist[mapname]->SetLineWidth(2);
       hist[mapname]->SetLineColor(kBlack);
       hist[mapname]->SetMarkerStyle(20);
@@ -90,7 +96,7 @@ void MakePlots(){
     }
     for(unsigned int b = 0; b<bgnames.size();++b){
       string mapname = histonames[i] + "_" + bgnames[b];
-      hist[mapname] = (TH1F*)f->Get(mapname.c_str());
+      hist[mapname] = (TH1F*)f->Get(mapname.c_str());//get histogram
       hist[mapname]->SetLineColor(bgcol[b]);
       hist[mapname]->SetMarkerColor(bgcol[b]);
       hist[mapname]->SetFillColor(bgcol[b]);
@@ -98,7 +104,7 @@ void MakePlots(){
     }
     for(unsigned int b = 0; b<signames.size();++b){
       string mapname = histonames[i] + "_" + signames[b];
-      hist[mapname] = (TH1F*)f->Get(mapname.c_str());
+      hist[mapname] = (TH1F*)f->Get(mapname.c_str());//get histogram
       hist[mapname]->SetLineWidth(3);
       hist[mapname]->SetLineStyle(7);
       hist[mapname]->SetLineColor(sigcol[b]);
@@ -107,6 +113,7 @@ void MakePlots(){
     }
   }
   for(map<string,TH1F*>::iterator h=    hist.begin(); h!=    hist.end();++h) {
+    //here do common styles
     hist[h->first]->GetXaxis()->SetLabelFont(42);
     hist[h->first]->GetXaxis()->SetLabelSize(0.04);
     hist[h->first]->GetXaxis()->SetTitleSize(0.05);
@@ -115,7 +122,7 @@ void MakePlots(){
     if(hist[h->first]->GetYaxis()->GetBinWidth(1)==1){
       hist[h->first]->GetYaxis()->SetTitle("events");
     } else {
-      string temp = "";
+      string temp = "";//general variables plotted --> can make plot more correct by adding the Events / XX GeV
       if(h->first.find(string("MT"))    != string::npos) temp = " GeV";
       if(h->first.find(string("Mlb"))   != string::npos) temp = " GeV";
       if(h->first.find(string("MET"))   != string::npos) temp = " GeV";
@@ -139,7 +146,7 @@ void MakePlots(){
     float maximum = 0; float minimum = 0;
     string stackname = histonames[i];
     string axisname = histonames[i] + "_axis";
-    stack[stackname] = new THStack();
+    stack[stackname] = new THStack();//all backgrounds are stacked together (i.e. plotted on top of each other) in a THStack so to see total background
     stack[stackname]->SetName(stackname.c_str());
     for(int b = bgnames.size()-1; b>=0;--b){
       string mapname = histonames[i] + "_" + bgnames[b];
@@ -152,7 +159,7 @@ void MakePlots(){
       if(hist[mapname]->GetMinimum()>0) minimum += hist[mapname]->GetMinimum();
       if(hist[mapname]->GetMaximum()>0) maximum += hist[mapname]->GetMaximum();
     }
-    if(logy){
+    if(logy){//for plotting - define minimum maximum of y axis range
       minimum *=0.9;
       maximum *=100.;
       minimum = pow(10.0, floor(log10(minimum)));
@@ -171,7 +178,8 @@ void MakePlots(){
     stack[stackname]->SetHistogram(hist[stackname]);
   }
 
-  TCanvas *c1 = new TCanvas("c1", "",334,192,600,600);
+  //now we are ready to draw the pretty picture - first define all needed quantities and then Draw
+  TCanvas *c1 = new TCanvas("c1", "",334,192,600,600);//plots are done on a canvas
   c1->SetFillColor(0);
   c1->SetBorderMode(0);
   c1->SetBorderSize(2);
@@ -187,7 +195,7 @@ void MakePlots(){
   c1->SetFrameFillStyle(0);
   c1->SetFrameBorderMode(0);
   //TLatex *tLumi = new TLatex(0.95,0.944,"36.6 fb^{-1} (13 TeV)");
-  string ls = Form("%f",lumi);
+  string ls = Form("%f",lumi);//luminosity of the samples - see in ExampleLooper --> weight
   ls.erase ( ls.find_last_not_of('0') + 1, std::string::npos );
   ls.erase ( ls.find_last_not_of('.') + 1, std::string::npos );
   TLatex *tLumi = new TLatex(0.95,0.944,Form("%s fb^{-1} (13 TeV)",ls.c_str()));
@@ -224,7 +232,7 @@ void MakePlots(){
   tPrel->SetTextFont(52);
   tPrel->SetTextSize(0.042);
   tPrel->SetLineWidth(2);
-  TLegend *leg1 = new TLegend(0.2,0.67,0.5,0.89,NULL,"brNDC");
+  TLegend *leg1 = new TLegend(0.2,0.67,0.5,0.89,NULL,"brNDC");//legend is always important so that reader knows what color/samples belong together
   leg1->SetBorderSize(0);
   leg1->SetTextSize(0.035);
   leg1->SetLineColor(1);
@@ -234,12 +242,13 @@ void MakePlots(){
   leg1->SetFillStyle(1001);
   for(unsigned int i = 0; i<bgnames.size(); ++i)
     leg1->AddEntry(hist[histonames[0]+"_"+bgnames[i] ], bgleg[i].c_str(),"f");
-    
+
+  //finally drawing - draw stack, data, signal
   for(unsigned int i  = 0; i<histonames.size(); ++i) {
     string stackname = histonames[i];
     stack[stackname]->Draw("hist");
 
-    TLegend *leg2 = new TLegend(0.5,0.67,0.85,0.89,NULL,"brNDC");
+    TLegend *leg2 = new TLegend(0.5,0.67,0.85,0.89,NULL,"brNDC");//have 2 legends - one for background, another for signal+data(if available)
     leg2->SetBorderSize(0);
     leg2->SetTextSize(0.035);
     leg2->SetLineColor(1);
@@ -256,7 +265,7 @@ void MakePlots(){
       h->SetMarkerColor(kBlack);
       for(int i = 1; i<=h->GetNbinsX(); ++i){
         for(int n = 1; n<=hist[stackname + "_Data"]->GetBinContent(i); ++n){
-          h->Fill(h->GetXaxis()->GetBinCenter(i),1);
+          h->Fill(h->GetXaxis()->GetBinCenter(i),1);//do this to get poisson uncertainty on data instead of Gaussian
         }
       }
       h->Draw("sameE0X0");
@@ -277,7 +286,7 @@ void MakePlots(){
     if(logy) outname = "Log_" + stackname;
     else     outname = "Lin_" + stackname;
     outname = "plots/" + outname + ".pdf";
-    c1->SaveAs(outname.c_str());
+    c1->SaveAs(outname.c_str());//save the pretty picture
     c1->Clear();
   }
 

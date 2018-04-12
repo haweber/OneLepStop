@@ -1,15 +1,17 @@
 {
 
+  //'compile' macro
   gROOT->ProcessLine(".L ExampleLooper.C+");
   const unsigned int chainsize = 4;//5;
   TChain *ch[chainsize];
   string dataset[chainsize];
 
-
+  //location of our ntuples that store all the simulated samples
   string babylocation = "/nfs-7/userdata/dsklein/tupler_babies/merged/Stop_1l/v24/skim/";    //>=1lep, >=2j, MET>150, MT>150, minDeltaPhi(j1,j2; MET)>0.5
   //string babylocation = "/nfs-7/userdata/dsklein/tupler_babies/merged/Stop_1l/v24/output/";//>=1lep, >=2j, MET>50          <-- does not contain signal
   string myhelper;
 
+  //already split samples into groups 
   dataset[0] = "LostLeptonAndTop";
   ch[0] = new TChain("t");
   myhelper = babylocation + "ttbar_diLept_madgraph_pythia8_ext1_25ns*.root";             ch[0]->Add(myhelper.c_str());
@@ -55,7 +57,8 @@
   myhelper = babylocation + "data_single_electron_*.root";                               ch[4]->Add(myhelper.c_str());
   myhelper = babylocation + "data_single_muon_*.root";                                   ch[4]->Add(myhelper.c_str());
   */
-  
+
+  //run over all TChains --> see ExampleLooper.C
   for(int i = 0; i<chainsize; ++i){
     //if(i!=3) continue;
     TChain *mych = ch[i];
