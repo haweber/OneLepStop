@@ -2,6 +2,7 @@
 import ROOT
 from inspect import currentframe, getframeinfo
 import math
+import string
 
 frameinfo = getframeinfo(currentframe())
 
@@ -9,9 +10,10 @@ frameinfo = getframeinfo(currentframe())
 #this script uses the histograms created with ExampleLooper.C and puts them into pretty plots
 
 
-data = False  #set this to False - we don't look at data
-lumi = 150.   #check what luminosity was put into the weight in ExampleLooper
-logy = True   #should the y axis being plotted in logarithmic scale (True) or linear scale (False)
+data   = False  #set this to False - we don't look at data
+lumi   = 150.   #check what luminosity was put into the weight in ExampleLooper
+logy   = True   #should the y axis being plotted in logarithmic scale (True) or linear scale (False)
+addgen = True
 
 ROOT.gStyle.SetOptStat(0);
 
@@ -42,6 +44,11 @@ for h,a in zip(histonames,axisnames) :
     for s,l,c in zip(sigsamples,siglegend,sigcolor) :
         #print h+"_"+s
         histos[h+"_"+s] = f.Get(h+"_"+s)#get histogram
+        if addgen:
+            s2 = string.replace(s,'Signal','SignalGen')
+            histos[h+"_"+s2] = f.Get(h+"_"+s2)#get histogram
+            histos[h+"_"+s].Add(histos[h+"_"+s2])
+            histos[h+"_"+s].Scale(0.5)
         histos[h+"_"+s].GetXaxis().SetTitle(a)
         histos[h+"_"+s].GetYaxis().SetTitle("Events")
         histos[h+"_"+s].GetXaxis().SetTitleSize(0.)
@@ -164,15 +171,18 @@ for h in histonames :
         maximum = pow(10.0, math.ceil( math.log10(100*maximum))) if maximum != 0 else True
         minimum = 0.02 if minimum == 0 else True
         minimum = 0.2  if (minimum > 1 and minimum < 5) else True
-        minimum = 2.0  if minimum > 0 else True
+        minimum = 2.0  if minimum >= 5 else True
     else:
         minimum = 0.
         maximum *= 2. 
 
     stacks[h].SetMaximum(maximum)
     histos[h+"_bg"].SetMaximum(maximum)
+    stacks[h].SetMinimum(minimum)
+    histos[h+"_bg"].SetMinimum(minimum)
     if data:
         histos[h+"_Data"].SetMaximum(maximum)
+        histos[h+"_Data"].SetMinimum(minimum)
     #first draw background, then signal, then data (if available)
     stacks[h].Draw("hist")
     stacks[h].SetHistogram(histos[h+"_bg"])

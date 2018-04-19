@@ -43,10 +43,11 @@ using namespace std;
 //this function uses the histograms created with ExampleLooper.C and puts them into pretty plots
 void MakePlots(){
     
-  bool logy = true; //should the y axis being plotted in logarithmic scale (true) or linear scale (false)
-  bool data = false;//set this to false - we don't look at data
-  float lumi = 150.;//check what luminosity was put into the weight in ExampleLooper
- 
+  bool  logy   = true; //should the y axis being plotted in logarithmic scale (true) or linear scale (false)
+  bool  data   = false;//set this to false - we don't look at data
+  float lumi   = 150.; //check what luminosity was put into the weight in ExampleLooper
+  bool  addgen = true; //average reco and genMET signal samples
+
   gStyle->SetOptFit(1);
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
@@ -105,6 +106,14 @@ void MakePlots(){
     for(unsigned int b = 0; b<signames.size();++b){
       string mapname = histonames[i] + "_" + signames[b];
       hist[mapname] = (TH1F*)f->Get(mapname.c_str());//get histogram
+      if(addgen){
+        string signamegen = signames[b];
+        signamegen.replace(0,6,"SignalGen");
+        string mapname2 =  histonames[i] + "_" + signamegen;
+        hist[mapname2] = (TH1F*)f->Get(mapname2.c_str());//get histogram
+        hist[mapname]->Add(hist[mapname2],1.);
+        hist[mapname]->Scale(0.5);
+      }
       hist[mapname]->SetLineWidth(3);
       hist[mapname]->SetLineStyle(7);
       hist[mapname]->SetLineColor(sigcol[b]);
@@ -165,7 +174,7 @@ void MakePlots(){
       minimum = pow(10.0, floor(log10(minimum)));
       maximum = pow(10.0, ceil(log10(maximum)));
       if(minimum==0) minimum = 0.02;
-      if(minimum>1&&minimum<5) minimum = 0.2;
+      if(minimum>1&&minimum<=5) minimum = 0.2;
       if(minimum>5) minimum = 2;
     } else {
       minimum *=0.;
