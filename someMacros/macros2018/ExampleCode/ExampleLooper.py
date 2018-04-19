@@ -365,6 +365,14 @@ def main():
     ch["Signal_T2tt"].Add(babylocation+"Signal_T2tt_mStop_350to400*.root")
     ch["Signal_T2tt"].Add(babylocation+"Signal_T2tt_mStop_400to1200*.root")
 
+    babylocation2 = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v24_softbgenmet/skim/"    #>=1lep, >=2j, MET>150, MT>150, minDeltaPhi(j1,j2; MET)>0.5
+    #babylocation2 = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v24_softbgenmet/output/"  #>=1lep, >=2j, MET>50
+    ch["SignalGen_T2tt"].Add(babylocation2+"Signal_T2tt_mStop_150to250*.root")
+    ch["SignalGen_T2tt"].Add(babylocation2+"Signal_T2tt_mStop_250to350*.root")
+    ch["SignalGen_T2tt"].Add(babylocation2+"Signal_T2tt_mStop_350to400*.root")
+    ch["SignalGen_T2tt"].Add(babylocation2+"Signal_T2tt_mStop_400to1200*.root")
+
+
     #babylocation = "/nfs-7/userdata/stopRun2/analysis2016_SUS-16-051_35p9fbinv/v24/skim/" #different data ntuple format
     #ch["Data"].Add(babylocation+"data_met_Run*.root")
     #ch["Data"].Add(babylocation+"data_single_electron_*.root")

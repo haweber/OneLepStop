@@ -2,7 +2,7 @@
 
   //'compile' macro
   gROOT->ProcessLine(".L ExampleLooper.C+");
-  const unsigned int chainsize = 4;//5;
+  const unsigned int chainsize = 5;//6;
   TChain *ch[chainsize];
   string dataset[chainsize];
 
@@ -49,13 +49,22 @@
   myhelper = babylocation + "Signal_T2tt_mStop_350to400*.root";                          ch[3]->Add(myhelper.c_str());
   myhelper = babylocation + "Signal_T2tt_mStop_400to1200*.root";                         ch[3]->Add(myhelper.c_str());
 
+  string babylocation2 = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v24_softbgenmet/skim/";    //>=1lep, >=2j, MET>150, MT>150, minDeltaPhi(j1,j2; MET)>0.5
+  //string babylocation2 = "/nfs-7/userdata/haweber/tupler_babies/merged/Stop_1l/v24_softbgenmet/output/";//>=1lep, >=2j, MET>50
+  dataset[4] = "SignalGen_T2tt";
+  ch[4] = new TChain("t");
+  myhelper = babylocation2 + "Signal_T2tt_mStop_150to250*.root";                          ch[4]->Add(myhelper.c_str());
+  myhelper = babylocation2 + "Signal_T2tt_mStop_250to350*.root";                          ch[4]->Add(myhelper.c_str());
+  myhelper = babylocation2 + "Signal_T2tt_mStop_350to400*.root";                          ch[4]->Add(myhelper.c_str());
+  myhelper = babylocation2 + "Signal_T2tt_mStop_400to1200*.root";                         ch[4]->Add(myhelper.c_str());
+
   /*
   babylocation = "/nfs-7/userdata/stopRun2/analysis2016_SUS-16-051_35p9fbinv/v24/skim/";//different data format
-  dataset[4] = "Data";
-  ch[4] = new TChain("t");
-  myhelper = babylocation + "data_met_Run*.root";                                        ch[4]->Add(myhelper.c_str());
-  myhelper = babylocation + "data_single_electron_*.root";                               ch[4]->Add(myhelper.c_str());
-  myhelper = babylocation + "data_single_muon_*.root";                                   ch[4]->Add(myhelper.c_str());
+  dataset[5] = "Data";
+  ch[5] = new TChain("t");
+  myhelper = babylocation + "data_met_Run*.root";                                        ch[5]->Add(myhelper.c_str());
+  myhelper = babylocation + "data_single_electron_*.root";                               ch[5]->Add(myhelper.c_str());
+  myhelper = babylocation + "data_single_muon_*.root";                                   ch[5]->Add(myhelper.c_str());
   */
 
   //run over all TChains --> see ExampleLooper.C
